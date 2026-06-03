@@ -1,0 +1,15 @@
+export const QUERY_KEYS = {
+  GET_USER: "get-user",
+  GET_LEADS: "get-leads",
+  GET_LEADS_BY_ID: "get-leads-by-id",
+  COUNSELLORS: "get-counsellors",
+  GET_APPLICATION_BY_ID: "get-application-by-id",
+  GET_APPLICATIONS: "get-applications",
+  GET_ALL_OFFER: "get-all-offers",
+  GET_ALL_SCHOLARSHIP: "get-all-scholarship",
+  GET_ALL_COUNCELLOR: "get-all-councellor",
+  GET_OFFER_DETAIL: "get-offer-detail",
+  GET_COMMUNICATION: "get-communication",
+  GET_STUDENT_DETAIL: "get-student-detail",
+  GET_LEAD_TIMELINE: "get-lead-timeline",
+} as const;
