@@ -1,10 +1,9 @@
 {
   "cleanUrls": true,
-  "outputDirectory": "dist/client",
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/_shell.html"
+      "destination": "/index.html"
     }
   ]
 }
