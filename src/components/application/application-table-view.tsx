@@ -62,7 +62,7 @@ export function ApplicationTableView() {
   });
 
   return (
-    <Card className="overflow-hidden h-full flex flex-col">
+    <Card className="overflow-hidden flex flex-col min-h-0 flex-1">
       <div className="p-3 border-b border-border flex flex-wrap items-center gap-3 shrink-0">
         <InputSearch
           searchTerm={q}
@@ -94,7 +94,7 @@ export function ApplicationTableView() {
         stretchColumns
         showPagination
         totalElements={filteredData.length}
-        className="flex-1"
+        className="flex-1 min-h-0"
       />
     </Card>
   );

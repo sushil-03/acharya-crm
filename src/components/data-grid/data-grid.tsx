@@ -21,7 +21,7 @@ interface DataGridProps<TData>
     Omit<ReturnType<typeof useDataGrid<TData>>, "dir">,
     Omit<React.ComponentProps<"div">, "contextMenu"> {
   dir?: Direction;
-  height?: number;
+  height?: number | string;
   stretchColumns?: boolean;
   showPagination?: boolean;
   totalElements?: number;
@@ -51,7 +51,7 @@ export function DataGrid<TData>({
   contextMenu,
   pasteDialog,
   onRowAdd: onRowAddProp,
-  height = 600,
+  height,
   stretchColumns = false,
   adjustLayout = false,
   showPagination = false,
@@ -64,6 +64,9 @@ export function DataGrid<TData>({
   const readOnly = tableMeta?.readOnly ?? false;
   const columnVisibility = table.getState().columnVisibility;
   const columnPinning = table.getState().columnPinning;
+
+  const hasHeightConstraint = className?.includes("flex-1") || className?.includes("h-") || className?.includes("flex-grow");
+  const resolvedMaxHeight = height !== undefined ? height : (hasHeightConstraint ? undefined : 600);
 
   const onRowAddRef = useAsRef(onRowAddProp);
 
@@ -95,7 +98,12 @@ export function DataGrid<TData>({
       data-slot="grid-wrapper"
       dir={dir}
       {...props}
-      className={cn("relative flex w-full flex-col", className)}
+      className={cn(
+        "relative flex w-full flex-col",
+        className?.includes("flex-1") && "min-h-0",
+        className?.includes("flex-grow") && "min-h-0",
+        className
+      )}
     >
       {searchState && <DataGridSearch {...searchState} />}
       <DataGridContextMenu tableMeta={tableMeta} columns={columns} contextMenu={contextMenu} />
@@ -108,18 +116,22 @@ export function DataGrid<TData>({
         data-slot="grid"
         tabIndex={0}
         ref={dataGridRef}
-        className="relative grid select-none overflow-auto scrollbar-thin rounded-md  focus:outline-none"
+        className="relative grid grid-rows-[auto_1fr_auto] select-none overflow-auto scrollbar-thin rounded-md focus:outline-none flex-1 min-h-0"
         style={{
           ...columnSizeVars,
-          maxHeight: `${height}px`,
-        }}
+          "--table-total-size": `${table.getTotalSize()}px`,
+          maxHeight: resolvedMaxHeight !== undefined ? (typeof resolvedMaxHeight === "number" ? `${resolvedMaxHeight}px` : resolvedMaxHeight) : undefined,
+        } as React.CSSProperties}
         onContextMenu={onDataGridContextMenu}
       >
         <div
           role="rowgroup"
           data-slot="grid-header"
           ref={headerRef}
-          className="sticky top-0 z-10 grid border-b bg-background"
+          className="sticky top-0 z-10 flex flex-col border-b bg-background"
+          style={{
+            minWidth: "var(--table-total-size)",
+          }}
         >
           {table.getHeaderGroups().map((headerGroup, rowIndex) => (
             <div
@@ -129,6 +141,9 @@ export function DataGrid<TData>({
               data-slot="grid-header-row"
               tabIndex={-1}
               className="flex w-full"
+              style={{
+                minWidth: "var(--table-total-size)",
+              }}
             >
               {headerGroup.headers.map((header, colIndex) => {
                 const sorting = table.getState().sorting;
@@ -187,9 +202,10 @@ export function DataGrid<TData>({
         <div
           role="rowgroup"
           data-slot="grid-body"
-          className="relative grid"
+          className="relative"
           style={{
             height: `${virtualTotalSize}px`,
+            minWidth: "var(--table-total-size)",
             contain: adjustLayout ? "layout paint" : "strict",
           }}
         >
@@ -232,7 +248,10 @@ export function DataGrid<TData>({
             role="rowgroup"
             data-slot="grid-footer"
             ref={footerRef}
-            className="sticky bottom-0 z-10 grid border-t bg-background"
+            className="sticky bottom-0 z-10 flex flex-col border-t bg-background"
+            style={{
+              minWidth: "var(--table-total-size)",
+            }}
           >
             <div
               role="row"

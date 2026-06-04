@@ -37,7 +37,7 @@ function AppsPage() {
   //   { value: "table", label: "Table", icon: <Table className="size-4" /> },
   // ];
   return (
-    <AppShell>
+    <AppShell className="h-screen min-h-0">
       <PageHeader
         title="Application Management"
         subtitle="Live tracker of every application, document and reviewer decision."
@@ -53,35 +53,9 @@ function AppsPage() {
         }
       />
 
-      {/* <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard
-          label="Total Applications"
-          value="3,210"
-          delta="+12.4%"
-          icon={<FileText className="size-4" />}
-        />
-        <StatCard
-          label="Approved"
-          value="1,840"
-          delta="+18%"
-          icon={<CheckCircle2 className="size-4" />}
-          accent="success"
-        />
-        <StatCard
-          label="Pending Review"
-          value="412"
-          icon={<Clock className="size-4" />}
-          accent="warning"
-        />
-        <StatCard
-          label="Avg Decision Time"
-          value="2.4d"
-          delta="-0.6d"
-          icon={<ArrowUpRight className="size-4" />}
-          accent="info"
-        />
-      </div> */}
-      <ApplicationTableView />
+      <div className="flex flex-col min-h-0 flex-1">
+        <ApplicationTableView />
+      </div>
       {/* {view === "table" ?  : <ApplicationKanbanView />} */}
     </AppShell>
   );

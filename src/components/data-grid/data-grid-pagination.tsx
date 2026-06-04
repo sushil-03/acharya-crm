@@ -25,7 +25,7 @@ interface DataGridPaginationProps<TData> extends React.ComponentProps<"div"> {
 
 export function DataGridPagination<TData>({
   table,
-  pageSizeOptions = [10, 20, 50, 100, 200],
+  pageSizeOptions = [10, 20, 50, 100],
   isLoading,
   totalElements,
   className,

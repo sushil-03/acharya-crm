@@ -32,15 +32,22 @@ export interface GetProgramsParams {
   discipline?: string;
   isActive?: boolean;
 }
-
+export interface ProgramResponse {
+  data: Program[];
+  meta: {
+    total: number;
+    page: number;
+    pageSize: number;
+  };
+}
 export const useGetPrograms = (params?: GetProgramsParams) => {
   return useQuery({
     queryKey: ["programs", params],
     queryFn: async () => {
-      const { data } = await Axios.get<Program[]>("/api/v1/programs", {
+      const { data } = await Axios.get<ProgramResponse>("/api/v1/programs", {
         params,
       });
-      return data;
+      return data.data;
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
   });

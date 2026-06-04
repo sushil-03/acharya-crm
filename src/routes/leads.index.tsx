@@ -146,7 +146,7 @@ function LeadsPage() {
   });
 
   return (
-    <AppShell>
+    <AppShell className="h-screen overflow-hidden">
       <PageHeader
         title="Lead Management"
         subtitle="Centralized acquisition, attribution, scoring & distribution across all channels."
@@ -158,7 +158,7 @@ function LeadsPage() {
           </>
         }
       />
-      <div className="flex flex-col  h-full min-h-0 flex-1">
+      <div className="flex flex-col min-h-0 flex-1">
         {/* <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <StatCard
             label="Total Leads"
@@ -189,7 +189,7 @@ function LeadsPage() {
           />
         </div> */}
 
-        <Card className="overflow-hidden h-full flex flex-col">
+        <Card className="overflow-hidden flex flex-col min-h-0 flex-1">
           <div className="p-3 border-b border-border flex flex-wrap items-center gap-3">
             <InputSearch
               searchTerm={q}
@@ -236,7 +236,7 @@ function LeadsPage() {
             showPagination
             totalElements={data?.meta?.total ?? 0}
             // className="border-0 border-none rounded-none "
-            className="flex-1 "
+            className="flex-1 min-h-0"
           />
         </Card>
       </div>

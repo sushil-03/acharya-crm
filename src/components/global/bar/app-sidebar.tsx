@@ -46,19 +46,20 @@ const groups = [
       { to: "/tasks", label: "Task Management", icon: CheckSquare },
       // { to: "/distribution", label: "Lead Distribution", icon: GitBranch },
       { to: "/applications", label: "Applications", icon: FileText },
+      { to: "/finance", label: "Finance & Payments", icon: Wallet },
+
       // { to: "/verification", label: "Verification", icon: ShieldCheck },
       // { to: "/admissions", label: "Admission Decisions", icon: GraduationCap },
       // { to: "/offer", label: "Offers", icon: FileText },
       // { to: "/scholarships", label: "Scholarships", icon: Award },
     ],
   },
-  {
-    label: "Conversion",
-    items: [
-      { to: "/finance", label: "Finance & Payments", icon: Wallet },
-      { to: "/enrollment", label: "Enrollment", icon: UserCheck },
-    ],
-  },
+  // {
+  //   label: "Conversion",
+  //   items: [
+  //     { to: "/enrollment", label: "Enrollment", icon: UserCheck },
+  //   ],
+  // },
   // {
   //   label: "Growth",
   //   items: [

@@ -25,15 +25,22 @@ export interface CommunicationLog {
   triggeredBy: string | null;
   createdAt: string;
 }
-
+export interface CommunicationResponse {
+  data: CommunicationLog[];
+  meta: {
+    total: number;
+    page: number;
+    pageSize: number;
+  };
+}
 export const useGetCommunications = (params: GetCommunicationsParams) => {
   return useQuery({
     queryKey: [QUERY_KEYS.GET_COMMUNICATION, params],
     queryFn: async () => {
-      const { data } = await Axios.get<CommunicationLog[]>("/api/v1/communications", {
+      const { data } = await Axios.get<CommunicationResponse>("/api/v1/communications", {
         params,
       });
-      return data;
+      return data.data;
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 2,

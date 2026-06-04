@@ -1996,21 +1996,29 @@ function useDataGrid<TData>({
   // Memoize state object to reduce shallow equality checks
   const tableState = React.useMemo<Partial<TableState>>(
     () => ({
-      ...propsRef.current.state,
+      ...props.state,
       sorting,
       columnFilters,
       rowSelection,
     }),
-    [propsRef, sorting, columnFilters, rowSelection],
+    [
+      props.state?.pagination?.pageIndex,
+      props.state?.pagination?.pageSize,
+      props.state?.columnVisibility,
+      props.state?.columnPinning,
+      sorting,
+      columnFilters,
+      rowSelection,
+    ],
   );
 
   const tableOptions = React.useMemo<TableOptions<TData>>(() => {
     return {
-      ...propsRef.current,
+      ...props,
       data,
       columns,
       defaultColumn,
-      initialState: propsRef.current.initialState,
+      initialState,
       state: tableState,
       onRowSelectionChange,
       onSortingChange,
@@ -2023,10 +2031,13 @@ function useDataGrid<TData>({
       meta: tableMeta,
     };
   }, [
-    propsRef,
+    props.onPaginationChange,
+    props.manualPagination,
+    props.pageCount,
     data,
     columns,
     defaultColumn,
+    initialState,
     tableState,
     dir,
     onRowSelectionChange,
@@ -2040,9 +2051,7 @@ function useDataGrid<TData>({
 
   const table = useReactTable(tableOptions);
 
-  if (!tableRef.current) {
-    tableRef.current = table;
-  }
+  tableRef.current = table;
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: columnSizingInfo and columnSizing are used for calculating the column size vars
   const columnSizeVars = React.useMemo(() => {
@@ -2053,7 +2062,12 @@ function useDataGrid<TData>({
       colSizes[`--col-${header.column.id}-size`] = header.column.getSize();
     }
     return colSizes;
-  }, [table.getState().columnSizingInfo, table.getState().columnSizing]);
+  }, [
+    table,
+    table.getState().columnSizingInfo,
+    table.getState().columnSizing,
+    table.getState().columnVisibility,
+  ]);
 
   const isFirefox = React.useSyncExternalStore(
     React.useCallback(() => () => {}, []),
@@ -2082,9 +2096,7 @@ function useDataGrid<TData>({
     measureElement: !isFirefox ? (element) => element?.getBoundingClientRect().height : undefined,
   });
 
-  if (!rowVirtualizerRef.current) {
-    rowVirtualizerRef.current = rowVirtualizer;
-  }
+  rowVirtualizerRef.current = rowVirtualizer;
 
   const onScrollToRow = React.useCallback(
     async (opts: Partial<CellPosition>) => {

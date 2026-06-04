@@ -208,6 +208,7 @@ function DataGridRowImpl<TData>({
       )}
       style={{
         height: `${getRowHeightValue(rowHeight)}px`,
+        minWidth: "var(--table-total-size)",
         ...(adjustLayout
           ? { top: `${virtualItem.start}px` }
           : { transform: `translateY(${virtualItem.start}px)` }),

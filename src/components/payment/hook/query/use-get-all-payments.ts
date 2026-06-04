@@ -32,13 +32,20 @@ export interface Payment {
   updatedAt: string;
   student: Student;
 }
-
+export interface PaymentResponse {
+  data: Payment[];
+  meta: {
+    total: number;
+    page: number;
+    pageSize: number;
+  };
+}
 export const useGetAllPayments = () => {
   return useQuery({
     queryKey: ["payments"],
     queryFn: async () => {
-      const { data } = await Axios.get<Payment[]>("/api/v1/payments");
-      return data;
+      const { data } = await Axios.get<PaymentResponse>("/api/v1/payments");
+      return data.data;
     },
   });
 };
