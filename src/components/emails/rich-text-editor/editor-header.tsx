@@ -1,16 +1,24 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface EditorHeaderProps {
   name: string;
   status: "Draft" | "Published";
   setStatus: (status: "Draft" | "Published") => void;
   onSave: () => void;
+  isSaving?: boolean;
 }
 
-export function EditorHeader({ name, status, setStatus, onSave }: EditorHeaderProps) {
+export function EditorHeader({ name, status, setStatus, onSave, isSaving }: EditorHeaderProps) {
   const navigate = useNavigate();
 
   return (
@@ -21,6 +29,7 @@ export function EditorHeader({ name, status, setStatus, onSave }: EditorHeaderPr
           size="icon"
           onClick={() => navigate({ to: "/email-templates" })}
           className="size-8"
+          disabled={isSaving}
         >
           <ArrowLeft className="size-4" />
         </Button>
@@ -29,26 +38,43 @@ export function EditorHeader({ name, status, setStatus, onSave }: EditorHeaderPr
             Email Library · Rich Text Editor
           </div>
           <h2 className="text-lg font-bold font-display text-foreground leading-none mt-0.5">
-            {name || "Untitled Template"}
+            {name || "Rich Text Template"}
           </h2>
         </div>
       </div>
       <div className="flex items-center gap-3">
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value as "Draft" | "Published")}
-          className="h-9 px-3 rounded-lg border border-border bg-card text-xs font-semibold text-foreground/80 outline-none focus:ring-1 focus:ring-primary"
-        >
-          <option value="Draft">Draft</option>
-          <option value="Published">Published</option>
-        </select>
+        <div>
+          <Select
+            value={status}
+            onValueChange={(val) => setStatus(val as "Draft" | "Published")}
+            disabled={isSaving}
+          >
+            <SelectTrigger className="h-9 text-xs font-semibold w-[120px] bg-card border-border">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Draft">Draft</SelectItem>
+              <SelectItem value="Published">Published</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <Button
           onClick={onSave}
-          className="bg-primary hover:bg-primary/95 text-white flex items-center gap-1.5 h-9"
+          disabled={isSaving}
+          className="bg-primary hover:bg-primary/95 text-white flex items-center gap-1.5 h-9 min-w-[130px] justify-center"
         >
-          <Save className="size-4" /> Save Template
+          {isSaving ? (
+            <>
+              <Loader2 className="size-4 animate-spin" /> Saving...
+            </>
+          ) : (
+            <>
+              <Save className="size-4" /> Save Template
+            </>
+          )}
         </Button>
       </div>
     </div>
   );
 }
+

@@ -1,63 +1,70 @@
 import { useState, useEffect, useRef } from "react";
 import type { MutableRefObject } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import {
-  getEmailTemplate,
-  saveEmailTemplate,
-  createBlankEmailTemplate,
-} from "@/store/use-email-templates-store";
-import { EmailTemplate } from "@/types/email-templates-types";
 import { toast } from "sonner";
-import {
-  EDITOR_ID,
-  MERGE_FIELDS,
-  DEFAULT_CONTENT,
-  DEFAULT_SUBJECT,
-} from "./constants";
+import { EDITOR_ID, MERGE_FIELDS } from "./constants";
+
+import { useGetEmailTemplateDetails } from "../hooks/query/use-get-email-template-details";
+import { useGetEmailTemplateCategories } from "../hooks/query/use-get-email-template-categories";
+import { useCreateEmailTemplate } from "../hooks/mutation/use-create-email-template";
+import { useUpdateEmailTemplate } from "../hooks/mutation/use-update-email-template";
 
 export function useRichTextEditor(id?: string) {
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [subject, setSubject] = useState("");
+  const [category, setCategory] = useState("");
   const [content, setContent] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [status, setStatus] = useState<"Draft" | "Published">("Draft");
-  const [template, setTemplate] = useState<EmailTemplate | null>(null);
   const [testEmails, setTestEmails] = useState("");
 
   const lastFocusedRef = useRef<"subject" | "content">("content");
   const contentValRef = useRef("");
+  const isLoadedRef = useRef(false);
+
+  // Queries & Mutations
+  const { data: templateDetails, isLoading: isLoadingDetails } = useGetEmailTemplateDetails(id);
+  const { data: categoriesData = [] } = useGetEmailTemplateCategories();
+  const defaultCategories = ["general", "marketing", "transactional", "admissions", "finance"];
+  const categories = categoriesData.length > 0 ? categoriesData : defaultCategories;
+
+  const { mutateAsync: createTemplate, isPending: isCreating } = useCreateEmailTemplate();
+  const { mutateAsync: updateTemplate, isPending: isUpdating } = useUpdateEmailTemplate();
+  const isSaving = isCreating || isUpdating;
 
   useEffect(() => {
     contentValRef.current = content;
   }, [content]);
 
+  // Load existing template details
   useEffect(() => {
-    if (id) {
-      const existing = getEmailTemplate(id);
-      if (existing) {
-        setTemplate(existing);
-        setName(existing.name);
-        setSubject(existing.subject);
-        setContent(existing.content);
-        setTags(existing.tags);
-        setStatus(existing.status);
-        setEditorContent(existing.content);
-      } else {
-        toast.error("Template not found");
-        navigate({ to: "/email-templates" });
-      }
-    } else {
-      const blank = createBlankEmailTemplate("rich-text");
-      setTemplate(blank);
-      setName("Scholarship Offer Visual Nudge");
-      setSubject(DEFAULT_SUBJECT);
-      setContent(DEFAULT_CONTENT);
-      setTags(["Scholarship", "Nudge", "Rich-Text"]);
-      setEditorContent(DEFAULT_CONTENT);
+    if (id && templateDetails && !isLoadedRef.current) {
+      isLoadedRef.current = true;
+      setName(templateDetails.name || "");
+      setSubject(templateDetails.subject || "");
+      setCategory(templateDetails.category || "");
+      setStatus(templateDetails.isActive ? "Published" : "Draft");
+
+      const loadedContent = templateDetails.htmlBody || templateDetails.textBody || "";
+      setContent(loadedContent);
+      setEditorContent(loadedContent);
     }
-  }, [id, navigate]);
+  }, [id, templateDetails]);
+
+  // Clean initialization for new templates
+  useEffect(() => {
+    if (!id) {
+      setName("");
+      setSubject("");
+      setCategory("");
+      setTags([]);
+      setStatus("Draft");
+      setContent("");
+      setEditorContent("");
+    }
+  }, [id]);
 
   useEffect(() => {
     let active = true;
@@ -67,9 +74,7 @@ export function useRichTextEditor(id?: string) {
     const initTiny = () => {
       if (!active || !(window as any).tinymce) return;
       (window as any).tinymce.remove(`#${EDITOR_ID}`);
-      (window as any).tinymce.init(
-        buildTinyConfig(contentValRef, setContent, lastFocusedRef),
-      );
+      (window as any).tinymce.init(buildTinyConfig(contentValRef, setContent, lastFocusedRef));
     };
 
     if (!script) {
@@ -108,28 +113,53 @@ export function useRichTextEditor(id?: string) {
     setTags(tags.filter((_, i) => i !== index));
   }
 
-  function handleSave() {
-    if (!name.trim()) {
-      toast.error("Template name is required");
-      return;
-    }
-    if (!subject.trim()) {
-      toast.error("Subject is required");
-      return;
-    }
-    if (!template) return;
+  async function handleSave() {
+    if (!name.trim()) return toast.error("Template name is required");
+    if (!subject.trim()) return toast.error("Subject is required");
+    if (!category) return toast.error("Category is required");
 
-    saveEmailTemplate({
-      ...template,
-      name,
-      subject,
-      content,
-      tags,
-      status,
-      modifiedBy: "Admin",
-    });
-    toast.success("Template saved successfully");
-    navigate({ to: "/email-templates" });
+    const key = name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "");
+
+    try {
+      if (id) {
+        toast.loading("Updating template...", { id: "save-template" });
+        await updateTemplate({
+          id,
+          data: {
+            name,
+            key,
+            subject,
+            htmlBody: content,
+            textBody: name, // Plain text description / body can fallback to name or simple tags
+            category,
+            isActive: status === "Published",
+          },
+        });
+        toast.success("Template updated successfully", { id: "save-template" });
+      } else {
+        toast.loading("Creating template...", { id: "save-template" });
+        await createTemplate({
+          key,
+          name,
+          subject,
+          htmlBody: content,
+          textBody: name,
+          editorType: "rich_text",
+          designJson: {},
+          variables: [],
+          category,
+          isActive: status === "Published",
+        });
+        toast.success("Template created successfully", { id: "save-template" });
+      }
+      navigate({ to: "/email-templates" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to save template";
+      toast.error(message, { id: "save-template" });
+    }
   }
 
   function insertMergeField(key: string) {
@@ -161,6 +191,11 @@ export function useRichTextEditor(id?: string) {
     setName,
     subject,
     setSubject,
+    category,
+    setCategory,
+    categories,
+    content,
+    setContent,
     tags,
     tagInput,
     setTagInput,
@@ -174,6 +209,8 @@ export function useRichTextEditor(id?: string) {
     handleSave,
     insertMergeField,
     handleSendTest,
+    isSaving,
+    isLoadingDetails,
   };
 }
 
@@ -191,6 +228,7 @@ function buildTinyConfig(
     selector: `#${EDITOR_ID}`,
     height: "100%",
     menubar: false,
+    statusbar: false,
     plugins: [
       "advlist",
       "autolink",
@@ -235,14 +273,13 @@ function buildTinyConfig(
           return;
         }
         const reader = new FileReader();
-        reader.onload = (e) =>
-          callback(e.target?.result as string, { alt: file.name });
+        reader.onload = (e) => callback(e.target?.result as string, { alt: file.name });
         reader.readAsDataURL(file);
       };
       input.click();
     },
     content_style:
-      "body { font-family:'Plus Jakarta Sans',Helvetica,Arial,sans-serif; font-size:14px; color: #1e293b; padding: 20px; }",
+      "body { font-family:'Plus Jakarta Sans',Helvetica,Arial,sans-serif; font-size:14px; color: #1e293b; padding: 10px; margin: 0; }",
     branding: false,
     setup: (editor: any) => {
       editor.ui.registry.addMenuButton("mailmergefields", {
@@ -261,9 +298,7 @@ function buildTinyConfig(
         },
       });
 
-      editor.on("change keyup undo redo", () =>
-        setContent(editor.getContent()),
-      );
+      editor.on("change keyup undo redo", () => setContent(editor.getContent()));
       editor.on("init", () => editor.setContent(contentValRef.current));
       editor.on("focus", () => {
         lastFocusedRef.current = "content";

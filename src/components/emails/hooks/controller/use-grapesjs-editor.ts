@@ -24,6 +24,7 @@ export interface UseGrapesJsEditorProps {
   setTemplate: Dispatch<SetStateAction<EmailTemplate | null>>;
   setTableModalOpen: Dispatch<SetStateAction<boolean>>;
   placeholderModelRef: MutableRefObject<any>;
+  setIsEditorInitialized: Dispatch<SetStateAction<boolean>>;
 }
 
 export function useGrapesJsEditor({
@@ -48,9 +49,8 @@ export function useGrapesJsEditor({
   setTemplate,
   setTableModalOpen,
   placeholderModelRef,
+  setIsEditorInitialized,
 }: UseGrapesJsEditorProps) {
-
-
   useEffect(() => {
     if (typeof window === "undefined") return;
     let cancelled = false;
@@ -71,6 +71,9 @@ export function useGrapesJsEditor({
         colorPicker: { appendTo: "body" },
         blockManager: { appendTo: "#blocks-container" },
         traitManager: { appendTo: "#traits-container" },
+        canvas: {
+          styles: ["body { padding: 40px 20px; background-color: #f1f5f9; min-height: 100%; }"],
+        },
         styleManager: {
           appendTo: "#styles-container",
           sectors: [
@@ -200,8 +203,6 @@ export function useGrapesJsEditor({
         content: `<div data-table-placeholder="true" style="padding: 20px; border: 2px dashed #800000; text-align: center; color: #800000; font-family: sans-serif; font-size: 13px; font-weight: bold; background-color: #fff5f5; border-radius: 6px; margin: 10px 0;">[ Table Configuration - Select rows & columns ]</div>`,
       });
 
-
-
       bm.add("row-1-col", {
         label: `<div class="custom-block-label"><svg class="block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg><span>1 Column</span></div>`,
         category: "Rows",
@@ -292,67 +293,27 @@ export function useGrapesJsEditor({
       });
       editor.on("component:deselected", () => setSelectedType("None"));
 
-      if (id) {
-        const existing = getEmailTemplate(id);
-        if (existing) {
-          setTemplate(existing);
-          setName(existing.name);
-          setSubject(existing.subject);
-          setTags(existing.tags);
-          setStatus(existing.status);
-          setContent(existing.content);
-          setVisualData(existing.visualData || "");
-          if (existing.visualData) {
-            try {
-              editor.loadProjectData(JSON.parse(existing.visualData));
-            } catch {
-              editor.setComponents(existing.content);
-            }
-          } else {
-            editor.setComponents(existing.content);
-          }
-        }
-      } else {
-        setName("FEE_pending2627_AIT");
-        setSubject("Urgent: Fee Payment Pending for Academic Year 2026-27");
-        setTags(["AIT", "Fee", "Pending"]);
-        editor.setComponents(`
-          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
-            <h2 style="color: #800000; font-size: 22px; font-weight: bold; margin-bottom: 16px; text-align: center;">Fee Payment Pending</h2>
-            <p style="color: #475569; font-size: 14px; line-height: 1.6;">Dear Student,</p>
-            <p style="color: #475569; font-size: 14px; line-height: 1.6;">We hope this email finds you well. Our records indicate that your tuition/admissions fee for the academic year 2026-27 is currently pending.</p>
-            <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 12px; margin: 20px 0; border-radius: 4px;">
-              <strong style="color: #b45309; font-size: 14px;">Please Note:</strong>
-              <p style="color: #d97706; font-size: 13px; margin: 4px 0 0 0;">The deadline to secure your seat by clearing the outstanding balance is approaching quickly.</p>
-            </div>
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="#" style="background-color: #800000; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-block;">Pay Pending Fee Now</a>
-            </div>
-          </div>
-        `);
-      }
+      setIsEditorInitialized(true);
 
       const handlePickerClick = (e: Event) => {
         const replacer = (e.target as Element).closest?.(
-          ".sp-replacer, .gjs-field-color, .gjs-field-color-picker"
+          ".sp-replacer, .gjs-field-color, .gjs-field-color-picker",
         ) as HTMLElement | null;
         if (!replacer) return;
         const reposition = () => {
-          const container = (
-            document.querySelector(".gjs-color-picker") ||
-            document.querySelector(".sp-container:not(.sp-hidden)")
-          ) as HTMLElement | null;
+          const container = (document.querySelector(".gjs-color-picker") ||
+            document.querySelector(".sp-container:not(.sp-hidden)")) as HTMLElement | null;
           if (!container) return;
           const rect = replacer.getBoundingClientRect();
           const pickerW = container.offsetWidth || 230;
           const pickerH = container.offsetHeight || 250;
           const left = Math.max(0, Math.min(rect.left, window.innerWidth - pickerW - 8));
-          
+
           let top = rect.bottom + 4;
           if (top + pickerH > window.innerHeight && rect.top - pickerH - 4 > 0) {
             top = rect.top - pickerH - 4;
           }
-          
+
           container.style.setProperty("position", "fixed", "important");
           container.style.setProperty("top", `${top}px`, "important");
           container.style.setProperty("left", `${left}px`, "important");

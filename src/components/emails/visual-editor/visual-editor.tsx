@@ -2,38 +2,55 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
-import { Undo2, Redo2, Layout, Eye, EyeOff, Maximize, Minimize } from "lucide-react";
+import { Undo2, Redo2, Layout, Eye, EyeOff, Maximize, Minimize, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { saveEmailTemplate } from "@/store/use-email-templates-store";
-import { EmailTemplate } from "@/types/email-templates-types";
 
 import { EditorHeader } from "./editor-header";
 import { EditorInputs } from "./editor-inputs";
 import { EditorSidebar } from "./editor-sidebar";
 import { EditorModals } from "./editor-modals";
 import { useGrapesJsEditor } from "../hooks/controller/use-grapesjs-editor";
+import { useGetEmailTemplateDetails } from "../hooks/query/use-get-email-template-details";
+import { useGetEmailTemplateCategories } from "../hooks/query/use-get-email-template-categories";
+import { useCreateEmailTemplate } from "../hooks/mutation/use-create-email-template";
+import { useUpdateEmailTemplate } from "../hooks/mutation/use-update-email-template";
+import { TestEmailVariablesDialog } from "../components/test-email-variables-dialog";
 
 export function VisualEditor({ id }: { id?: string }) {
   const navigate = useNavigate();
 
   const [name, setName] = useState("");
   const [subject, setSubject] = useState("");
+  const [category, setCategory] = useState("");
   const [content, setContent] = useState("");
   const [visualData, setVisualData] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [status, setStatus] = useState<"Draft" | "Published">("Draft");
-  const [template, setTemplate] = useState<EmailTemplate | null>(null);
+  const [template, setTemplate] = useState<any>(null);
 
   const [activeTab, setActiveTab] = useState<"content" | "rows" | "settings">("content");
   const [testEmails, setTestEmails] = useState("");
   const [selectedType, setSelectedType] = useState<string>("None");
-  
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   const [isPreviewActive, setIsPreviewActive] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isEditorInitialized, setIsEditorInitialized] = useState(false);
 
   const editorRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isLoadedRef = useRef(false);
+
+  // Queries & Mutations
+  const { data: templateDetails, isLoading: isLoadingDetails } = useGetEmailTemplateDetails(id);
+  const { data: categoriesData = [] } = useGetEmailTemplateCategories();
+  const defaultCategories = ["general", "marketing", "transactional", "admissions", "finance"];
+  const categories = categoriesData.length > 0 ? categoriesData : defaultCategories;
+
+  const { mutateAsync: createTemplate, isPending: isCreating } = useCreateEmailTemplate();
+  const { mutateAsync: updateTemplate, isPending: isUpdating } = useUpdateEmailTemplate();
+  const isSaving = isCreating || isUpdating;
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -45,6 +62,50 @@ export function VisualEditor({ id }: { id?: string }) {
     };
   }, []);
 
+  // Synchronize backend data to GrapesJS
+  useEffect(() => {
+    if (isEditorInitialized && id && templateDetails && !isLoadedRef.current) {
+      isLoadedRef.current = true;
+      setName(templateDetails.name || "");
+      setSubject(templateDetails.subject || "");
+      setCategory(templateDetails.category || "");
+      setStatus(templateDetails.isActive ? "Published" : "Draft");
+      setContent(templateDetails.htmlBody || "");
+
+      const designJson = templateDetails.designJson;
+      if (designJson) {
+        try {
+          const parsedData = typeof designJson === "string" ? JSON.parse(designJson) : designJson;
+          if (parsedData && Object.keys(parsedData).length > 0) {
+            editorRef.current.loadProjectData(parsedData);
+          } else if (templateDetails.htmlBody) {
+            editorRef.current.setComponents(templateDetails.htmlBody);
+          }
+        } catch (err) {
+          console.error("Error loading design JSON", err);
+          editorRef.current.setComponents(templateDetails.htmlBody);
+        }
+      } else if (templateDetails.htmlBody) {
+        editorRef.current.setComponents(templateDetails.htmlBody);
+      }
+    }
+  }, [isEditorInitialized, id, templateDetails]);
+
+  // Synchronize new template canvas state
+  useEffect(() => {
+    if (isEditorInitialized && !id) {
+      setName("");
+      setSubject("");
+      setCategory("");
+      setTags([]);
+      setStatus("Draft");
+      editorRef.current.setComponents(`
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff; min-height: 300px;">
+        </div>
+      `);
+    }
+  }, [isEditorInitialized, id, categories]);
+
   const togglePreview = () => {
     if (!editorRef.current) return;
     const isCurrentlyPreview = editorRef.current.Commands.isActive("preview");
@@ -55,7 +116,7 @@ export function VisualEditor({ id }: { id?: string }) {
       editorRef.current.Commands.run("preview");
       setIsPreviewActive(true);
     }
-    
+
     // Trigger layout/canvas recalculation in GrapesJS after DOM changes
     setTimeout(() => {
       if (editorRef.current) {
@@ -75,7 +136,6 @@ export function VisualEditor({ id }: { id?: string }) {
       document.exitFullscreen();
     }
   };
-
 
   const [linkModalOpen, setLinkModalOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
@@ -110,7 +170,7 @@ export function VisualEditor({ id }: { id?: string }) {
   const handleInsertTable = () => {
     if (editorRef.current) {
       let html = `<table style="width: 100%; margin: 15px 0; border-collapse: collapse; font-family: sans-serif; font-size: 13px; color: #475569; border: 1px solid #e2e8f0;">`;
-      
+
       if (tableHasHeader) {
         html += `<thead><tr style="background-color: #f8fafc; border-bottom: 2px solid #e2e8f0; text-align: left;">`;
         for (let c = 0; c < tableCols; c++) {
@@ -118,7 +178,7 @@ export function VisualEditor({ id }: { id?: string }) {
         }
         html += `</tr></thead>`;
       }
-      
+
       html += `<tbody>`;
       for (let r = 0; r < tableRows; r++) {
         html += `<tr style="border-bottom: 1px solid #e2e8f0;">`;
@@ -182,8 +242,8 @@ export function VisualEditor({ id }: { id?: string }) {
     setTemplate,
     setTableModalOpen,
     placeholderModelRef,
+    setIsEditorInitialized,
   });
-
 
   const handleInsertLink = () => {
     if (rteInstance && linkUrl.trim()) {
@@ -224,31 +284,79 @@ export function VisualEditor({ id }: { id?: string }) {
 
   const handleSendTest = () => {
     if (!testEmails.trim()) return toast.error("Please enter at least one email address");
-    toast.success(`Test email successfully sent to ${testEmails}!`);
+    setIsDialogOpen(true);
+  };
+
+  const handleActualSendTest = (customSubject: string, customContent: string) => {
+    toast.success(`Test email successfully sent to ${testEmails}!`, {
+      description: `Subject: "${customSubject}"`,
+      duration: 5000,
+    });
     setTestEmails("");
   };
 
-  const handleSave = () => {
+  const getEditorHtmlContent = () => {
+    if (editorRef.current) {
+      return editorRef.current.getHtml() + `<style>${editorRef.current.getCss()}</style>`;
+    }
+    return visualData;
+  };
+
+  const handleSave = async () => {
     if (!name.trim()) return toast.error("Template name is required");
     if (!subject.trim()) return toast.error("Subject is required");
+    if (!category) return toast.error("Category is required");
 
-    saveEmailTemplate({
-      id: id || `temp-${Math.random().toString(36).slice(2, 10)}`,
-      name,
-      subject,
-      content,
-      visualData,
-      type: "visual",
-      tags,
-      status,
-      createdBy: template?.createdBy || "Admin",
-      modifiedBy: "Admin",
-      accessibleTo: template?.accessibleTo || "Everyone",
-      createdOn: template?.createdOn || new Date().toISOString(),
-      modifiedOn: new Date().toISOString(),
-    });
-    toast.success("Template saved successfully");
-    navigate({ to: "/email-templates" });
+    const key = name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "");
+
+    let htmlContent = "";
+    let designData: any = {};
+    if (editorRef.current) {
+      htmlContent = `<style>${editorRef.current.getCss()}</style>${editorRef.current.getHtml()}`;
+      designData = editorRef.current.getProjectData();
+    }
+
+    try {
+      if (id) {
+        toast.loading("Updating template...", { id: "save-template" });
+        await updateTemplate({
+          id,
+          data: {
+            name,
+            key,
+            subject,
+            htmlBody: htmlContent,
+            textBody: name,
+            designJson: designData,
+            category,
+            isActive: status === "Published",
+          },
+        });
+        toast.success("Template updated successfully", { id: "save-template" });
+      } else {
+        toast.loading("Creating template...", { id: "save-template" });
+        await createTemplate({
+          key,
+          name,
+          subject,
+          htmlBody: htmlContent,
+          textBody: name,
+          editorType: "visual_designer",
+          designJson: designData,
+          variables: [],
+          category,
+          isActive: status === "Published",
+        });
+        toast.success("Template created successfully", { id: "save-template" });
+      }
+      navigate({ to: "/email-templates" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to save template";
+      toast.error(message, { id: "save-template" });
+    }
   };
 
   return (
@@ -259,12 +367,21 @@ export function VisualEditor({ id }: { id?: string }) {
           isFullscreen ? "h-screen w-screen" : "h-[calc(100vh-64px)]"
         }`}
       >
-        <EditorHeader name={name} status={status} setStatus={setStatus} handleSave={handleSave} />
+        <EditorHeader
+          name={name}
+          status={status}
+          setStatus={setStatus}
+          handleSave={handleSave}
+          isSaving={isSaving}
+        />
         <EditorInputs
           name={name}
           setName={setName}
           subject={subject}
           setSubject={setSubject}
+          category={category}
+          setCategory={setCategory}
+          categories={categories}
           tags={tags}
           tagInput={tagInput}
           setTagInput={setTagInput}
@@ -272,7 +389,15 @@ export function VisualEditor({ id }: { id?: string }) {
           handleRemoveTag={handleRemoveTag}
           className={isPreviewActive ? "hidden" : ""}
         />
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex overflow-hidden relative">
+          {id && isLoadingDetails && (
+            <div className="absolute inset-0 bg-background/80 z-[10000] flex flex-col items-center justify-center gap-3 backdrop-blur-[2px]">
+              <Loader2 className="size-8 animate-spin text-primary" />
+              <p className="text-muted-foreground text-sm font-medium">
+                Loading email template details...
+              </p>
+            </div>
+          )}
           <div className="flex-1 flex flex-col bg-slate-100 overflow-hidden relative">
             <div className="px-4 py-2 border-b border-border bg-muted/40 flex items-center gap-2 shrink-0">
               <Button size="icon" variant="ghost" onClick={undo} className="size-7" title="Undo">
@@ -293,7 +418,11 @@ export function VisualEditor({ id }: { id?: string }) {
                   className="h-7 px-2 text-xs flex items-center gap-1.5 font-medium"
                   title={isPreviewActive ? "Exit Preview" : "Preview"}
                 >
-                  {isPreviewActive ? <EyeOff className="size-3.5 text-primary" /> : <Eye className="size-3.5 text-muted-foreground" />}
+                  {isPreviewActive ? (
+                    <EyeOff className="size-3.5 text-primary" />
+                  ) : (
+                    <Eye className="size-3.5 text-muted-foreground" />
+                  )}
                   {isPreviewActive ? "Edit Mode" : "Preview"}
                 </Button>
                 <Button
@@ -303,7 +432,11 @@ export function VisualEditor({ id }: { id?: string }) {
                   className="h-7 px-2 text-xs flex items-center gap-1.5 font-medium"
                   title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
                 >
-                  {isFullscreen ? <Minimize className="size-3.5 text-primary" /> : <Maximize className="size-3.5 text-muted-foreground" />}
+                  {isFullscreen ? (
+                    <Minimize className="size-3.5 text-primary" />
+                  ) : (
+                    <Maximize className="size-3.5 text-muted-foreground" />
+                  )}
                   {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
                 </Button>
               </div>
@@ -348,6 +481,14 @@ export function VisualEditor({ id }: { id?: string }) {
         setTableHasHeader={setTableHasHeader}
         handleInsertTable={handleInsertTable}
         handleCancelTable={handleCancelTable}
+      />
+      <TestEmailVariablesDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        subject={subject}
+        content={getEditorHtmlContent()}
+        testEmails={testEmails}
+        onSend={handleActualSendTest}
       />
     </AppShell>
   );
