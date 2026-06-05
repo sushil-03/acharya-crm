@@ -56,12 +56,12 @@ export function StatCard({
     info: "from-info/15 to-info/0 text-info",
   };
   return (
-    <Card className="p-5 relative overflow-hidden group hover:shadow-elev-2 transition-shadow">
+    <Card className="p-4 relative overflow-hidden group hover:shadow-elev-2 transition-shadow">
       <div
         className={`absolute -top-12 -right-12 size-40 rounded-full bg-gradient-to-br ${accents[accent]} opacity-60 blur-xl pointer-events-none`}
       />
       <div className="relative">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-2">
           <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             {label}
           </div>
