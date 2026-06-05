@@ -25,6 +25,7 @@ import { Route as DistributionRouteImport } from './routes/distribution'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CounsellorRouteImport } from './routes/counsellor'
 import { Route as CommunicationsRouteImport } from './routes/communications'
+import { Route as ChatSettingsRouteImport } from './routes/chat-settings'
 import { Route as AutomationRouteImport } from './routes/automation'
 import { Route as ApplicationsRouteImport } from './routes/applications'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
@@ -131,6 +132,11 @@ const CounsellorRoute = CounsellorRouteImport.update({
 const CommunicationsRoute = CommunicationsRouteImport.update({
   id: '/communications',
   path: '/communications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatSettingsRoute = ChatSettingsRouteImport.update({
+  id: '/chat-settings',
+  path: '/chat-settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AutomationRoute = AutomationRouteImport.update({
@@ -281,6 +287,7 @@ export interface FileRoutesByFullPath {
   '/analytics': typeof AnalyticsRoute
   '/applications': typeof ApplicationsRoute
   '/automation': typeof AutomationRouteWithChildren
+  '/chat-settings': typeof ChatSettingsRoute
   '/communications': typeof CommunicationsRoute
   '/counsellor': typeof CounsellorRoute
   '/dashboard': typeof DashboardRoute
@@ -325,6 +332,7 @@ export interface FileRoutesByTo {
   '/admissions': typeof AdmissionsRoute
   '/analytics': typeof AnalyticsRoute
   '/applications': typeof ApplicationsRoute
+  '/chat-settings': typeof ChatSettingsRoute
   '/communications': typeof CommunicationsRoute
   '/counsellor': typeof CounsellorRoute
   '/dashboard': typeof DashboardRoute
@@ -369,6 +377,7 @@ export interface FileRoutesById {
   '/analytics': typeof AnalyticsRoute
   '/applications': typeof ApplicationsRoute
   '/automation': typeof AutomationRouteWithChildren
+  '/chat-settings': typeof ChatSettingsRoute
   '/communications': typeof CommunicationsRoute
   '/counsellor': typeof CounsellorRoute
   '/dashboard': typeof DashboardRoute
@@ -416,6 +425,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/applications'
     | '/automation'
+    | '/chat-settings'
     | '/communications'
     | '/counsellor'
     | '/dashboard'
@@ -460,6 +470,7 @@ export interface FileRouteTypes {
     | '/admissions'
     | '/analytics'
     | '/applications'
+    | '/chat-settings'
     | '/communications'
     | '/counsellor'
     | '/dashboard'
@@ -503,6 +514,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/applications'
     | '/automation'
+    | '/chat-settings'
     | '/communications'
     | '/counsellor'
     | '/dashboard'
@@ -549,6 +561,7 @@ export interface RootRouteChildren {
   AnalyticsRoute: typeof AnalyticsRoute
   ApplicationsRoute: typeof ApplicationsRoute
   AutomationRoute: typeof AutomationRouteWithChildren
+  ChatSettingsRoute: typeof ChatSettingsRoute
   CommunicationsRoute: typeof CommunicationsRoute
   CounsellorRoute: typeof CounsellorRoute
   DashboardRoute: typeof DashboardRoute
@@ -690,6 +703,13 @@ declare module '@tanstack/react-router' {
       path: '/communications'
       fullPath: '/communications'
       preLoaderRoute: typeof CommunicationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat-settings': {
+      id: '/chat-settings'
+      path: '/chat-settings'
+      fullPath: '/chat-settings'
+      preLoaderRoute: typeof ChatSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/automation': {
@@ -941,6 +961,7 @@ const rootRouteChildren: RootRouteChildren = {
   AnalyticsRoute: AnalyticsRoute,
   ApplicationsRoute: ApplicationsRoute,
   AutomationRoute: AutomationRouteWithChildren,
+  ChatSettingsRoute: ChatSettingsRoute,
   CommunicationsRoute: CommunicationsRoute,
   CounsellorRoute: CounsellorRoute,
   DashboardRoute: DashboardRoute,

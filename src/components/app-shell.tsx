@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { AppSidebar } from "@/components/global/bar/app-sidebar";
 import { TopBar } from "@/components/global/bar/top-bar";
+import { ChatWidget } from "@/components/communications/chat-widget";
 import { cn } from "@/lib/utils";
 
 export function AppShell({
@@ -28,6 +29,7 @@ export function AppShell({
           {children}
         </main>
       </div>
+      <ChatWidget />
     </div>
   );
 }

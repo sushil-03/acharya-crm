@@ -26,11 +26,13 @@ import { GlobalSearch } from "./global-search";
 import ItemButton from "./item-button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { AppSidebar } from "./app-sidebar";
+import { SettingsModal } from "@/components/settings/settings-modal";
 
 export function TopBar() {
   const { user } = useUserStore();
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -40,6 +42,7 @@ export function TopBar() {
   const currentTheme = theme === "system" ? resolvedTheme : theme;
 
   return (
+    <>
     <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border w-full">
       <div className="flex items-center gap-3 px-4 lg:px-6 h-12 w-full">
         <div className="flex items-center gap-2 lg:hidden">
@@ -146,9 +149,9 @@ export function TopBar() {
                   type="coming_soon"
                 />
                 <ItemButton
+                  onClick={() => setSettingsOpen(true)}
                   icon={<Settings className="size-4 text-muted-foreground" />}
-                  buttonText="Preferences"
-                  type="coming_soon"
+                  buttonText="Settings"
                 />
                 <ItemButton
                   onClick={() => setTheme(currentTheme === "light" ? "dark" : "light")}
@@ -161,7 +164,7 @@ export function TopBar() {
                   }
                   buttonText={mounted && currentTheme === "light" ? "Dark Mode" : "Light Mode"}
                 />
-                {/* <div className="h-px bg-border my-1" /> */}
+                <div className="h-px bg-border my-1" />
                 <ItemButton
                   onClick={() => {
                     logout();
@@ -176,5 +179,8 @@ export function TopBar() {
         </div>
       </div>
     </header>
+
+    <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
+    </>
   );
 }

@@ -19,6 +19,7 @@ import {
   BarChart3,
   User,
   Settings,
+  Settings2,
   Sparkles,
   ChevronRight,
   Zap,
@@ -60,15 +61,12 @@ const groups = [
   //     { to: "/enrollment", label: "Enrollment", icon: UserCheck },
   //   ],
   // },
-  // {
-  //   label: "Growth",
-  //   items: [
-  //     { to: "/marketing", label: "Marketing Automation", icon: Megaphone },
-  //     { to: "/communications", label: "Communication Hub", icon: MessageSquare },
-  //     { to: "/international", label: "International", icon: Globe2 },
-  //     { to: "/partners", label: "Channel Partners", icon: Handshake },
-  //   ],
-  // },
+  {
+    label: "Growth",
+    items: [
+      { to: "/chat-settings", label: "Chat Settings", icon: Settings2 },
+    ],
+  },
   {
     label: "Automation",
     items: [
