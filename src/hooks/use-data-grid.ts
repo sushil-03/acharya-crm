@@ -95,7 +95,7 @@ function useStore<T>(store: DataGridStore, selector: (state: DataGridState) => T
 
 interface UseDataGridProps<TData> extends Omit<
   TableOptions<TData>,
-  "pageCount" | "getCoreRowModel"
+  "getCoreRowModel"
 > {
   onDataChange?: (data: TData[]) => void;
   onRowAdd?: (
