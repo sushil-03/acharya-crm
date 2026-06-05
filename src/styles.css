@@ -117,6 +117,10 @@
   --chart-8: oklch(0.508 0.249 273.1);
   --chart-9: oklch(0.588 0.222 303.1);
   --chart-10: oklch(0.668 0.219 335);
+  /* Semantic chart additions */
+  --chart-11: oklch(0.493 0.131 149.6);  /* green  – converted / enrolled */
+  --chart-12: oklch(0.577 0.215 27.3);   /* red    – lost / destructive   */
+  --chart-13: oklch(0.62 0.008 286.4);   /* gray   – new / neutral        */
 
   --gold: oklch(0.772 0.153 74.7);
   --gold-foreground: oklch(1 0 89.9);
@@ -170,6 +174,10 @@
   --chart-8: oklch(0.581 0.185 279);
   --chart-9: oklch(0.641 0.174 305.1);
   --chart-10: oklch(0.698 0.171 333.9);
+  /* Semantic chart additions */
+  --chart-11: oklch(0.687 0.144 163.1);  /* green  – converted / enrolled */
+  --chart-12: oklch(0.598 0.199 25.6);   /* red    – lost / destructive   */
+  --chart-13: oklch(0.712 0.013 286.1);  /* gray   – new / neutral        */
 
   --gold: oklch(0.772 0.153 74.7);
   --gold-foreground: oklch(1 0 89.9);
