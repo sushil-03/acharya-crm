@@ -14,7 +14,7 @@ import { useGetEmailTemplateDetails } from "../hooks/query/use-get-email-templat
 import { useGetEmailTemplateCategories } from "../hooks/query/use-get-email-template-categories";
 import { useCreateEmailTemplate } from "../hooks/mutation/use-create-email-template";
 import { useUpdateEmailTemplate } from "../hooks/mutation/use-update-email-template";
-import { TestEmailVariablesDialog } from "../components/test-email-variables-dialog";
+
 
 export function VisualEditor({ id }: { id?: string }) {
   const navigate = useNavigate();
@@ -29,11 +29,8 @@ export function VisualEditor({ id }: { id?: string }) {
   const [status, setStatus] = useState<"Draft" | "Published">("Draft");
   const [template, setTemplate] = useState<any>(null);
 
-  const [activeTab, setActiveTab] = useState<"content" | "rows" | "settings">("content");
-  const [testEmails, setTestEmails] = useState("");
+  const [activeTab, setActiveTab] = useState<"content" | "rows" | "settings" | "variables">("content");
   const [selectedType, setSelectedType] = useState<string>("None");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-
   const [isPreviewActive, setIsPreviewActive] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isEditorInitialized, setIsEditorInitialized] = useState(false);
@@ -51,6 +48,10 @@ export function VisualEditor({ id }: { id?: string }) {
   const { mutateAsync: createTemplate, isPending: isCreating } = useCreateEmailTemplate();
   const { mutateAsync: updateTemplate, isPending: isUpdating } = useUpdateEmailTemplate();
   const isSaving = isCreating || isUpdating;
+
+  const templateKey = id && templateDetails?.key
+    ? templateDetails.key
+    : (name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "") || "test_template");
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -99,10 +100,7 @@ export function VisualEditor({ id }: { id?: string }) {
       setCategory("");
       setTags([]);
       setStatus("Draft");
-      editorRef.current.setComponents(`
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff; min-height: 300px;">
-        </div>
-      `);
+      editorRef.current.setComponents("");
     }
   }, [isEditorInitialized, id, categories]);
 
@@ -282,18 +280,7 @@ export function VisualEditor({ id }: { id?: string }) {
   const undo = () => editorRef.current?.UndoManager.undo();
   const redo = () => editorRef.current?.UndoManager.redo();
 
-  const handleSendTest = () => {
-    if (!testEmails.trim()) return toast.error("Please enter at least one email address");
-    setIsDialogOpen(true);
-  };
 
-  const handleActualSendTest = (customSubject: string, customContent: string) => {
-    toast.success(`Test email successfully sent to ${testEmails}!`, {
-      description: `Subject: "${customSubject}"`,
-      duration: 5000,
-    });
-    setTestEmails("");
-  };
 
   const getEditorHtmlContent = () => {
     if (editorRef.current) {
@@ -449,9 +436,10 @@ export function VisualEditor({ id }: { id?: string }) {
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             selectedType={selectedType}
-            testEmails={testEmails}
-            setTestEmails={setTestEmails}
-            handleSendTest={handleSendTest}
+            templateKey={templateKey}
+            subject={subject}
+            getContent={getEditorHtmlContent}
+            disabled={isSaving}
             className={isPreviewActive ? "!hidden" : ""}
           />
         </div>
@@ -481,14 +469,6 @@ export function VisualEditor({ id }: { id?: string }) {
         setTableHasHeader={setTableHasHeader}
         handleInsertTable={handleInsertTable}
         handleCancelTable={handleCancelTable}
-      />
-      <TestEmailVariablesDialog
-        isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
-        subject={subject}
-        content={getEditorHtmlContent()}
-        testEmails={testEmails}
-        onSend={handleActualSendTest}
       />
     </AppShell>
   );

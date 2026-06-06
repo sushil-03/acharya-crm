@@ -44,7 +44,10 @@ export function EmailTemplatesList() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10); // default to 10 rows per page
-  const [deleteTemplateTarget, setDeleteTemplateTarget] = useState<{ id: string; name: string } | null>(null);
+  const [deleteTemplateTarget, setDeleteTemplateTarget] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   // Queries
   const {
@@ -253,7 +256,7 @@ export function EmailTemplatesList() {
             placeholder="Search templates by name, key, or subject..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 h-9 text-sm"
+            className="pl-9 h-8 text-sm"
           />
         </div>
 
@@ -343,7 +346,10 @@ export function EmailTemplatesList() {
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the email template
-              {deleteTemplateTarget && <strong className="text-foreground"> "{deleteTemplateTarget.name}"</strong>}.
+              {deleteTemplateTarget && (
+                <strong className="text-foreground"> "{deleteTemplateTarget.name}"</strong>
+              )}
+              .
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

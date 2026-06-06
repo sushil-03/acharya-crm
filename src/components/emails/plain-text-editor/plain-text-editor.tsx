@@ -30,7 +30,7 @@ import { useGetEmailTemplateCategories } from "../hooks/query/use-get-email-temp
 import { useCreateEmailTemplate } from "../hooks/mutation/use-create-email-template";
 import { useUpdateEmailTemplate } from "../hooks/mutation/use-update-email-template";
 import { useEmailVariables } from "../hooks/use-email-variables";
-import { TestEmailVariablesDialog } from "../components/test-email-variables-dialog";
+import { SendTestEmail } from "../components/send-test-email";
 
 
 interface PlainTextEditorProps {
@@ -47,18 +47,13 @@ export function PlainTextEditor({ id }: PlainTextEditorProps) {
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [status, setStatus] = useState<"Draft" | "Published">("Draft");
-
-  const [testEmails, setTestEmails] = useState("");
   const [newVarLabel, setNewVarLabel] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showAllVars, setShowAllVars] = useState(false);
-
   const lastFocusedRef = useRef<"subject" | "content">("content");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const isLoadedRef = useRef(false);
 
   const { variables, addVariable, removeVariable } = useEmailVariables();
-
 
   // Queries & Mutations
   const { data: templateDetails, isLoading: isLoadingDetails } = useGetEmailTemplateDetails(id);
@@ -69,6 +64,10 @@ export function PlainTextEditor({ id }: PlainTextEditorProps) {
   const { mutateAsync: createTemplate, isPending: isCreating } = useCreateEmailTemplate();
   const { mutateAsync: updateTemplate, isPending: isUpdating } = useUpdateEmailTemplate();
   const isSaving = isCreating || isUpdating;
+
+  const templateKey = id && templateDetails?.key
+    ? templateDetails.key
+    : (name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "") || "test_template");
 
   // Load existing template details
   useEffect(() => {
@@ -195,22 +194,6 @@ Acharya Admissions Desk`);
     } else {
       toast.error(res.error || "Failed to create variable");
     }
-  };
-
-  const handleSendTestClick = () => {
-    if (!testEmails.trim()) {
-      toast.error("Please enter at least one email address");
-      return;
-    }
-    setIsDialogOpen(true);
-  };
-
-  const handleActualSendTest = (customSubject: string, customContent: string) => {
-    toast.success(`Test email successfully sent to ${testEmails}!`, {
-      description: `Subject: "${customSubject}"`,
-      duration: 5000,
-    });
-    setTestEmails("");
   };
 
 
@@ -448,38 +431,16 @@ Acharya Admissions Desk`);
               </button>
             </div>
 
-            {/* Test Email */}
-            <div className="p-4">
-              <h3 className="font-semibold text-sm text-foreground mb-1.5 flex items-center gap-1">
-                <Send className="size-3.5 text-success" /> Send Test Emails
-              </h3>
-              <p className="text-[11px] text-muted-foreground leading-normal mb-3">
-                Send test emails to review layouts before publishing.
-              </p>
-              <div className="space-y-2">
-                <textarea
-                  value={testEmails}
-                  onChange={(e) => setTestEmails(e.target.value)}
-                  placeholder="e.g. test@example.com, developer@acharya.ac.in"
-                  className="w-full text-xs bg-muted border border-border rounded p-2 focus:ring-1 focus:ring-primary outline-none min-h-[60px]"
-                  disabled={isSaving}
-                />
-                <Button onClick={handleSendTestClick} className="w-full text-xs h-8 bg-success hover:bg-success/95 text-white flex items-center justify-center gap-1.5" disabled={isSaving}>
-                  <Send className="size-3.5" /> Send Test Email
-                </Button>
-              </div>
-            </div>
+            {/* Test Email Component */}
+            <SendTestEmail
+              templateKey={templateKey}
+              subject={subject}
+              content={content}
+              disabled={isSaving}
+            />
           </div>
         </div>
       </div>
-      <TestEmailVariablesDialog
-        isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
-        subject={subject}
-        content={content}
-        testEmails={testEmails}
-        onSend={handleActualSendTest}
-      />
     </AppShell>
   );
 }

@@ -10,7 +10,7 @@ export interface UseGrapesJsEditorProps {
   setRteInstance: Dispatch<SetStateAction<any>>;
   setLinkUrl: Dispatch<SetStateAction<string>>;
   setLinkModalOpen: Dispatch<SetStateAction<boolean>>;
-  setActiveTab: Dispatch<SetStateAction<"content" | "rows" | "settings">>;
+  setActiveTab: Dispatch<SetStateAction<"content" | "rows" | "settings" | "variables">>;
   setSelectedVideoComponent: Dispatch<SetStateAction<any>>;
   setVideoUrl: Dispatch<SetStateAction<string>>;
   setVideoProvider: Dispatch<SetStateAction<"so" | "yt" | "vi">>;
@@ -128,6 +128,12 @@ export function useGrapesJsEditor({
       });
 
       const bm = editor.BlockManager;
+      bm.add("card-block", {
+        label: `<div class="custom-block-label"><svg class="block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3" stroke-dasharray="3 3"/></svg><span>CARD</span></div>`,
+        category: "Content",
+        content:
+          '<div style="font-family: sans-serif; max-width: 600px; margin: 15px auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff; min-height: 150px; display: flex; flex-direction: column; gap: 10px;"></div>',
+      });
       bm.add("title-block", {
         label: `<div class="custom-block-label"><svg class="block-icon" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="4" width="18" height="2.5" rx="1.25"/><rect x="10.75" y="6.5" width="2.5" height="13.5" rx="1.25"/></svg><span>TITLE</span></div>`,
         category: "Content",

@@ -1,17 +1,19 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Grid, Layout, Settings, Send, Sparkles, Plus, Trash2 } from "lucide-react";
+import { Grid, Layout, Settings, Sparkles, Plus, Trash2 } from "lucide-react";
 import { useEmailVariables } from "../hooks/use-email-variables";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { SendTestEmail } from "../components/send-test-email";
 
 interface EditorSidebarProps {
-  activeTab: "content" | "rows" | "settings";
-  setActiveTab: (tab: "content" | "rows" | "settings") => void;
+  activeTab: "content" | "rows" | "settings" | "variables";
+  setActiveTab: (tab: "content" | "rows" | "settings" | "variables") => void;
   selectedType: string;
-  testEmails: string;
-  setTestEmails: (emails: string) => void;
-  handleSendTest: () => void;
+  templateKey: string;
+  subject: string;
+  getContent: () => string;
+  disabled?: boolean;
   className?: string;
 }
 
@@ -19,9 +21,10 @@ export function EditorSidebar({
   activeTab,
   setActiveTab,
   selectedType,
-  testEmails,
-  setTestEmails,
-  handleSendTest,
+  templateKey,
+  subject,
+  getContent,
+  disabled,
   className,
 }: EditorSidebarProps) {
   const { variables, addVariable, removeVariable } = useEmailVariables();
@@ -46,26 +49,34 @@ export function EditorSidebar({
   };
 
   return (
-    <div className={`w-[300px] shrink-0 bg-card overflow-y-auto flex flex-col divide-y divide-border h-full hidden lg:flex border-l border-border ${className || ""}`}>
+    <div
+      className={`w-[360px] shrink-0 bg-card overflow-y-auto flex flex-col divide-y divide-border h-full hidden lg:flex border-l border-border ${className || ""}`}
+    >
       {/* Tabs Selector */}
       <div className="flex bg-muted/40 p-1.5 shrink-0">
         <button
           onClick={() => setActiveTab("content")}
-          className={`flex-1 py-1.5 text-xs font-semibold rounded-md flex items-center justify-center gap-1 transition ${activeTab === "content" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+          className={`flex-1 py-2.25 text-xs font-semibold rounded-md flex items-center justify-center gap-1 transition ${activeTab === "content" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
         >
           <Grid className="size-3.5" /> Content
         </button>
         <button
           onClick={() => setActiveTab("rows")}
-          className={`flex-1 py-1.5 text-xs font-semibold rounded-md flex items-center justify-center gap-1 transition ${activeTab === "rows" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+          className={`flex-1 py-2.25 text-xs font-semibold rounded-md flex items-center justify-center gap-1 transition ${activeTab === "rows" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
         >
           <Layout className="size-3.5" /> Rows
         </button>
         <button
           onClick={() => setActiveTab("settings")}
-          className={`flex-1 py-1.5 text-xs font-semibold rounded-md flex items-center justify-center gap-1 transition ${activeTab === "settings" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+          className={`flex-1 py-2.25 text-xs font-semibold rounded-md flex items-center justify-center gap-1 transition ${activeTab === "settings" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
         >
           <Settings className="size-3.5" /> Style
+        </button>
+        <button
+          onClick={() => setActiveTab("variables")}
+          className={`flex-1 py-2.25 text-xs font-semibold rounded-md flex items-center justify-center gap-1 transition ${activeTab === "variables" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+        >
+          <Sparkles className="size-3.5" /> Vars
         </button>
       </div>
 
@@ -80,90 +91,81 @@ export function EditorSidebar({
           />
         </div>
 
-        {/* Variables & Test Email Section (only on Content tab) */}
+        {/* Test Email Section (only on Content tab) */}
         {activeTab === "content" && (
-          <div className="flex flex-col border-t border-border mt-auto divide-y divide-border bg-card/50">
-            {/* Variables Creator and List */}
-            <div className="p-4">
-              <h3 className="font-semibold text-sm text-foreground mb-1 flex items-center gap-1.5">
-                <Sparkles className="size-3.5 text-primary" /> Template Variables
-              </h3>
-              <p className="text-[10px] text-muted-foreground leading-normal mb-3">
-                Click any variable to copy its placeholder syntax.
-              </p>
-
-              {/* Add Custom Variable Form */}
-              <form onSubmit={handleCreateVariable} className="flex gap-1.5 mb-3">
-                <Input
-                  value={newVarLabel}
-                  onChange={(e) => setNewVarLabel(e.target.value)}
-                  placeholder="Add variable name..."
-                  className="h-8 text-xs bg-muted border-border"
-                />
-                <Button
-                  type="submit"
-                  size="icon"
-                  className="size-8 shrink-0 bg-primary text-white"
-                  disabled={!newVarLabel.trim()}
-                >
-                  <Plus className="size-4" />
-                </Button>
-              </form>
-
-              <div className="space-y-1 max-h-[160px] overflow-y-auto pr-1">
-                {variables.map((field) => (
-                  <div
-                    key={field.key}
-                    className="group flex items-center justify-between bg-muted hover:bg-primary/10 hover:text-primary transition px-2.5 py-1.5 rounded-md text-xs font-medium"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => copyToClipboard(field.key)}
-                      className="flex-1 text-left flex items-center justify-between"
-                      title="Click to copy placeholder"
-                    >
-                      <span>{field.label}</span>
-                      <span className="text-[10px] text-muted-foreground font-mono group-hover:text-primary/70 mr-1.5">
-                        {`{{${field.key}}}`}
-                      </span>
-                    </button>
-                    {field.isCustom && (
-                      <button
-                        type="button"
-                        onClick={() => removeVariable(field.key)}
-                        className="text-muted-foreground hover:text-destructive opacity-40 hover:opacity-100 p-0.5 rounded transition shrink-0"
-                        title="Delete custom variable"
-                      >
-                        <Trash2 className="size-3" />
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Test Email */}
-            <div className="p-4">
-              <h3 className="font-semibold text-sm text-foreground mb-1.5 flex items-center gap-1.5">
-                <Send className="size-3.5 text-success" /> Send Test Emails
-              </h3>
-              <div className="space-y-2">
-                <textarea
-                  value={testEmails}
-                  onChange={(e) => setTestEmails(e.target.value)}
-                  placeholder="e.g. test@example.com, developer@acharya.ac.in"
-                  className="w-full text-xs bg-muted border border-border rounded p-2 focus:ring-1 focus:ring-primary outline-none min-h-[60px]"
-                />
-                <Button
-                  onClick={handleSendTest}
-                  className="w-full text-xs h-8 bg-success hover:bg-success/95 text-white flex items-center justify-center gap-1.5"
-                >
-                  <Send className="size-3.5" /> Send Test Email
-                </Button>
-              </div>
-            </div>
+          <div className="flex flex-col border-t border-border mt-auto bg-card/50">
+            <SendTestEmail
+              templateKey={templateKey}
+              subject={subject}
+              getContent={getContent}
+              disabled={disabled}
+            />
           </div>
         )}
+      </div>
+
+      {/* Variables Tab */}
+      <div
+        className={`flex-grow overflow-y-auto flex flex-col ${activeTab === "variables" ? "block" : "hidden"}`}
+      >
+        {/* Variables Creator and List */}
+        <div className="p-4 flex flex-col h-full">
+          <h3 className="font-semibold text-sm text-foreground mb-1 flex items-center gap-1.5">
+            <Sparkles className="size-3.5 text-primary" /> Template Variables
+          </h3>
+          <p className="text-[10px] text-muted-foreground leading-normal mb-3">
+            Click any variable to copy its placeholder syntax.
+          </p>
+
+          {/* Add Custom Variable Form */}
+          <form onSubmit={handleCreateVariable} className="flex gap-1.5 mb-4">
+            <Input
+              value={newVarLabel}
+              onChange={(e) => setNewVarLabel(e.target.value)}
+              placeholder="Add variable name..."
+              className="h-8 text-xs bg-muted border-border"
+            />
+            <Button
+              type="submit"
+              size="icon"
+              className="size-8 shrink-0 bg-primary text-white"
+              disabled={!newVarLabel.trim()}
+            >
+              <Plus className="size-4" />
+            </Button>
+          </form>
+
+          <div className="space-y-1 overflow-y-auto flex-1 pr-1 max-h-[calc(100vh-280px)]">
+            {variables.map((field) => (
+              <div
+                key={field.key}
+                className="group flex items-center justify-between bg-muted hover:bg-primary/10 hover:text-primary transition px-2.5 py-1.5 rounded-md text-xs font-medium"
+              >
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(field.key)}
+                  className="flex-1 text-left flex items-center justify-between"
+                  title="Click to copy placeholder"
+                >
+                  <span>{field.label}</span>
+                  <span className="text-[10px] text-muted-foreground font-mono group-hover:text-primary/70 mr-1.5">
+                    {`{{${field.key}}}`}
+                  </span>
+                </button>
+                {field.isCustom && (
+                  <button
+                    type="button"
+                    onClick={() => removeVariable(field.key)}
+                    className="text-muted-foreground hover:text-destructive opacity-40 hover:opacity-100 p-0.5 rounded transition shrink-0"
+                    title="Delete custom variable"
+                  >
+                    <Trash2 className="size-3" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Settings/Style Tab */}

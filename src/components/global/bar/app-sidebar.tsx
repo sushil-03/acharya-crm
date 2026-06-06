@@ -61,12 +61,12 @@ const groups = [
   //     { to: "/enrollment", label: "Enrollment", icon: UserCheck },
   //   ],
   // },
-  {
-    label: "Growth",
-    items: [
-      { to: "/chat-settings", label: "Chat Settings", icon: Settings2 },
-    ],
-  },
+  // {
+  //   label: "Growth",
+  //   items: [
+  //     { to: "/chat-settings", label: "Chat Settings", icon: Settings2 },
+  //   ],
+  // },
   {
     label: "Automation",
     items: [
