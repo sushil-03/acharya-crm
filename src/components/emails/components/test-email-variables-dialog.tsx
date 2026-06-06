@@ -17,7 +17,7 @@ interface TestEmailVariablesDialogProps {
   subject: string;
   content: string;
   testEmails: string;
-  onSend: (customizedSubject: string, customizedContent: string) => void;
+  onSend: (customizedSubject: string, customizedContent: string, params: Record<string, string>) => void;
 }
 
 export function extractVariables(subject: string, content: string): string[] {
@@ -79,7 +79,7 @@ export function TestEmailVariablesDialog({
       finalContent = finalContent.replace(regex, val);
     });
 
-    onSend(finalSubject, finalContent);
+    onSend(finalSubject, finalContent, values);
     onClose();
   };
 

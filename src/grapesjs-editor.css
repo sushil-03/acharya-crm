@@ -85,8 +85,7 @@
 #blocks-container .gjs-block,
 .gjs-block {
   width: calc(33.333% - 7px) !important; /* 3 blocks per row to match the visual reference */
-  aspect-ratio: 1 / 1 !important;
-  min-height: 90px !important;
+  height: 72px !important;
   margin: 0 !important;
   display: inline-flex !important;
   flex-direction: column !important;
@@ -122,16 +121,16 @@
   justify-content: center !important;
   width: 100% !important;
   height: 100% !important;
-  padding: 8px !important;
+  padding: 4px !important;
   text-align: center !important;
 }
 
 .block-icon {
-  width: 26px;
-  height: 26px;
+  width: 20px;
+  height: 20px;
   color: var(--foreground);
   fill: currentColor;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   transition:
     color 0.2s ease,
     transform 0.2s ease;
@@ -1084,7 +1083,9 @@ select.gjs-clm-select {
   font-size: 18px !important;
   line-height: 1 !important;
   cursor: pointer !important;
-  transition: background-color 0.15s, color 0.15s !important;
+  transition:
+    background-color 0.15s,
+    color 0.15s !important;
   position: static !important;
 }
 .gjs-mdl-btn-close:hover {
@@ -1118,7 +1119,9 @@ select.gjs-clm-select {
   text-align: center !important;
   padding: 32px 16px !important;
   margin-bottom: 0 !important;
-  transition: border-color 0.2s, background-color 0.2s !important;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s !important;
   cursor: pointer !important;
 }
 .gjs-am-file-uploader > form:hover,
@@ -1184,7 +1187,9 @@ select.gjs-clm-select {
   display: flex !important;
   align-items: center !important;
   gap: 8px !important;
-  transition: border-color 0.15s, box-shadow 0.15s !important;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s !important;
   position: relative !important;
   width: 100% !important;
   box-sizing: border-box !important;
@@ -1287,7 +1292,9 @@ select.gjs-clm-select {
   font-weight: 400 !important;
   outline: none !important;
   box-sizing: border-box !important;
-  transition: border-color 0.2s, box-shadow 0.2s !important;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s !important;
 }
 .gjs-am-add-field input:focus {
   border-color: var(--primary) !important;

@@ -6,7 +6,7 @@ export interface SendCommunicationPayload {
   channel: "whatsapp" | "email" | "sms" | "push" | string;
   templateKey: string;
   to: string;
-  leadId: string;
+  leadId?: string;
   studentId?: string | null;
   params?: Record<string, any>;
 }
@@ -20,8 +20,10 @@ export const useSendCommunication = () => {
       return data;
     },
     onSuccess: (_, { leadId }) => {
-      console.log("leadId", leadId);
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_COMMUNICATION] });
+      if (leadId) {
+        console.log("leadId", leadId);
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_COMMUNICATION] });
+      }
     },
   });
 };
