@@ -4,7 +4,7 @@ import type { NodeProps } from "@xyflow/react";
 import type { AutomationNodeData } from "../../../types/automation-types";
 
 export function ConditionNode({ data, selected }: NodeProps) {
-  const d = data as AutomationNodeData;
+  const d = (data || {}) as AutomationNodeData;
 
   return (
     <div

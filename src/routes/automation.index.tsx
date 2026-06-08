@@ -242,7 +242,7 @@ export default function AutomationPage() {
         </div>
 
         {/* right panel */}
-        <aside className="w-64 shrink-0 hidden xl:block">
+        {/* <aside className="w-64 shrink-0 hidden xl:block">
           <Card className="p-4">
             <Button className="w-full mb-4" onClick={() => setShowCreate(true)}>
               <Plus className="size-4 mr-1.5" /> Create Automation
@@ -258,7 +258,7 @@ export default function AutomationPage() {
               ))}
             </ul>
           </Card>
-        </aside>
+        </aside> */}
       </div>
 
       <TemplateSelectModal

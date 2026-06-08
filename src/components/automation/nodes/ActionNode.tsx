@@ -28,7 +28,7 @@ const ACTION_ICONS: Record<string, React.ElementType> = {
 };
 
 export function ActionNode({ data, selected }: NodeProps) {
-  const d = data as AutomationNodeData;
+  const d = (data || {}) as AutomationNodeData;
   const Icon = (d.actionType && ACTION_ICONS[d.actionType]) || Play;
 
   return (
