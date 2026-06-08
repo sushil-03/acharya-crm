@@ -10,6 +10,7 @@ export interface AutomationNodeData extends Record<string, unknown> {
   triggerCategory?: string;
   triggerActName?: string;
   // condition
+  conditionSubType?: string;
   conditionField?: string;
   conditionOp?: string;
   conditionValue?: string;

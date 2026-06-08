@@ -62,7 +62,7 @@ export function ConditionPanel({ open, data, onClose, onSave }: Props) {
           <div className="space-y-1.5">
             <Label>Condition Field</Label>
             <Select value={field} onValueChange={setField}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select field" />
               </SelectTrigger>
               <SelectContent>
@@ -77,7 +77,7 @@ export function ConditionPanel({ open, data, onClose, onSave }: Props) {
           <div className="space-y-1.5">
             <Label>Operator</Label>
             <Select value={op} onValueChange={setOp}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

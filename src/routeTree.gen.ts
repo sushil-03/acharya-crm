@@ -14,7 +14,6 @@ import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as StudentRouteImport } from './routes/student'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ScholarshipsRouteImport } from './routes/scholarships'
-import { Route as ProgramsRouteImport } from './routes/programs'
 import { Route as PartnersRouteImport } from './routes/partners'
 import { Route as MarketingRouteImport } from './routes/marketing'
 import { Route as LoginRouteImport } from './routes/login'
@@ -33,7 +32,6 @@ import { Route as AdmissionsRouteImport } from './routes/admissions'
 import { Route as AcharyawebsiteRouteImport } from './routes/acharyawebsite'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UsersIndexRouteImport } from './routes/users.index'
-import { Route as ProgramsIndexRouteImport } from './routes/programs.index'
 import { Route as OfferIndexRouteImport } from './routes/offer.index'
 import { Route as LeadsIndexRouteImport } from './routes/leads.index'
 import { Route as EnrollmentIndexRouteImport } from './routes/enrollment.index'
@@ -41,7 +39,6 @@ import { Route as EmailTemplatesIndexRouteImport } from './routes/email-template
 import { Route as AutomationIndexRouteImport } from './routes/automation.index'
 import { Route as UsersNewRouteImport } from './routes/users.new'
 import { Route as ProgramsNewRouteImport } from './routes/programs.new'
-import { Route as ProgramsProgramIdRouteImport } from './routes/programs.$programId'
 import { Route as OfferOfferIdRouteImport } from './routes/offer.$offerId'
 import { Route as LeadsNewRouteImport } from './routes/leads.new'
 import { Route as LeadsLeadIdRouteImport } from './routes/leads.$leadId'
@@ -77,11 +74,6 @@ const SettingsRoute = SettingsRouteImport.update({
 const ScholarshipsRoute = ScholarshipsRouteImport.update({
   id: '/scholarships',
   path: '/scholarships',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProgramsRoute = ProgramsRouteImport.update({
-  id: '/programs',
-  path: '/programs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PartnersRoute = PartnersRouteImport.update({
@@ -174,11 +166,6 @@ const UsersIndexRoute = UsersIndexRouteImport.update({
   path: '/users/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProgramsIndexRoute = ProgramsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => ProgramsRoute,
-} as any)
 const OfferIndexRoute = OfferIndexRouteImport.update({
   id: '/offer/',
   path: '/offer/',
@@ -212,11 +199,6 @@ const UsersNewRoute = UsersNewRouteImport.update({
 const ProgramsNewRoute = ProgramsNewRouteImport.update({
   id: '/new',
   path: '/new',
-  getParentRoute: () => ProgramsRoute,
-} as any)
-const ProgramsProgramIdRoute = ProgramsProgramIdRouteImport.update({
-  id: '/$programId',
-  path: '/$programId',
   getParentRoute: () => ProgramsRoute,
 } as any)
 const OfferOfferIdRoute = OfferOfferIdRouteImport.update({
@@ -298,7 +280,6 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/marketing': typeof MarketingRoute
   '/partners': typeof PartnersRoute
-  '/programs': typeof ProgramsRouteWithChildren
   '/scholarships': typeof ScholarshipsRoute
   '/settings': typeof SettingsRoute
   '/student': typeof StudentRoute
@@ -311,7 +292,6 @@ export interface FileRoutesByFullPath {
   '/leads/$leadId': typeof LeadsLeadIdRoute
   '/leads/new': typeof LeadsNewRoute
   '/offer/$offerId': typeof OfferOfferIdRoute
-  '/programs/$programId': typeof ProgramsProgramIdRoute
   '/programs/new': typeof ProgramsNewRoute
   '/users/new': typeof UsersNewRoute
   '/automation/': typeof AutomationIndexRoute
@@ -319,7 +299,6 @@ export interface FileRoutesByFullPath {
   '/enrollment/': typeof EnrollmentIndexRoute
   '/leads/': typeof LeadsIndexRoute
   '/offer/': typeof OfferIndexRoute
-  '/programs/': typeof ProgramsIndexRoute
   '/users/': typeof UsersIndexRoute
   '/email-templates/create/html': typeof EmailTemplatesCreateHtmlRoute
   '/email-templates/create/plain-text': typeof EmailTemplatesCreatePlainTextRoute
@@ -354,7 +333,6 @@ export interface FileRoutesByTo {
   '/leads/$leadId': typeof LeadsLeadIdRoute
   '/leads/new': typeof LeadsNewRoute
   '/offer/$offerId': typeof OfferOfferIdRoute
-  '/programs/$programId': typeof ProgramsProgramIdRoute
   '/programs/new': typeof ProgramsNewRoute
   '/users/new': typeof UsersNewRoute
   '/automation': typeof AutomationIndexRoute
@@ -362,7 +340,6 @@ export interface FileRoutesByTo {
   '/enrollment': typeof EnrollmentIndexRoute
   '/leads': typeof LeadsIndexRoute
   '/offer': typeof OfferIndexRoute
-  '/programs': typeof ProgramsIndexRoute
   '/users': typeof UsersIndexRoute
   '/email-templates/create/html': typeof EmailTemplatesCreateHtmlRoute
   '/email-templates/create/plain-text': typeof EmailTemplatesCreatePlainTextRoute
@@ -388,7 +365,6 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/marketing': typeof MarketingRoute
   '/partners': typeof PartnersRoute
-  '/programs': typeof ProgramsRouteWithChildren
   '/scholarships': typeof ScholarshipsRoute
   '/settings': typeof SettingsRoute
   '/student': typeof StudentRoute
@@ -401,7 +377,6 @@ export interface FileRoutesById {
   '/leads/$leadId': typeof LeadsLeadIdRoute
   '/leads/new': typeof LeadsNewRoute
   '/offer/$offerId': typeof OfferOfferIdRoute
-  '/programs/$programId': typeof ProgramsProgramIdRoute
   '/programs/new': typeof ProgramsNewRoute
   '/users/new': typeof UsersNewRoute
   '/automation/': typeof AutomationIndexRoute
@@ -409,7 +384,6 @@ export interface FileRoutesById {
   '/enrollment/': typeof EnrollmentIndexRoute
   '/leads/': typeof LeadsIndexRoute
   '/offer/': typeof OfferIndexRoute
-  '/programs/': typeof ProgramsIndexRoute
   '/users/': typeof UsersIndexRoute
   '/email-templates/create/html': typeof EmailTemplatesCreateHtmlRoute
   '/email-templates/create/plain-text': typeof EmailTemplatesCreatePlainTextRoute
@@ -436,7 +410,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/marketing'
     | '/partners'
-    | '/programs'
     | '/scholarships'
     | '/settings'
     | '/student'
@@ -449,7 +422,6 @@ export interface FileRouteTypes {
     | '/leads/$leadId'
     | '/leads/new'
     | '/offer/$offerId'
-    | '/programs/$programId'
     | '/programs/new'
     | '/users/new'
     | '/automation/'
@@ -457,7 +429,6 @@ export interface FileRouteTypes {
     | '/enrollment/'
     | '/leads/'
     | '/offer/'
-    | '/programs/'
     | '/users/'
     | '/email-templates/create/html'
     | '/email-templates/create/plain-text'
@@ -492,7 +463,6 @@ export interface FileRouteTypes {
     | '/leads/$leadId'
     | '/leads/new'
     | '/offer/$offerId'
-    | '/programs/$programId'
     | '/programs/new'
     | '/users/new'
     | '/automation'
@@ -500,7 +470,6 @@ export interface FileRouteTypes {
     | '/enrollment'
     | '/leads'
     | '/offer'
-    | '/programs'
     | '/users'
     | '/email-templates/create/html'
     | '/email-templates/create/plain-text'
@@ -525,7 +494,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/marketing'
     | '/partners'
-    | '/programs'
     | '/scholarships'
     | '/settings'
     | '/student'
@@ -538,7 +506,6 @@ export interface FileRouteTypes {
     | '/leads/$leadId'
     | '/leads/new'
     | '/offer/$offerId'
-    | '/programs/$programId'
     | '/programs/new'
     | '/users/new'
     | '/automation/'
@@ -546,7 +513,6 @@ export interface FileRouteTypes {
     | '/enrollment/'
     | '/leads/'
     | '/offer/'
-    | '/programs/'
     | '/users/'
     | '/email-templates/create/html'
     | '/email-templates/create/plain-text'
@@ -572,7 +538,6 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MarketingRoute: typeof MarketingRoute
   PartnersRoute: typeof PartnersRoute
-  ProgramsRoute: typeof ProgramsRouteWithChildren
   ScholarshipsRoute: typeof ScholarshipsRoute
   SettingsRoute: typeof SettingsRoute
   StudentRoute: typeof StudentRoute
@@ -626,13 +591,6 @@ declare module '@tanstack/react-router' {
       path: '/scholarships'
       fullPath: '/scholarships'
       preLoaderRoute: typeof ScholarshipsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/programs': {
-      id: '/programs'
-      path: '/programs'
-      fullPath: '/programs'
-      preLoaderRoute: typeof ProgramsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/partners': {
@@ -761,13 +719,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UsersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/programs/': {
-      id: '/programs/'
-      path: '/'
-      fullPath: '/programs/'
-      preLoaderRoute: typeof ProgramsIndexRouteImport
-      parentRoute: typeof ProgramsRoute
-    }
     '/offer/': {
       id: '/offer/'
       path: '/offer'
@@ -815,13 +766,6 @@ declare module '@tanstack/react-router' {
       path: '/new'
       fullPath: '/programs/new'
       preLoaderRoute: typeof ProgramsNewRouteImport
-      parentRoute: typeof ProgramsRoute
-    }
-    '/programs/$programId': {
-      id: '/programs/$programId'
-      path: '/$programId'
-      fullPath: '/programs/$programId'
-      preLoaderRoute: typeof ProgramsProgramIdRouteImport
       parentRoute: typeof ProgramsRoute
     }
     '/offer/$offerId': {
@@ -938,22 +882,6 @@ const EmailTemplatesRouteWithChildren = EmailTemplatesRoute._addFileChildren(
   EmailTemplatesRouteChildren,
 )
 
-interface ProgramsRouteChildren {
-  ProgramsProgramIdRoute: typeof ProgramsProgramIdRoute
-  ProgramsNewRoute: typeof ProgramsNewRoute
-  ProgramsIndexRoute: typeof ProgramsIndexRoute
-}
-
-const ProgramsRouteChildren: ProgramsRouteChildren = {
-  ProgramsProgramIdRoute: ProgramsProgramIdRoute,
-  ProgramsNewRoute: ProgramsNewRoute,
-  ProgramsIndexRoute: ProgramsIndexRoute,
-}
-
-const ProgramsRouteWithChildren = ProgramsRoute._addFileChildren(
-  ProgramsRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AcharyawebsiteRoute: AcharyawebsiteRoute,
@@ -972,7 +900,6 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MarketingRoute: MarketingRoute,
   PartnersRoute: PartnersRoute,
-  ProgramsRoute: ProgramsRouteWithChildren,
   ScholarshipsRoute: ScholarshipsRoute,
   SettingsRoute: SettingsRoute,
   StudentRoute: StudentRoute,
