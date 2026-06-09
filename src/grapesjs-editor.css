@@ -33,7 +33,7 @@
   width: 100% !important;
   height: 100% !important;
   top: 0 !important;
-  background-color: oklch(0.97 0.005 256) !important; /* light soft gray bg for the canvas area */
+  background-color: oklch(0.93 0.005 256) !important; /* light soft gray bg for the canvas area */
 }
 
 /* Hide default panels we don't want */

@@ -20,6 +20,7 @@ import {
   Phone,
   Mail,
   MoreHorizontal,
+  MoreVertical,
   Loader2,
 } from "lucide-react";
 import React, { useState } from "react";
@@ -38,6 +39,13 @@ import { useUserStore } from "@/store/use-user-store";
 import { useGetCounsellors } from "@/components/global/hooks/use-get-counsellor";
 import InputSearch from "@/components/global/input-search";
 import { LEAD_STATUS, LEAD_SOURCES } from "@/lib/constant";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/leads/")({
   component: LeadsPage,
@@ -51,6 +59,14 @@ function LeadsPage() {
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(100);
+
+  const handleImportLeads = () => {
+    toast.info("Import feature coming soon");
+  };
+
+  const handleExportLeads = () => {
+    toast.success("Leads export initiated");
+  };
 
   const { user, counsellorId } = useUserStore();
   const { data: counsellors, isLoading: isLoadingCounsellors } = useGetCounsellors();
@@ -149,12 +165,31 @@ function LeadsPage() {
     <AppShell className="h-screen overflow-hidden">
       <PageHeader
         title="Lead Management"
-        subtitle="Centralized acquisition, attribution, scoring & distribution across all channels."
+        // subtitle="Centralized acquisition, attribution, scoring & distribution across all channels."
         actions={
           <>
-            <Button variant="outline">
-              <Download className="size-4" /> Export
+            <Button
+              variant="outline-primary"
+              className="font-medium"
+              asChild
+            >
+              <Link to="/leads/new">Quick Add Lead</Link>
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" className="h-8 w-8">
+                  <MoreVertical className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-[160px]">
+                <DropdownMenuItem onClick={handleImportLeads}>
+                  Import Leads
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportLeads}>
+                  Export Leads
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </>
         }
       />
