@@ -15,7 +15,7 @@ export function AppShell({
 }) {
   const isHScreen = className?.includes("h-screen");
   return (
-    <div className={cn("flex min-h-screen w-full bg-background", className)}>
+    <div className={cn("flex min-h-screen w-full bg-slate-50/50 dark:bg-zinc-950", className)}>
       <AppSidebar />
       <div className={cn("flex-1 min-w-0 flex flex-col", isHScreen && "h-screen overflow-hidden")}>
         <TopBar />
@@ -23,13 +23,13 @@ export function AppShell({
           className={cn(
             "flex-1 flex flex-col",
             isHScreen && "overflow-hidden",
-            !noPadding && "px-4 lg:px-6 py-6 lg:py-6"
+            !noPadding && "px-4 lg:px-6 py-4 ",
           )}
         >
           {children}
         </main>
       </div>
-      <ChatWidget />
+      {/* <ChatWidget /> */}
     </div>
   );
 }

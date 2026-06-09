@@ -54,7 +54,7 @@ export function TopBar() {
             </SheetTrigger>
             <SheetContent side="left" className="p-0 w-64 border-none [&>button]:hidden">
               <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-              <AppSidebar className="flex border-none w-full h-full" />
+              <AppSidebar className="flex border-none w-full h-full" collapsible={false} />
             </SheetContent>
           </Sheet>
           <img src="/brand/logo.png" alt="Logo" className="size-7 object-contain" />

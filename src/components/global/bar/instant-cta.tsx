@@ -11,9 +11,33 @@ import { ChevronDown, Plus, UserPlus } from "lucide-react";
 
 import { useNavigate } from "@tanstack/react-router";
 
-export function InstantCta() {
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
+export function InstantCta({ collapsed }: { collapsed?: boolean }) {
   const user = useUserStore((state) => state.user);
   const navigate = useNavigate();
+
+  if (collapsed) {
+    return (
+      <div className="px-3 pt-4 pb-1 flex justify-center">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="default"
+              size="icon"
+              className="size-10 rounded-full bg-primary text-primary-foreground shadow-md hover:bg-primary/95 transition-all duration-200"
+              onClick={() => navigate({ to: "/leads/new" })}
+            >
+              <Plus className="h-5 w-5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right">
+            <span>New Lead</span>
+          </TooltipContent>
+        </Tooltip>
+      </div>
+    );
+  }
 
   if (user?.role === "super_admin") {
     return (

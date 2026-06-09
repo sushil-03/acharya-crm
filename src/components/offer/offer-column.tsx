@@ -314,9 +314,11 @@ export const getOffersColumn: ColumnDef<Offer>[] = [
     size: 60,
     cell: ({ row, table }) => {
       const { pageIndex, pageSize } = table.getState().pagination;
+      const sortedIndex = table.getRowModel().rows.findIndex((r) => r.id === row.id);
+      const index = sortedIndex !== -1 ? sortedIndex : row.index;
       return (
         <span className="text-[12px] tabular-nums  pl-1">
-          {pageIndex * pageSize + row.index + 1}
+          {pageIndex * pageSize + index + 1}
         </span>
       );
     },

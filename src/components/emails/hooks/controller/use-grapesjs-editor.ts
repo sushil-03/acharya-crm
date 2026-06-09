@@ -72,7 +72,10 @@ export function useGrapesJsEditor({
         blockManager: { appendTo: "#blocks-container" },
         traitManager: { appendTo: "#traits-container" },
         canvas: {
-          styles: ["body { padding: 40px 20px; background-color: #f1f5f9; min-height: 100%; }"],
+          styles: [
+            "body { padding: 40px 20px; background-color: #f1f5f9; min-height: 100%; }",
+            "#wrapper { max-width: 900px; margin: 40px auto 20px auto; background-color: #ffffff; border: 1px solid #cbd5e1; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); border-radius: 8px; min-height: 600px; padding: 20px; }",
+          ],
         },
         styleManager: {
           appendTo: "#styles-container",
@@ -274,6 +277,25 @@ export function useGrapesJsEditor({
       editor.on("load", () => {
         addCategoryClasses();
         handleCanvasDblClick();
+
+        const wrapper = editor.getWrapper();
+        if (wrapper) {
+          const currentStyle = wrapper.getStyle();
+          if (!currentStyle || !currentStyle["max-width"]) {
+            wrapper.setStyle({
+              ...currentStyle,
+              "max-width": "800px",
+              margin: "40px auto 20px auto",
+              "background-color": "#ffffff",
+              border: "1px solid #cbd5e1",
+              "box-shadow":
+                "0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05)",
+              "border-radius": "8px",
+              "min-height": "600px",
+              padding: "20px",
+            });
+          }
+        }
       });
       addCategoryClasses();
       handleCanvasDblClick();
@@ -295,6 +317,7 @@ export function useGrapesJsEditor({
             const titleTrait = traits.where({ name: "title" })[0];
             if (titleTrait) traits.remove(titleTrait);
           }
+          setActiveTab("settings");
         }
       });
       editor.on("component:deselected", () => setSelectedType("None"));
