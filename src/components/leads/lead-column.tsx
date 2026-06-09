@@ -152,6 +152,42 @@ export const getLeadsColumn: ColumnDef<any>[] = [
     size: 120,
   },
   {
+    accessorKey: "email",
+    header: "Email",
+    meta: { label: "Email", cell: { variant: "short-text" } },
+    size: 180,
+  },
+  {
+    accessorKey: "mobile",
+    header: "Mobile",
+    meta: { label: "Mobile", cell: { variant: "short-text" } },
+    size: 120,
+  },
+  {
+    accessorKey: "state",
+    header: "State",
+    meta: { label: "State", cell: { variant: "short-text" } },
+    size: 120,
+  },
+  {
+    accessorKey: "utmSource",
+    header: "UTM Source",
+    meta: { label: "UTM Source", cell: { variant: "short-text" } },
+    size: 120,
+  },
+  {
+    accessorKey: "utmMedium",
+    header: "UTM Medium",
+    meta: { label: "UTM Medium", cell: { variant: "short-text" } },
+    size: 120,
+  },
+  {
+    accessorKey: "utmCampaign",
+    header: "UTM Campaign",
+    meta: { label: "UTM Campaign", cell: { variant: "short-text" } },
+    size: 120,
+  },
+  {
     accessorKey: "program",
     header: "Program",
     meta: {

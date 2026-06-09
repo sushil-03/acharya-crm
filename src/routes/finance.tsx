@@ -63,24 +63,24 @@ function FinancePage() {
 
   const stats = React.useMemo(() => {
     if (!data) return { booked: 0, collected: 0, outstanding: 0, avg: 0 };
-    
+
     let booked = 0;
     let collected = 0;
     let outstanding = 0;
-    
+
     data.forEach((p) => {
       const amount = Number(p.amount) || 0;
       booked += amount;
       if (p.paymentStatus === "completed") collected += amount;
       if (p.paymentStatus === "initiated") outstanding += amount;
     });
-    
+
     const avg = data.length > 0 ? booked / data.length : 0;
-    
+
     return { booked, collected, outstanding, avg };
   }, [data]);
 
-  const formatCompact = (num: number) => 
+  const formatCompact = (num: number) =>
     new Intl.NumberFormat("en-IN", {
       style: "currency",
       currency: "INR",
@@ -106,7 +106,7 @@ function FinancePage() {
       />
 
       <div className="flex flex-col h-full min-h-0 flex-1">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4 shrink-0">
+        {/* <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4 shrink-0">
           <StatCard
             label="Revenue Booked"
             value={formatCompact(stats.booked)}
@@ -131,7 +131,7 @@ function FinancePage() {
             icon={<TrendingUp className="size-4" />}
             accent="primary"
           />
-        </div>
+        </div> */}
 
         {/* <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6 shrink-0">
           <Card className="p-5 lg:col-span-2">

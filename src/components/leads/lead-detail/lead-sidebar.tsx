@@ -15,6 +15,10 @@ import {
   Megaphone,
   FileText,
   Edit2,
+  Tag,
+  Compass,
+  Share2,
+  Type,
 } from "lucide-react";
 import { getReadableDate } from "@/lib/utils";
 import { useGetLeadAssignment } from "../hook/query/use-get-lead";
@@ -43,6 +47,18 @@ export function LeadSidebar({ lead, applicationData, isApplicationDataLoading }:
 
   const { data: assignmentData } = useGetLeadAssignment(lead?.id);
   const locationString = [lead.city, lead.state, lead.country].filter(Boolean).join(", ");
+
+  const isValueEmpty = (val: string | null | undefined) => {
+    if (!val) return true;
+    const lower = val.trim().toLowerCase();
+    return lower === "" || lower === "n/a" || lower === "na";
+  };
+
+  const utmSource = isValueEmpty(lead.utmSource) ? null : lead.utmSource;
+  const utmMedium = isValueEmpty(lead.utmMedium) ? null : lead.utmMedium;
+  const utmCampaign = isValueEmpty(lead.utmCampaign) ? null : lead.utmCampaign;
+  const utmContent = isValueEmpty(lead.utmContent) ? null : lead.utmContent;
+  const hasAnyUtm = !!(utmSource || utmMedium || utmCampaign || utmContent);
 
   return (
     <div className="w-[300px] shrink-0 border-r border-border bg-background overflow-y-auto h-full flex flex-col">
@@ -270,32 +286,79 @@ export function LeadSidebar({ lead, applicationData, isApplicationDataLoading }:
                 <span>Marketing Attribution</span>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="px-3 pb-3.5 pt-1.5 space-y-4">
+            <AccordionContent className="px-3 pb-3.5 pt-1.5 space-y-3">
               <DetailRow
                 icon={<Link2 className="size-3.5 text-muted-foreground" />}
                 label="Source"
-                value={lead.sourceChannel || "N/A"}
+                value={
+                  !isValueEmpty(lead.sourceChannel) ? (
+                    <span className="font-semibold text-foreground bg-muted px-2 py-0.5 rounded text-[11px] border border-border/40">
+                      {lead.sourceChannel}
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground italic text-[12px]">Not specified</span>
+                  )
+                }
               />
-              <DetailRow
-                icon={<Info className="size-3.5 text-muted-foreground" />}
-                label="UTM Source"
-                value={lead.utmSource || "N/A"}
-              />
-              <DetailRow
-                icon={<Info className="size-3.5 text-muted-foreground" />}
-                label="UTM Medium"
-                value={lead.utmMedium || "N/A"}
-              />
-              <DetailRow
-                icon={<Info className="size-3.5 text-muted-foreground" />}
-                label="UTM Campaign"
-                value={lead.utmCampaign || "N/A"}
-              />
-              <DetailRow
-                icon={<Info className="size-3.5 text-muted-foreground" />}
-                label="UTM Content"
-                value={lead.utmContent || "N/A"}
-              />
+
+              <div className="mt-3 pt-3 border-t border-border/60 space-y-2">
+                <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-0.5">
+                  UTM Parameters
+                </div>
+                {hasAnyUtm ? (
+                  <div className="space-y-2.5 pt-1">
+                    {utmSource && (
+                      <DetailRow
+                        icon={<Compass className="size-3.5 text-blue-500 shrink-0" />}
+                        label="Source"
+                        value={
+                          <span className="font-medium text-blue-700 dark:text-blue-300 bg-blue-500/10 px-1.5 py-0.5 rounded text-[11px] border border-blue-500/20 truncate max-w-[150px]" title={utmSource}>
+                            {utmSource}
+                          </span>
+                        }
+                      />
+                    )}
+                    {utmMedium && (
+                      <DetailRow
+                        icon={<Share2 className="size-3.5 text-purple-500 shrink-0" />}
+                        label="Medium"
+                        value={
+                          <span className="font-medium text-purple-700 dark:text-purple-300 bg-purple-500/10 px-1.5 py-0.5 rounded text-[11px] border border-purple-500/20 truncate max-w-[150px]" title={utmMedium}>
+                            {utmMedium}
+                          </span>
+                        }
+                      />
+                    )}
+                    {utmCampaign && (
+                      <DetailRow
+                        icon={<Tag className="size-3.5 text-emerald-500 shrink-0" />}
+                        label="Campaign"
+                        value={
+                          <span className="font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 px-1.5 py-0.5 rounded text-[11px] border border-emerald-500/20 truncate max-w-[150px]" title={utmCampaign}>
+                            {utmCampaign}
+                          </span>
+                        }
+                      />
+                    )}
+                    {utmContent && (
+                      <DetailRow
+                        icon={<Type className="size-3.5 text-amber-500 shrink-0" />}
+                        label="Content"
+                        value={
+                          <span className="font-medium text-amber-700 dark:text-amber-300 bg-amber-500/10 px-1.5 py-0.5 rounded text-[11px] border border-amber-500/20 truncate max-w-[150px]" title={utmContent}>
+                            {utmContent}
+                          </span>
+                        }
+                      />
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground/80 italic py-1 px-0.5">
+                    <Info className="size-3 text-muted-foreground/50" />
+                    <span>No UTM parameters captured</span>
+                  </div>
+                )}
+              </div>
             </AccordionContent>
           </AccordionItem>
         </Accordion>

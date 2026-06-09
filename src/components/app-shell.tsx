@@ -18,12 +18,12 @@ export function AppShell({
     <div className={cn("flex min-h-screen w-full bg-slate-50/50 dark:bg-zinc-950", className)}>
       <AppSidebar />
       <div className={cn("flex-1 min-w-0 flex flex-col", isHScreen && "h-screen overflow-hidden")}>
-        <TopBar />
+        {/* <TopBar /> */}
         <main
           className={cn(
             "flex-1 flex flex-col",
             isHScreen && "overflow-hidden",
-            !noPadding && "px-4 lg:px-6 py-4 ",
+            !noPadding && "p-4 pt-2",
           )}
         >
           {children}

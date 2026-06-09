@@ -45,6 +45,7 @@ export interface Application {
 export interface GetApplicationsParams {
   campusId?: string;
   status?: string;
+  search?: string;
 }
 
 export const useGetApplications = (params?: GetApplicationsParams) => {

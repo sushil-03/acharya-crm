@@ -66,6 +66,8 @@ interface DataGridState {
   columnFilters: ColumnFiltersState;
   rowHeight: RowHeightValue;
   rowSelection: RowSelectionState;
+  columnVisibility: Record<string, boolean>;
+  columnPinning: any;
   selectionState: SelectionState;
   focusedCell: CellPosition | null;
   editingCell: CellPosition | null;
@@ -124,6 +126,7 @@ interface UseDataGridProps<TData> extends Omit<
   enableSearch?: boolean;
   enablePaste?: boolean;
   readOnly?: boolean;
+  persistedKey?: string;
 }
 
 function useDataGrid<TData>({
@@ -133,6 +136,7 @@ function useDataGrid<TData>({
   overscan = OVERSCAN,
   dir: dirProp,
   initialState,
+  persistedKey,
   ...props
 }: UseDataGridProps<TData>) {
   const dir = useDirection(dirProp);
@@ -150,24 +154,63 @@ function useDataGrid<TData>({
     data,
     columns,
     initialState,
+    persistedKey,
   });
 
   const listenersRef = useLazyRef(() => new Set<() => void>());
 
   const stateRef = useLazyRef<DataGridState>(() => {
+    let initialSorting = initialState?.sorting ?? [];
+    if (persistedKey) {
+      const saved = localStorage.getItem(`${persistedKey}_sorting`);
+      if (saved) {
+        try {
+          initialSorting = JSON.parse(saved);
+        } catch (e) {
+          // ignore
+        }
+      }
+    }
+
+    let initialVisibility = initialState?.columnVisibility ?? {};
+    if (persistedKey) {
+      const savedVisibility = localStorage.getItem(`${persistedKey}_column_visibility`);
+      if (savedVisibility) {
+        try {
+          initialVisibility = JSON.parse(savedVisibility);
+        } catch (e) {
+          // ignore
+        }
+      }
+    }
+
+    let initialPinning = initialState?.columnPinning ?? {};
+    if (persistedKey) {
+      const savedPinning = localStorage.getItem(`${persistedKey}_column_pinning`);
+      if (savedPinning) {
+        try {
+          initialPinning = JSON.parse(savedPinning);
+        } catch (e) {
+          // ignore
+        }
+      }
+    }
+
     return {
-      sorting: initialState?.sorting ?? [],
+      sorting: initialSorting,
       columnFilters: initialState?.columnFilters ?? [],
       rowHeight: rowHeightProp,
       rowSelection: initialState?.rowSelection ?? {},
+      columnVisibility: initialVisibility,
+      columnPinning: initialPinning,
       selectionState: {
-        selectedCells: new Set(),
+        selectedCells: new Set<string>(),
         selectionRange: null,
         isSelecting: false,
       },
       focusedCell: null,
       editingCell: null,
-      cutCells: new Set(),
+      cutCells: new Set<string>(),
       contextMenu: {
         open: false,
         x: 0,
@@ -250,6 +293,8 @@ function useDataGrid<TData>({
   const sorting = useStore(store, (state) => state.sorting);
   const columnFilters = useStore(store, (state) => state.columnFilters);
   const rowSelection = useStore(store, (state) => state.rowSelection);
+  const columnVisibility = useStore(store, (state) => state.columnVisibility);
+  const columnPinning = useStore(store, (state) => state.columnPinning);
   const rowHeight = useStore(store, (state) => state.rowHeight);
   const contextMenu = useStore(store, (state) => state.contextMenu);
   const pasteDialog = useStore(store, (state) => state.pasteDialog);
@@ -407,7 +452,7 @@ function useDataGrid<TData>({
   const onSelectionClear = React.useCallback(() => {
     store.batch(() => {
       store.setState("selectionState", {
-        selectedCells: new Set(),
+        selectedCells: new Set<string>(),
         selectionRange: null,
         isSelecting: false,
       });
@@ -608,7 +653,7 @@ function useDataGrid<TData>({
 
       const currentState = store.getState();
       if (currentState.cutCells.size > 0) {
-        store.setState("cutCells", new Set());
+        store.setState("cutCells", new Set<string>());
       }
 
       toast.success(
@@ -630,7 +675,7 @@ function useDataGrid<TData>({
     try {
       await navigator.clipboard.writeText(tsvData);
 
-      store.setState("cutCells", new Set(selectedCellsArray));
+      store.setState("cutCells", new Set<string>(selectedCellsArray));
 
       toast.success(
         `${selectedCellsArray.length} cell${selectedCellsArray.length !== 1 ? "s" : ""} cut`,
@@ -948,7 +993,7 @@ function useDataGrid<TData>({
               allUpdates.push({ rowIndex, columnId, value: emptyValue });
             }
 
-            store.setState("cutCells", new Set());
+            store.setState("cutCells", new Set<string>());
           }
 
           onDataUpdate(allUpdates);
@@ -1075,7 +1120,7 @@ function useDataGrid<TData>({
 
       store.batch(() => {
         store.setState("selectionState", {
-          selectedCells: new Set(),
+          selectedCells: new Set<string>(),
           selectionRange: null,
           isSelecting: false,
         });
@@ -1669,8 +1714,8 @@ function useDataGrid<TData>({
         store.batch(() => {
           store.setState("selectionState", {
             selectedCells: propsRef.current.enableSingleCellSelection
-              ? new Set([cellKey])
-              : new Set(),
+              ? new Set<string>([cellKey])
+              : new Set<string>(),
             selectionRange: {
               start: { rowIndex, columnId },
               end: { rowIndex, columnId },
@@ -1724,7 +1769,7 @@ function useDataGrid<TData>({
       if (!isTargetCellSelected) {
         store.batch(() => {
           store.setState("selectionState", {
-            selectedCells: new Set([cellKey]),
+            selectedCells: new Set<string>([cellKey]),
             selectionRange: {
               start: { rowIndex, columnId },
               end: { rowIndex, columnId },
@@ -1764,9 +1809,41 @@ function useDataGrid<TData>({
       const newSorting = typeof updater === "function" ? updater(currentState.sorting) : updater;
       store.setState("sorting", newSorting);
 
+      if (persistedKey) {
+        localStorage.setItem(`${persistedKey}_sorting`, JSON.stringify(newSorting));
+      }
+
       propsRef.current.onSortingChange?.(newSorting);
     },
-    [store, propsRef],
+    [store, propsRef, persistedKey],
+  );
+
+  const onColumnVisibilityChange = React.useCallback(
+    (updater: Updater<Record<string, boolean>>) => {
+      const currentState = store.getState();
+      const newVisibility = typeof updater === "function" ? updater(currentState.columnVisibility) : updater;
+      store.setState("columnVisibility", newVisibility);
+
+      if (persistedKey) {
+        localStorage.setItem(`${persistedKey}_column_visibility`, JSON.stringify(newVisibility));
+      }
+      propsRef.current.onColumnVisibilityChange?.(newVisibility);
+    },
+    [store, persistedKey, propsRef],
+  );
+
+  const onColumnPinningChange = React.useCallback(
+    (updater: Updater<any>) => {
+      const currentState = store.getState();
+      const newPinning = typeof updater === "function" ? updater(currentState.columnPinning) : updater;
+      store.setState("columnPinning", newPinning);
+
+      if (persistedKey) {
+        localStorage.setItem(`${persistedKey}_column_pinning`, JSON.stringify(newPinning));
+      }
+      propsRef.current.onColumnPinningChange?.(newPinning);
+    },
+    [store, persistedKey, propsRef],
   );
 
   const onColumnFiltersChange = React.useCallback(
@@ -2000,6 +2077,8 @@ function useDataGrid<TData>({
       sorting,
       columnFilters,
       rowSelection,
+      columnVisibility,
+      columnPinning,
     }),
     [
       props.state?.pagination?.pageIndex,
@@ -2009,8 +2088,29 @@ function useDataGrid<TData>({
       sorting,
       columnFilters,
       rowSelection,
+      columnVisibility,
+      columnPinning,
     ],
   );
+
+  const resolvedInitialState = React.useMemo(() => {
+    const res = { ...initialState };
+    if (persistedKey) {
+      const savedVisibility = localStorage.getItem(`${persistedKey}_column_visibility`);
+      if (savedVisibility) {
+        try {
+          res.columnVisibility = JSON.parse(savedVisibility);
+        } catch (e) {}
+      }
+      const savedPinning = localStorage.getItem(`${persistedKey}_column_pinning`);
+      if (savedPinning) {
+        try {
+          res.columnPinning = JSON.parse(savedPinning);
+        } catch (e) {}
+      }
+    }
+    return res;
+  }, [initialState, persistedKey]);
 
   const tableOptions = React.useMemo<TableOptions<TData>>(() => {
     return {
@@ -2018,11 +2118,13 @@ function useDataGrid<TData>({
       data,
       columns,
       defaultColumn,
-      initialState,
+      initialState: resolvedInitialState,
       state: tableState,
       onRowSelectionChange,
       onSortingChange,
       onColumnFiltersChange,
+      onColumnVisibilityChange,
+      onColumnPinningChange,
       columnResizeMode: "onChange",
       columnResizeDirection: dir,
       getCoreRowModel: getMemoizedCoreRowModel,
@@ -2037,12 +2139,14 @@ function useDataGrid<TData>({
     data,
     columns,
     defaultColumn,
-    initialState,
+    resolvedInitialState,
     tableState,
     dir,
     onRowSelectionChange,
     onSortingChange,
     onColumnFiltersChange,
+    onColumnVisibilityChange,
+    onColumnPinningChange,
     getMemoizedCoreRowModel,
     getMemoizedFilteredRowModel,
     getMemoizedSortedRowModel,
@@ -2372,7 +2476,7 @@ function useDataGrid<TData>({
           }
 
           if (currentState.cutCells.size > 0) {
-            store.setState("cutCells", new Set());
+            store.setState("cutCells", new Set<string>());
           }
         }
         return;

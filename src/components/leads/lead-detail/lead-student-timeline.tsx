@@ -142,18 +142,18 @@ export function LeadStudentTimeline({ leadId }: LeadStudentTimelineProps) {
     const renderActorPill = () => {
       if (!actorName) return null;
       return (
-        <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-650 px-3 py-1 rounded-full">
-          <User className="size-3.5 text-slate-400" />
-          <span className="text-slate-500 font-medium">By:</span>
-          <span className="font-semibold text-slate-700 capitalize">{actorName}</span>
+        <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full">
+          <User className="size-3 text-muted-foreground/70" />
+          <span className="font-medium">By:</span>
+          <span className="font-semibold text-foreground capitalize">{actorName}</span>
         </span>
       );
     };
 
     // Left Node Badge: all use clean neutral slate overlays and slate grey icons
     const commonConfig = {
-      overlayColor: "bg-slate-400",
-      iconTextColor: "text-slate-500",
+      overlayColor: "bg-muted-foreground",
+      iconTextColor: "text-muted-foreground dark:text-foreground/80",
     };
 
     switch (type) {
@@ -161,21 +161,21 @@ export function LeadStudentTimeline({ leadId }: LeadStudentTimelineProps) {
         return {
           icon: Sparkles,
           ...commonConfig,
-          badgeColor: "bg-indigo-50 text-indigo-600 border-indigo-100/40",
+          badgeColor: "bg-indigo-50 text-indigo-600 border-indigo-100/40 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20",
           renderDetail: () => (
             <div className="flex flex-wrap gap-2 mt-3">
-              <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full">
-                <Globe className="size-3.5 text-slate-400" />
-                <span className="text-slate-500 font-medium">Source:</span>
-                <span className="font-semibold text-slate-800 capitalize">
+              <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full">
+                <Globe className="size-3 text-muted-foreground/70" />
+                <span className="font-medium">Source:</span>
+                <span className="font-semibold text-foreground capitalize">
                   {rawData.source || "N/A"}
                 </span>
               </span>
               {rawData.leadScore !== undefined && (
-                <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full">
-                  <TrendingUp className="size-3.5 text-slate-400" />
-                  <span className="text-slate-500 font-medium">Score:</span>
-                  <span className="font-semibold text-slate-800">{rawData.leadScore}</span>
+                <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full">
+                  <TrendingUp className="size-3 text-muted-foreground/70" />
+                  <span className="font-medium">Score:</span>
+                  <span className="font-semibold text-foreground">{rawData.leadScore}</span>
                 </span>
               )}
               {renderActorPill()}
@@ -186,19 +186,19 @@ export function LeadStudentTimeline({ leadId }: LeadStudentTimelineProps) {
         return {
           icon: UserCheck,
           ...commonConfig,
-          badgeColor: "bg-blue-50 text-blue-600 border-blue-100/40",
+          badgeColor: "bg-blue-50 text-blue-600 border-blue-100/40 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20",
           renderDetail: () => (
             <div className="flex flex-wrap gap-2 mt-3">
-              <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full">
-                <User className="size-3.5 text-slate-400" />
-                <span className="text-slate-500 font-medium">Counsellor:</span>
-                <span className="font-semibold text-slate-800 capitalize">
+              <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full">
+                <User className="size-3 text-muted-foreground/70" />
+                <span className="font-medium">Counsellor:</span>
+                <span className="font-semibold text-foreground capitalize">
                   {rawData.counsellorName || "N/A"}
                 </span>
               </span>
-              <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full">
-                <CheckCircle className="size-3.5 text-slate-400" />
-                <span className="font-semibold text-slate-800">Active Assignment</span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full">
+                <CheckCircle className="size-3 text-muted-foreground/70" />
+                <span className="font-semibold text-foreground">Active Assignment</span>
               </span>
               {renderActorPill()}
             </div>
@@ -219,30 +219,30 @@ export function LeadStudentTimeline({ leadId }: LeadStudentTimelineProps) {
         return {
           icon,
           ...commonConfig,
-          badgeColor: "bg-emerald-50 text-emerald-600 border-emerald-100/40",
+          badgeColor: "bg-emerald-50 text-emerald-600 border-emerald-100/40 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20",
           renderDetail: () => (
             <div className="flex flex-wrap gap-2 mt-3">
-              <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full">
-                <Phone className="size-3.5 text-slate-400" />
-                <span className="text-slate-500 font-medium">Channel:</span>
-                <span className="font-semibold text-slate-800 capitalize">
+              <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full">
+                <Phone className="size-3 text-muted-foreground/70" />
+                <span className="font-medium">Channel:</span>
+                <span className="font-semibold text-foreground capitalize">
                   {rawData.interactionType || "Interaction"}
                 </span>
               </span>
               {rawData.outcome && (
-                <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full">
-                  <RefreshCw className="size-3.5 text-slate-400" />
-                  <span className="text-slate-500 font-medium">Outcome:</span>
-                  <span className="font-semibold text-slate-800 capitalize">
+                <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full">
+                  <RefreshCw className="size-3 text-muted-foreground/70" />
+                  <span className="font-medium">Outcome:</span>
+                  <span className="font-semibold text-foreground capitalize">
                     {rawData.outcome.replace("_", " ")}
                   </span>
                 </span>
               )}
               {rawData.durationSeconds !== undefined && rawData.durationSeconds > 0 && (
-                <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full">
-                  <Clock className="size-3.5 text-slate-400" />
-                  <span className="text-slate-500 font-medium">Duration:</span>
-                  <span className="font-semibold text-slate-800">{rawData.durationSeconds}s</span>
+                <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full">
+                  <Clock className="size-3 text-muted-foreground/70" />
+                  <span className="font-medium">Duration:</span>
+                  <span className="font-semibold text-foreground">{rawData.durationSeconds}s</span>
                 </span>
               )}
               {renderActorPill()}
@@ -253,21 +253,21 @@ export function LeadStudentTimeline({ leadId }: LeadStudentTimelineProps) {
         return {
           icon: CheckSquare,
           ...commonConfig,
-          badgeColor: "bg-amber-50 text-amber-600 border-amber-100/40",
+          badgeColor: "bg-amber-50 text-amber-600 border-amber-100/40 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20",
           renderDetail: () => (
             <div className="flex flex-wrap gap-2 mt-3">
-              <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full">
-                <Tag className="size-3.5 text-slate-400" />
-                <span className="text-slate-500 font-medium">Type:</span>
-                <span className="font-semibold text-slate-800 capitalize">
+              <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full">
+                <Tag className="size-3 text-muted-foreground/70" />
+                <span className="font-medium">Type:</span>
+                <span className="font-semibold text-foreground capitalize">
                   {rawData.taskType?.replace("_", " ") || "Task"}
                 </span>
               </span>
               {rawData.dueDate && (
-                <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full">
-                  <Calendar className="size-3.5 text-slate-400" />
-                  <span className="text-slate-500 font-medium">Due:</span>
-                  <span className="font-semibold text-slate-800">
+                <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full">
+                  <Calendar className="size-3 text-muted-foreground/70" />
+                  <span className="font-medium">Due:</span>
+                  <span className="font-semibold text-foreground">
                     {format(new Date(rawData.dueDate), "MMM d, yyyy h:mm a")}
                   </span>
                 </span>
@@ -280,19 +280,18 @@ export function LeadStudentTimeline({ leadId }: LeadStudentTimelineProps) {
         return {
           icon: BadgeCheck,
           ...commonConfig,
-          badgeColor: "bg-purple-50 text-purple-600 border-purple-100/40",
+          badgeColor: "bg-purple-50 text-purple-600 border-purple-100/40 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20",
           renderDetail: () => (
             <div className="flex flex-wrap gap-2 mt-3">
-              <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full">
-                <User className="size-3.5 text-slate-400" />
-                <span className="text-slate-500 font-medium">Student:</span>
-                <span className="font-semibold text-slate-800">{data.leadName}</span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full">
+                <User className="size-3 text-muted-foreground/70" />
+                <span className="font-medium">Student:</span>
+                <span className="font-semibold text-foreground">{data.leadName}</span>
               </span>
               {rawData.studentId && (
-                <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full">
-                  <GraduationCap className="size-3.5 text-slate-400" />
-                  <span className="text-slate-500 font-medium">Program:</span>
-                  <span className="font-semibold text-slate-800">MBA 2026</span>
+                <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full font-mono">
+                  <span className="font-medium">Program:</span>
+                  <span className="font-semibold text-foreground">MBA 2026</span>
                 </span>
               )}
               {renderActorPill()}
@@ -303,18 +302,18 @@ export function LeadStudentTimeline({ leadId }: LeadStudentTimelineProps) {
         return {
           icon: GraduationCap,
           ...commonConfig,
-          badgeColor: "bg-sky-50 text-sky-600 border-sky-100/40",
+          badgeColor: "bg-sky-50 text-sky-600 border-sky-100/40 dark:bg-sky-500/10 dark:text-sky-400 dark:border-sky-500/20",
           renderDetail: () => (
             <div className="flex flex-wrap gap-2 mt-3">
-              <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full">
-                <GraduationCap className="size-3.5 text-slate-400" />
-                <span className="text-slate-500 font-medium">Program:</span>
-                <span className="font-semibold text-slate-800">{rawData.programName || "N/A"}</span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full">
+                <GraduationCap className="size-3 text-muted-foreground/70" />
+                <span className="font-medium">Program:</span>
+                <span className="font-semibold text-foreground">{rawData.programName || "N/A"}</span>
               </span>
               {rawData.applicationId && (
-                <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full font-mono">
-                  <span className="text-slate-500 font-medium">App ID:</span>
-                  <span className="text-slate-800">{rawData.applicationId.slice(0, 8)}...</span>
+                <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full font-mono">
+                  <span className="font-medium">App ID:</span>
+                  <span className="text-foreground">{rawData.applicationId.slice(0, 8)}...</span>
                 </span>
               )}
               {renderActorPill()}
@@ -328,19 +327,19 @@ export function LeadStudentTimeline({ leadId }: LeadStudentTimelineProps) {
           icon: CreditCard,
           ...commonConfig,
           badgeColor: isPaid
-            ? "bg-emerald-50 text-emerald-600 border-emerald-100/40"
-            : "bg-amber-50 text-amber-600 border-amber-100/40",
+            ? "bg-emerald-50 text-emerald-600 border-emerald-100/40 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20"
+            : "bg-amber-50 text-amber-600 border-amber-100/40 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20",
           renderDetail: () => (
             <div className="flex flex-wrap gap-2 mt-3">
               {rawData.amount && (
-                <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full font-semibold">
-                  Amount: <span>₹{rawData.amount}</span>
+                <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full font-semibold">
+                  Amount: <span className="text-foreground">₹{rawData.amount}</span>
                 </span>
               )}
               {rawData.status && (
-                <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full">
+                <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full">
                   Status:{" "}
-                  <span className="font-semibold capitalize text-slate-800">{rawData.status}</span>
+                  <span className="font-semibold capitalize text-foreground">{rawData.status}</span>
                 </span>
               )}
               {renderActorPill()}
@@ -355,16 +354,16 @@ export function LeadStudentTimeline({ leadId }: LeadStudentTimelineProps) {
           icon: isAppApproved ? CheckCircle : Eye,
           ...commonConfig,
           badgeColor: isAppApproved
-            ? "bg-emerald-50 text-emerald-600 border-emerald-100/40"
-            : "bg-orange-50 text-orange-600 border-orange-100/40",
+            ? "bg-emerald-50 text-emerald-600 border-emerald-100/40 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20"
+            : "bg-orange-50 text-orange-600 border-orange-100/40 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20",
           renderDetail: () => (
             <div className="flex flex-wrap gap-2 mt-3">
-              <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full font-semibold">
-                Status: <span>{isAppApproved ? "Verification Successful" : "In Progress"}</span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full font-semibold">
+                Status: <span className="text-foreground">{isAppApproved ? "Verification Successful" : "In Progress"}</span>
               </span>
               {rawData.applicationId && (
-                <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full font-mono">
-                  App ID: {rawData.applicationId.slice(0, 8)}...
+                <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full font-mono">
+                  App ID: <span className="text-foreground">{rawData.applicationId.slice(0, 8)}...</span>
                 </span>
               )}
               {renderActorPill()}
@@ -378,20 +377,20 @@ export function LeadStudentTimeline({ leadId }: LeadStudentTimelineProps) {
           icon: isDocVerified ? FileCheck : FileUp,
           ...commonConfig,
           badgeColor: isDocVerified
-            ? "bg-teal-50 text-teal-600 border-teal-100/40"
-            : "bg-blue-50 text-blue-600 border-blue-100/40",
+            ? "bg-teal-50 text-teal-600 border-teal-100/40 dark:bg-teal-500/10 dark:text-teal-400 dark:border-teal-500/20"
+            : "bg-blue-50 text-blue-600 border-blue-100/40 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20",
           renderDetail: () => (
             <div className="flex flex-wrap gap-2 mt-3">
-              <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full">
-                <FileText className="size-3.5 text-slate-400" />
+              <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full">
+                <FileText className="size-3 text-muted-foreground/70" />
                 Type:{" "}
-                <span className="font-semibold uppercase">
+                <span className="font-semibold uppercase text-foreground">
                   {rawData.documentType?.replace("_", " ")}
                 </span>
               </span>
               {rawData.status && (
-                <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full font-semibold">
-                  Status: <span>{rawData.status}</span>
+                <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full font-semibold">
+                  Status: <span className="text-foreground">{rawData.status}</span>
                 </span>
               )}
               {renderActorPill()}
@@ -405,19 +404,19 @@ export function LeadStudentTimeline({ leadId }: LeadStudentTimelineProps) {
           icon: Award,
           ...commonConfig,
           badgeColor: isOfferReleased
-            ? "bg-pink-50 text-pink-600 border-pink-100/40"
-            : "bg-rose-50 text-rose-600 border-rose-100/40",
+            ? "bg-pink-50 text-pink-600 border-pink-100/40 dark:bg-pink-500/10 dark:text-pink-400 dark:border-pink-500/20"
+            : "bg-rose-50 text-rose-600 border-rose-100/40 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20",
           renderDetail: () => (
             <div className="flex flex-wrap gap-2 mt-3">
               {rawData.offerType && (
-                <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full font-semibold">
-                  Offer: {rawData.offerType}
+                <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full font-semibold">
+                  Offer: <span className="text-foreground">{rawData.offerType}</span>
                 </span>
               )}
               {rawData.totalFee && (
-                <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full font-semibold">
+                <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full font-semibold">
                   Total Fee:{" "}
-                  <span className="font-semibold text-slate-800">₹{rawData.totalFee}</span>
+                  <span className="font-semibold text-foreground">₹{rawData.totalFee}</span>
                 </span>
               )}
               {renderActorPill()}
@@ -429,17 +428,17 @@ export function LeadStudentTimeline({ leadId }: LeadStudentTimelineProps) {
         return {
           icon: Award,
           ...commonConfig,
-          badgeColor: "bg-purple-50 text-purple-600 border-purple-100/40",
+          badgeColor: "bg-purple-50 text-purple-600 border-purple-100/40 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20",
           renderDetail: () => (
             <div className="flex flex-wrap gap-2 mt-3">
               {rawData.type && (
-                <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full font-semibold">
-                  Type: {capitalizeWords(rawData.type)}
+                <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full font-semibold">
+                  Type: <span className="text-foreground">{capitalizeWords(rawData.type)}</span>
                 </span>
               )}
               {rawData.amountValue && (
-                <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full font-bold">
-                  Amount: ₹{rawData.amountValue}
+                <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full font-bold">
+                  Amount: <span className="text-foreground">₹{rawData.amountValue}</span>
                 </span>
               )}
               {renderActorPill()}
@@ -450,12 +449,12 @@ export function LeadStudentTimeline({ leadId }: LeadStudentTimelineProps) {
         return {
           icon: BadgeCheck,
           ...commonConfig,
-          badgeColor: "bg-emerald-50 text-emerald-600 border-emerald-100/40",
+          badgeColor: "bg-emerald-50 text-emerald-600 border-emerald-100/40 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20",
           renderDetail: () => (
             <div className="flex flex-wrap gap-2 mt-3">
               {rawData.netFeePayable && (
-                <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full font-bold">
-                  Net Payable: ₹{rawData.netFeePayable}
+                <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full font-bold">
+                  Net Payable: <span className="text-foreground">₹{rawData.netFeePayable}</span>
                 </span>
               )}
               {renderActorPill()}
@@ -477,23 +476,23 @@ export function LeadStudentTimeline({ leadId }: LeadStudentTimelineProps) {
           icon: CreditCard,
           ...commonConfig,
           badgeColor: isPaymentCompleted
-            ? "bg-emerald-50 text-emerald-600 border-emerald-100/40"
-            : "bg-amber-50 text-amber-600 border-amber-100/40",
+            ? "bg-emerald-50 text-emerald-600 border-emerald-100/40 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20"
+            : "bg-amber-50 text-amber-600 border-amber-100/40 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20",
           renderDetail: () => (
             <div className="flex flex-wrap gap-2 mt-3">
               {rawData.amount && (
-                <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full font-bold">
-                  Amount: ₹{rawData.amount}
+                <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full font-bold">
+                  Amount: <span className="text-foreground">₹{rawData.amount}</span>
                 </span>
               )}
               {(rawData.paymentStatus || rawData.status) && (
-                <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-650 px-3 py-1 rounded-full capitalize font-semibold">
-                  Status: {rawData.paymentStatus || rawData.status}
+                <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full capitalize font-semibold">
+                  Status: <span className="text-foreground">{rawData.paymentStatus || rawData.status}</span>
                 </span>
               )}
               {(rawData.paymentType || rawData.type) && (
-                <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-650 px-3 py-1 rounded-full capitalize">
-                  Type: {(rawData.paymentType || rawData.type).replace("_", " ")}
+                <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full capitalize">
+                  Type: <span className="text-foreground">{(rawData.paymentType || rawData.type).replace("_", " ")}</span>
                 </span>
               )}
               {renderActorPill()}
@@ -506,24 +505,24 @@ export function LeadStudentTimeline({ leadId }: LeadStudentTimelineProps) {
         return {
           icon: GraduationCap,
           ...commonConfig,
-          badgeColor: "bg-violet-50 text-violet-600 border-violet-100/40",
+          badgeColor: "bg-violet-50 text-violet-600 border-violet-100/40 dark:bg-violet-500/10 dark:text-violet-400 dark:border-violet-500/20",
           renderDetail: () => (
             <div className="flex flex-wrap gap-2 mt-3">
               {rawData.programName && (
-                <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full font-medium">
+                <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full font-medium">
                   Program:{" "}
-                  <span className="font-semibold text-slate-800">{rawData.programName}</span>
+                  <span className="font-semibold text-foreground">{rawData.programName}</span>
                 </span>
               )}
               {rawData.status && (
-                <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full">
+                <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full">
                   Status:{" "}
-                  <span className="font-semibold capitalize text-slate-800">{rawData.status}</span>
+                  <span className="font-semibold capitalize text-foreground">{rawData.status}</span>
                 </span>
               )}
               {rawData.enrollmentId && (
-                <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 text-slate-655 px-3 py-1 rounded-full font-mono">
-                  Enroll ID: {rawData.enrollmentId.slice(0, 8)}...
+                <span className="inline-flex items-center gap-1.5 text-[11px] bg-muted/60 border border-border text-muted-foreground px-2.5 py-0.5 rounded-full font-mono">
+                  Enroll ID: <span className="text-foreground">{rawData.enrollmentId.slice(0, 8)}...</span>
                 </span>
               )}
               {renderActorPill()}
@@ -535,14 +534,14 @@ export function LeadStudentTimeline({ leadId }: LeadStudentTimelineProps) {
         return {
           icon: FileText,
           ...commonConfig,
-          badgeColor: "bg-slate-50 text-slate-600 border-slate-100/40",
+          badgeColor: "bg-slate-50 text-slate-600 border-slate-100/40 dark:bg-slate-500/10 dark:text-slate-400 dark:border-slate-500/20",
           renderDetail: () => <div className="flex flex-wrap gap-2 mt-3">{renderActorPill()}</div>,
         };
       default:
         return {
           icon: Clock,
           ...commonConfig,
-          badgeColor: "bg-slate-50 text-slate-500 border-slate-100/40",
+          badgeColor: "bg-slate-50 text-slate-500 border-slate-100/40 dark:bg-slate-500/10 dark:text-slate-400 dark:border-slate-500/20",
           renderDetail: () => <div className="flex flex-wrap gap-2 mt-3">{renderActorPill()}</div>,
         };
     }
@@ -576,18 +575,18 @@ export function LeadStudentTimeline({ leadId }: LeadStudentTimelineProps) {
                 <div key={dateStr} className="space-y-4 ">
                   {/* Date Centered Header */}
                   <div className="flex items-center justify-center my-4">
-                    <div className="h-[1px] bg-slate-100 flex-1" />
-                    <span className="text-[10px] font-bold tracking-widest text-slate-400 bg-background px-4 uppercase">
+                    <div className="h-[1px] bg-border flex-1" />
+                    <span className="text-[10px] font-bold tracking-widest text-muted-foreground bg-background px-4 uppercase">
                       {headerText}
                     </span>
-                    <div className="h-[1px] bg-slate-100 flex-1" />
+                    <div className="h-[1px] bg-border flex-1" />
                   </div>
 
                   {/* Events list of this day with reduced padding and width padding-left */}
                   <div className="relative space-y-4">
                     {/* The connecting vertical timeline line adjusted to left-20px */}
                     {items.length > 1 && (
-                      <div className="absolute left-[20px] top-7 bottom-7 w-[1.5px] bg-slate-100 z-0" />
+                      <div className="absolute left-[20px] top-7 bottom-7 w-[1.5px] bg-border z-0" />
                     )}
 
                     {items.map((item, index) => {
@@ -610,10 +609,10 @@ export function LeadStudentTimeline({ leadId }: LeadStudentTimelineProps) {
                           </div>
 
                           {/* Event content card with compact spacing, smaller padding and font sizes */}
-                          <div className="flex-1 flex flex-col gap-1 p-3.5 rounded-md  shadow-[0px_0px_6px_0px_rgba(0,_0,_0,_0.1)]">
+                          <div className="flex-1 flex flex-col gap-1 p-3.5 rounded-md bg-card border border-border shadow-sm">
                             <div className="flex items-center justify-between gap-2">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <span className="font-bold text-sm text-slate-800 leading-tight">
+                                <span className="font-bold text-sm text-foreground leading-tight">
                                   {capitalizeWords(item.title)}
                                 </span>
                                 <span
@@ -622,7 +621,7 @@ export function LeadStudentTimeline({ leadId }: LeadStudentTimelineProps) {
                                   {item.type.replace("_", " ")}
                                 </span>
                               </div>
-                              <div className="flex items-center gap-1 text-xs text-slate-400 font-medium shrink-0">
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground font-medium shrink-0">
                                 <Clock className="size-3.5" />
                                 <span title={exactTime} className="cursor-help text-[11px]">
                                   {relativeTime} • {exactTime}
@@ -630,7 +629,7 @@ export function LeadStudentTimeline({ leadId }: LeadStudentTimelineProps) {
                               </div>
                             </div>
 
-                            <p className="text-[13px] text-slate-500 leading-relaxed mt-0.5">
+                            <p className="text-[13px] text-muted-foreground leading-relaxed mt-0.5">
                               {item.description}
                             </p>
 
