@@ -15,4 +15,7 @@ export const QUERY_KEYS = {
   GET_EMAIL_TEMPLATES: "get-email-templates",
   GET_EMAIL_TEMPLATE_DETAILS: "get-email-template-details",
   GET_EMAIL_TEMPLATE_CATEGORIES: "get-email-template-categories",
+  GET_LISTS: "get-lists",
+  GET_LIST_BY_ID: "get-list-by-id",
+  GET_LEAD_LISTS: "get-lead-lists",
 } as const;

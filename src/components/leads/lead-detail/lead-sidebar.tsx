@@ -19,6 +19,9 @@ import {
   Compass,
   Share2,
   Type,
+  ListOrdered,
+  Plus,
+  Loader2,
 } from "lucide-react";
 import { getReadableDate } from "@/lib/utils";
 import { useGetLeadAssignment } from "../hook/query/use-get-lead";
@@ -33,6 +36,9 @@ import {
 } from "@/components/ui/accordion";
 import { useState } from "react";
 import { LeadEditSheet } from "./lead-edit-sheet";
+import { useGetLeadLists } from "@/components/lists/hook/query/use-get-lead-lists";
+import { AddToListDialog } from "@/components/lists/add-to-list-dialog";
+import { Link } from "@tanstack/react-router";
 
 interface LeadSidebarProps {
   lead: LeadDetail;
@@ -42,6 +48,8 @@ interface LeadSidebarProps {
 
 export function LeadSidebar({ lead, applicationData, isApplicationDataLoading }: LeadSidebarProps) {
   const [openEditSheet, setOpenEditSheet] = useState(false);
+  const [addToListOpen, setAddToListOpen] = useState(false);
+  const { data: leadLists, isLoading: isLoadingLists } = useGetLeadLists(lead?.id);
   const formattedDob = lead.dob ? getReadableDate(lead.dob) : "N/A";
   const formattedCreatedAt = lead.createdAt ? getReadableDate(lead.createdAt) : "N/A";
 
@@ -278,7 +286,82 @@ export function LeadSidebar({ lead, applicationData, isApplicationDataLoading }:
             </AccordionContent>
           </AccordionItem>
 
-          {/* Section 7: Marketing Attribution (Collapsed by default) */}
+          {/* Section 7: In Lists */}
+          <AccordionItem value="lists" className="border-b border-border">
+            <AccordionTrigger className="py-2.5 px-3 hover:no-underline [&[data-state=open]]:bg-muted/30">
+              <div className="flex items-center justify-between flex-1 mr-2">
+                <div className="flex items-center gap-2 text-[13px] font-semibold text-foreground">
+                  <ListOrdered className="size-3.5 text-muted-foreground" />
+                  <span>In Lists</span>
+                  {leadLists && leadLists.length > 0 && (
+                    <span className="text-[11px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">
+                      {leadLists.length}
+                    </span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  className="size-6 rounded hover:bg-muted grid place-items-center text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setAddToListOpen(true);
+                  }}
+                >
+                  <Plus className="size-3.5" />
+                </button>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-3 pb-3.5 pt-1.5">
+              {isLoadingLists ? (
+                <div className="flex justify-center py-2">
+                  <Loader2 className="size-4 animate-spin text-muted-foreground" />
+                </div>
+              ) : leadLists && leadLists.length > 0 ? (
+                <div className="space-y-1.5">
+                  {leadLists.map((membership) => (
+                    <Link
+                      key={membership.id}
+                      to="/lists/$listId"
+                      params={{ listId: membership.listId }}
+                      className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors group"
+                    >
+                      <span className="text-sm leading-none">{membership.list.icon || "📋"}</span>
+                      <span
+                        className="size-1.5 rounded-full shrink-0"
+                        style={{ backgroundColor: membership.list.color || "#cbd5e1" }}
+                      />
+                      <span className="text-[13px] font-medium truncate flex-1">
+                        {membership.list.name}
+                      </span>
+                    </Link>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setAddToListOpen(true)}
+                    className="w-full text-left flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors text-[12px] text-muted-foreground"
+                  >
+                    <Plus className="size-3.5" />
+                    Add to another list
+                  </button>
+                </div>
+              ) : (
+                <div className="text-center py-2">
+                  <p className="text-[12px] text-muted-foreground mb-2">Not in any list</p>
+                  <button
+                    type="button"
+                    onClick={() => setAddToListOpen(true)}
+                    className="text-[12px] text-primary hover:underline flex items-center gap-1 mx-auto"
+                  >
+                    <Plus className="size-3" />
+                    Add to a list
+                  </button>
+                </div>
+              )}
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Section 8: Marketing Attribution (Collapsed by default) */}
           <AccordionItem value="marketing" className="border-b border-border">
             <AccordionTrigger className="py-2.5 px-3 hover:no-underline [&[data-state=open]]:bg-muted/30">
               <div className="flex items-center gap-2 text-[13px] font-semibold text-foreground">
@@ -363,6 +446,13 @@ export function LeadSidebar({ lead, applicationData, isApplicationDataLoading }:
           </AccordionItem>
         </Accordion>
       </div>
+
+      <AddToListDialog
+        open={addToListOpen}
+        onOpenChange={setAddToListOpen}
+        leadId={lead.id}
+        leadName={lead.name}
+      />
     </div>
   );
 }
