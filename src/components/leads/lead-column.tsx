@@ -5,7 +5,6 @@ import {
   Mail,
   MoreHorizontal,
   MessageCircle,
-  Hash,
   User,
   UserPlus,
   Link2,
@@ -13,7 +12,9 @@ import {
   Signal,
   Headset,
   Activity,
+  List,
 } from "lucide-react";
+import { LeadListsCell } from "./lead-lists-cell";
 import React from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
@@ -113,22 +114,6 @@ const CounsellorCell = ({ row }: { row: any }) => {
 };
 
 export const getLeadsColumn: ColumnDef<any>[] = [
-  {
-    id: "sno",
-    header: "S.No",
-    meta: { label: "S.No", cell: { variant: "custom", headerIcon: Hash } },
-    size: 60,
-    cell: ({ row, table }) => {
-      const { pageIndex, pageSize } = table.getState().pagination;
-      const sortedIndex = table.getRowModel().rows.findIndex((r) => r.id === row.id);
-      const index = sortedIndex !== -1 ? sortedIndex : row.index;
-      return (
-        <span className="text-[12px] tabular-nums  pl-1">
-          {pageIndex * pageSize + index + 1}
-        </span>
-      );
-    },
-  },
   {
     accessorKey: "name",
     header: "Lead",
@@ -271,6 +256,15 @@ export const getLeadsColumn: ColumnDef<any>[] = [
     cell: ({ row }) => <CounsellorCell row={row} />,
   },
 
+  {
+    id: "lists",
+    header: "Lists",
+    meta: { label: "Lists", cell: { variant: "custom", headerIcon: List } },
+    size: 220,
+    cell: ({ row }) => (
+      <LeadListsCell leadId={row.original.id} leadName={row.original.name} />
+    ),
+  },
   {
     accessorKey: "lastActivity",
     header: "Activity",

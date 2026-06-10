@@ -1672,14 +1672,24 @@ function useDataGrid<TData>({
         const isClickingSelectedCell = currentState.selectionState.selectedCells.has(cellKey);
 
         if (!isClickingSelectedCell) {
-          onSelectionClear();
+          // Clear cell highlights only — preserve checkbox row selection
+          store.setState("selectionState", {
+            selectedCells: new Set<string>(),
+            selectionRange: null,
+            isSelecting: false,
+          });
         } else {
           focusCell(rowIndex, columnId);
           scrollToCell();
           return;
         }
       } else if (hasSelectedRows && columnId !== "select") {
-        onSelectionClear();
+        // Clear cell selection only — preserve checkbox row selection
+        store.setState("selectionState", {
+          selectedCells: new Set<string>(),
+          selectionRange: null,
+          isSelecting: false,
+        });
       }
 
       if (currentFocused?.rowIndex === rowIndex && currentFocused?.columnId === columnId) {
@@ -1711,18 +1721,15 @@ function useDataGrid<TData>({
 
       if (!event.ctrlKey && !event.metaKey && !event.shiftKey) {
         const cellKey = getCellKey(rowIndex, columnId);
-        store.batch(() => {
-          store.setState("selectionState", {
-            selectedCells: propsRef.current.enableSingleCellSelection
-              ? new Set<string>([cellKey])
-              : new Set<string>(),
-            selectionRange: {
-              start: { rowIndex, columnId },
-              end: { rowIndex, columnId },
-            },
-            isSelecting: true,
-          });
-          store.setState("rowSelection", {});
+        store.setState("selectionState", {
+          selectedCells: propsRef.current.enableSingleCellSelection
+            ? new Set<string>([cellKey])
+            : new Set<string>(),
+          selectionRange: {
+            start: { rowIndex, columnId },
+            end: { rowIndex, columnId },
+          },
+          isSelecting: true,
         });
       }
     },
@@ -3033,11 +3040,13 @@ function useDataGrid<TData>({
         if (!isInsidePopover) {
           blurCell();
           const currentState = store.getState();
-          if (
-            currentState.selectionState.selectedCells.size > 0 ||
-            Object.keys(currentState.rowSelection).length > 0
-          ) {
-            onSelectionClear();
+          if (currentState.selectionState.selectedCells.size > 0) {
+            // Clear cell selection only — preserve checkbox row selection
+            store.setState("selectionState", {
+              selectedCells: new Set<string>(),
+              selectionRange: null,
+              isSelecting: false,
+            });
           }
         }
       }

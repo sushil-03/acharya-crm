@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { useDataGrid } from "@/hooks/use-data-grid";
 import { DataGrid } from "@/components/data-grid/data-grid";
@@ -42,6 +42,7 @@ import { DataGridViewMenu } from "@/components/data-grid/data-grid-view-menu";
 import { DataGridRowHeightMenu } from "@/components/data-grid/data-grid-row-height-menu";
 import { getDataGridSelectColumn } from "@/components/data-grid/data-grid-select-column";
 import { getLeadsColumn } from "@/components/leads/lead-column";
+import { BulkAddToListDialog } from "@/components/leads/bulk-add-to-list-dialog";
 import { useGetLeads } from "@/components/leads/hook/query/use-get-leads";
 import { useUserStore } from "@/store/use-user-store";
 import { useGetCounsellors } from "@/components/global/hooks/use-get-counsellor";
@@ -145,15 +146,21 @@ function LeadsPage() {
     );
   }
 
+  const leadsColumns = useMemo(
+    () => [getDataGridSelectColumn<any>({ enableRowMarkers: true }), ...getLeadsColumn],
+    [],
+  );
+
   console.log("leads", data);
   const dataGrid = useDataGrid({
     data: filtered,
-    columns: getLeadsColumn,
+    columns: leadsColumns,
+    getRowId: (row: any) => row.id,
     readOnly: true,
     manualPagination: true,
     persistedKey: "leads_table",
     initialState: {
-      columnPinning: { right: ["actions"] },
+      columnPinning: { left: ["select"], right: ["actions"] },
       columnVisibility: {
         lastActivity: false,
         city: false,
@@ -183,8 +190,16 @@ function LeadsPage() {
     },
   });
 
+  const rowSelection = dataGrid.table.getState().rowSelection;
+  const selectedLeadIds = useMemo(
+    () => Object.keys(rowSelection).filter((id) => rowSelection[id]),
+    [rowSelection],
+  );
+
+  const [bulkListDialogOpen, setBulkListDialogOpen] = useState(false);
+
   return (
-    <AppShell className="h-screen overflow-hidden">
+    <AppShell className="h-screen overflow-hidden" noPadding>
       <PageHeader
         title="Lead Management"
         subtitle="Centralized acquisition, attribution, scoring & distribution across all channels."
@@ -207,7 +222,7 @@ function LeadsPage() {
           </>
         }
       />
-      <div className="flex flex-col min-h-0 flex-1">
+      <div className="flex flex-col min-h-0 flex-1  border-t">
         {/* <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <StatCard
             label="Total Leads"
@@ -238,7 +253,7 @@ function LeadsPage() {
           />
         </div> */}
 
-        <Card className="overflow-hidden flex flex-col min-h-0 flex-1">
+        <Card className="overflow-hidden flex flex-col min-h-0 flex-1 border-none">
           <div className="p-3 border-b border-border flex flex-wrap items-center gap-3">
             <InputSearch
               searchTerm={q}
@@ -285,10 +300,53 @@ function LeadsPage() {
             showPagination
             totalElements={data?.meta?.total ?? 0}
             // className="border-0 border-none rounded-none "
-            className="flex-1 min-h-0"
+            className="flex-1 min-h-0 border-none"
           />
         </Card>
       </div>
+
+      {selectedLeadIds.length > 0 && (
+        <div
+          data-grid-popover
+          className="animated-border fixed bottom-4 left-1/2 -translate-x-1/2 z-50 rounded-full p-px shadow-[0_4px_24px_rgba(0,0,0,0.12)]"
+        >
+          <div className="flex items-center gap-3 rounded-full bg-white px-2 py-1.5">
+            <div className="flex items-center gap-2 pl-2">
+              <span className="flex size-5 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground">
+                {selectedLeadIds.length}
+              </span>
+              <span className="text-sm font-medium text-foreground whitespace-nowrap">
+                lead{selectedLeadIds.length !== 1 ? "s" : ""} selected
+              </span>
+            </div>
+            <div className="h-5 w-px bg-border" />
+            <div className="flex items-center gap-1 pr-1">
+              <Button
+                size="sm"
+                className="h-7 rounded-full px-3 text-xs"
+                onClick={() => setBulkListDialogOpen(true)}
+              >
+                Add to List
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 rounded-full px-3 text-xs text-muted-foreground hover:text-foreground"
+                onClick={() => dataGrid.table.resetRowSelection()}
+              >
+                Clear
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <BulkAddToListDialog
+        open={bulkListDialogOpen}
+        onOpenChange={setBulkListDialogOpen}
+        leadIds={selectedLeadIds}
+        onSuccess={() => dataGrid.table.resetRowSelection()}
+      />
     </AppShell>
   );
 }

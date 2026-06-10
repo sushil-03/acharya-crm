@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { ListIconBadge } from "@/components/lists/list-icon";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader, Card } from "@/components/ui-kit";
 import {
@@ -44,8 +45,8 @@ function ListsPage() {
   const { data: lists, isLoading } = useGetLists();
   const { mutate: deleteList, isPending: isDeleting } = useDeleteList();
 
-  const [view, setView] = useState<"card" | "table">(() =>
-    (localStorage.getItem("lists_view") as "card" | "table") || "card",
+  const [view, setView] = useState<"card" | "table">(
+    () => (localStorage.getItem("lists_view") as "card" | "table") || "card",
   );
   const [createOpen, setCreateOpen] = useState(false);
   const [editList, setEditList] = useState<LeadList | null>(null);
@@ -67,7 +68,7 @@ function ListsPage() {
   }
 
   return (
-    <AppShell className="h-screen overflow-hidden">
+    <AppShell className="h-screen overflow-hidden" noPadding>
       <PageHeader
         title="Lists"
         subtitle="Organise leads into personal saved lists for quick access and follow-up."
@@ -95,7 +96,7 @@ function ListsPage() {
         }
       />
 
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto border-t">
         {!lists || lists.length === 0 ? (
           <Card className="p-12 text-center">
             <div className="text-4xl mb-3">📋</div>
@@ -109,7 +110,7 @@ function ListsPage() {
             </Button>
           </Card>
         ) : view === "card" ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4 ">
             {lists.map((list) => (
               <ListCard
                 key={list.id}
@@ -121,7 +122,7 @@ function ListsPage() {
             ))}
           </div>
         ) : (
-          <Card className="overflow-hidden">
+          <Card className="overflow-hidden rounded-none border-none">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/30 text-left">
@@ -139,18 +140,11 @@ function ListsPage() {
                   <tr
                     key={list.id}
                     className="group border-b border-border last:border-0 hover:bg-muted/20 cursor-pointer transition-colors"
-                    onClick={() =>
-                      navigate({ to: "/lists/$listId", params: { listId: list.id } })
-                    }
+                    onClick={() => navigate({ to: "/lists/$listId", params: { listId: list.id } })}
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2.5">
-                        <span
-                          className="size-7 rounded-lg grid place-items-center text-sm shrink-0"
-                          style={{ backgroundColor: list.color ? `${list.color}20` : "#f3f4f6" }}
-                        >
-                          {list.icon || "📋"}
-                        </span>
+                        <ListIconBadge name={list.icon} color={list.color} size="sm" />
                         <div className="flex items-center gap-1.5">
                           <span className="font-medium">{list.name}</span>
                           {list.isSystem && (
@@ -168,10 +162,7 @@ function ListsPage() {
                     <td className="px-4 py-3 text-muted-foreground text-xs">
                       {formatDate(list.createdAt)}
                     </td>
-                    <td
-                      className="px-3 py-3"
-                      onClick={(e) => e.stopPropagation()}
-                    >
+                    <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
                       <ListActionsMenu
                         list={list}
                         onEdit={() => setEditList(list)}
@@ -242,12 +233,7 @@ function ListCard({
       className="group relative bg-background border border-border rounded-xl p-4 cursor-pointer hover:border-primary/40 hover:shadow-sm transition-all"
     >
       <div className="flex items-start justify-between mb-3">
-        <div
-          className="size-10 rounded-xl grid place-items-center text-xl"
-          style={{ backgroundColor: list.color ? `${list.color}20` : "#f3f4f6" }}
-        >
-          {list.icon || "📋"}
-        </div>
+        <ListIconBadge name={list.icon} color={list.color} size="md" />
         <div onClick={(e) => e.stopPropagation()}>
           <ListActionsMenu list={list} onEdit={onEdit} onDelete={onDelete} />
         </div>
@@ -296,10 +282,7 @@ function ListActionsMenu({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-36">
-        <DropdownMenuItem
-          onClick={onEdit}
-          disabled={list.isSystem}
-        >
+        <DropdownMenuItem onClick={onEdit} disabled={list.isSystem}>
           <Pencil className="size-3.5 mr-2" />
           Edit
         </DropdownMenuItem>

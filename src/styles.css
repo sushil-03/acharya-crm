@@ -313,3 +313,29 @@
 .tox .tox-toolbar {
   padding: 0 !important;
 }
+
+/* Animated gradient border for selection toolbar */
+@property --border-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes spin-border {
+  to { --border-angle: 360deg; }
+}
+
+.animated-border {
+  background: conic-gradient(
+    from var(--border-angle),
+    #e2e8f0 0%,
+    #e2e8f0 60%,
+    #818cf8 67%,
+    #6366f1 70%,
+    #a855f7 73%,
+    #818cf8 76%,
+    #e2e8f0 83%,
+    #e2e8f0 100%
+  );
+  animation: spin-border 1.5s linear infinite;
+}

@@ -12,7 +12,7 @@ export function PageHeader({
   breadcrumb?: string;
 }) {
   return (
-    <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-4">
+    <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 p-2">
       <div>
         {breadcrumb && (
           <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-semibold mb-1.5">

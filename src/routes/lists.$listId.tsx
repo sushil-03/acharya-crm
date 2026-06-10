@@ -2,6 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader, Card } from "@/components/ui-kit";
 import { ArrowLeft, Star, Trash2, Loader2, MoveRight, UserPlus } from "lucide-react";
+import { ListIconBadge } from "@/components/lists/list-icon";
+import { getListIconComponent } from "@/components/lists/list-icons";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -128,12 +130,7 @@ function ListDetailPage() {
           <Link to="/lists" className="text-muted-foreground hover:text-foreground transition">
             <ArrowLeft className="size-4" />
           </Link>
-          <span
-            className="size-8 rounded-lg grid place-items-center text-lg"
-            style={{ backgroundColor: list.color ? `${list.color}20` : "#f3f4f6" }}
-          >
-            {list.icon || "📋"}
-          </span>
+          <ListIconBadge name={list.icon} color={list.color} size="sm" />
           <div>
             <div className="flex items-center gap-1.5">
               <h1 className="font-semibold text-[17px] leading-tight">{list.name}</h1>
@@ -241,11 +238,17 @@ function ListDetailPage() {
                 <SelectValue placeholder="Select a list…" />
               </SelectTrigger>
               <SelectContent>
-                {otherLists.map((l) => (
-                  <SelectItem key={l.id} value={l.id}>
-                    {l.icon || "📋"} {l.name}
-                  </SelectItem>
-                ))}
+                {otherLists.map((l) => {
+                  const Icon = getListIconComponent(l.icon ?? undefined);
+                  return (
+                    <SelectItem key={l.id} value={l.id}>
+                      <span className="flex items-center gap-2">
+                        <Icon className="size-3.5 shrink-0" style={{ color: l.color ?? undefined }} />
+                        {l.name}
+                      </span>
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>

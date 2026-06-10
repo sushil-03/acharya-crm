@@ -38,6 +38,7 @@ import { useState } from "react";
 import { LeadEditSheet } from "./lead-edit-sheet";
 import { useGetLeadLists } from "@/components/lists/hook/query/use-get-lead-lists";
 import { AddToListDialog } from "@/components/lists/add-to-list-dialog";
+import { ListIconBadge } from "@/components/lists/list-icon";
 import { Link } from "@tanstack/react-router";
 
 interface LeadSidebarProps {
@@ -326,11 +327,7 @@ export function LeadSidebar({ lead, applicationData, isApplicationDataLoading }:
                       params={{ listId: membership.listId }}
                       className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors group"
                     >
-                      <span className="text-sm leading-none">{membership.list.icon || "📋"}</span>
-                      <span
-                        className="size-1.5 rounded-full shrink-0"
-                        style={{ backgroundColor: membership.list.color || "#cbd5e1" }}
-                      />
+                      <ListIconBadge name={membership.list.icon} color={membership.list.color} size="xs" />
                       <span className="text-[13px] font-medium truncate flex-1">
                         {membership.list.name}
                       </span>
