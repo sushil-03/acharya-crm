@@ -20,9 +20,17 @@ import {
   Phone,
   Mail,
   MoreHorizontal,
-  MoreVertical,
   Loader2,
+  MoreVertical,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useDataGrid } from "@/hooks/use-data-grid";
@@ -39,13 +47,6 @@ import { useUserStore } from "@/store/use-user-store";
 import { useGetCounsellors } from "@/components/global/hooks/use-get-counsellor";
 import InputSearch from "@/components/global/input-search";
 import { LEAD_STATUS, LEAD_SOURCES } from "@/lib/constant";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
-import { toast } from "sonner";
 
 export const Route = createFileRoute("/leads/")({
   component: LeadsPage,
@@ -54,19 +55,29 @@ export const Route = createFileRoute("/leads/")({
 
 function LeadsPage() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState("all");
-  const [sourceChannel, setSourceChannel] = useState("all");
-  const [q, setQ] = useState("");
+  const [tab, setTab] = useState(() => {
+    return localStorage.getItem("leads_table_status") || "all";
+  });
+  const [sourceChannel, setSourceChannel] = useState(() => {
+    return localStorage.getItem("leads_table_source") || "all";
+  });
+  const [q, setQ] = useState(() => {
+    return localStorage.getItem("leads_table_search") || "";
+  });
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(100);
 
-  const handleImportLeads = () => {
-    toast.info("Import feature coming soon");
-  };
+  React.useEffect(() => {
+    localStorage.setItem("leads_table_status", tab);
+  }, [tab]);
 
-  const handleExportLeads = () => {
-    toast.success("Leads export initiated");
-  };
+  React.useEffect(() => {
+    localStorage.setItem("leads_table_source", sourceChannel);
+  }, [sourceChannel]);
+
+  React.useEffect(() => {
+    localStorage.setItem("leads_table_search", q);
+  }, [q]);
 
   const { user, counsellorId } = useUserStore();
   const { data: counsellors, isLoading: isLoadingCounsellors } = useGetCounsellors();
@@ -140,8 +151,19 @@ function LeadsPage() {
     columns: getLeadsColumn,
     readOnly: true,
     manualPagination: true,
+    persistedKey: "leads_table",
     initialState: {
       columnPinning: { right: ["actions"] },
+      columnVisibility: {
+        lastActivity: false,
+        city: false,
+        email: false,
+        mobile: false,
+        state: false,
+        utmSource: false,
+        utmMedium: false,
+        utmCampaign: false,
+      },
     },
     state: {
       pagination: {
@@ -165,14 +187,10 @@ function LeadsPage() {
     <AppShell className="h-screen overflow-hidden">
       <PageHeader
         title="Lead Management"
-        // subtitle="Centralized acquisition, attribution, scoring & distribution across all channels."
+        subtitle="Centralized acquisition, attribution, scoring & distribution across all channels."
         actions={
           <>
-            <Button
-              variant="outline-primary"
-              className="font-medium"
-              asChild
-            >
+            <Button variant="outline-primary" className="font-medium" asChild>
               <Link to="/leads/new">Quick Add Lead</Link>
             </Button>
             <DropdownMenu>
@@ -182,12 +200,8 @@ function LeadsPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-[160px]">
-                <DropdownMenuItem onClick={handleImportLeads}>
-                  Import Leads
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleExportLeads}>
-                  Export Leads
-                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => {}}>Import Leads</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => {}}>Export Leads</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </>

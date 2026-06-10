@@ -21,6 +21,7 @@ import { useTheme } from "next-themes";
 import ItemButton from "./item-button";
 import { SettingsModal } from "@/components/settings/settings-modal";
 import { navItems, NavigationItem } from "./sidebar-items";
+import { GlobalSearch } from "./global-search";
 
 interface SidebarLinkProps {
   item: NavigationItem;
@@ -157,16 +158,33 @@ function SidebarSubmenu({
         />
       </button>
       {isOpen && (
-        <ul className="pl-9 pr-1 py-0.5 space-y-1 border-l border-sidebar-border ml-3">
-          {item.items?.map((child) => {
+        <ul className="relative ml-[20px] pl-0 pr-1 py-1 space-y-1">
+          {item.items?.map((child, idx) => {
             const childActive =
               path === child.to || (child.to !== "/" && path.startsWith(child.to));
+            const isFirst = idx === 0;
+            const isLast = idx === (item.items?.length || 0) - 1;
+
             return (
-              <li key={child.to}>
+              <li key={child.to} className="relative pl-5">
+                {/* Connection Lines */}
+                {/* 1. Curved connection from left to child */}
+                <div className="absolute left-0 top-0 w-3.5 h-3.5 border-l border-b border-border rounded-bl-[5px] pointer-events-none" />
+
+                {/* 2. Top extension line for the first item to connect to the parent icon */}
+                {isFirst && (
+                  <div className="absolute left-0 -top-2.5 h-3 w-px bg-border pointer-events-none" />
+                )}
+
+                {/* 3. Continuation line going down to the next items */}
+                {!isLast && (
+                  <div className="absolute left-0 top-3.5 bottom-0 w-px bg-border pointer-events-none" />
+                )}
+
                 <Link
                   to={child.to}
                   className={cn(
-                    "group flex items-center gap-2 rounded-md px-2 py-1 text-xs font-medium transition-colors duration-200",
+                    "group flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors duration-200",
                     childActive
                       ? "text-sidebar-accent-foreground bg-sidebar-accent/30"
                       : "text-sidebar-foreground/70 hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/20",
@@ -301,6 +319,9 @@ export function AppSidebar({
               </div>
             )}
           </Link>
+        </div>
+        <div className={cn("pt-2.5 shrink-0", isActuallyCollapsed ? "px-0" : "px-3")}>
+          <GlobalSearch isCollapsed={isActuallyCollapsed} />
         </div>
 
         {/* Navigation list */}

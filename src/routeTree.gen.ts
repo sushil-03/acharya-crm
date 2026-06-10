@@ -33,6 +33,7 @@ import { Route as AcharyawebsiteRouteImport } from './routes/acharyawebsite'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UsersIndexRouteImport } from './routes/users.index'
 import { Route as OfferIndexRouteImport } from './routes/offer.index'
+import { Route as ListsIndexRouteImport } from './routes/lists.index'
 import { Route as LeadsIndexRouteImport } from './routes/leads.index'
 import { Route as EnrollmentIndexRouteImport } from './routes/enrollment.index'
 import { Route as EmailTemplatesIndexRouteImport } from './routes/email-templates.index'
@@ -40,6 +41,7 @@ import { Route as AutomationIndexRouteImport } from './routes/automation.index'
 import { Route as UsersNewRouteImport } from './routes/users.new'
 import { Route as ProgramsNewRouteImport } from './routes/programs.new'
 import { Route as OfferOfferIdRouteImport } from './routes/offer.$offerId'
+import { Route as ListsListIdRouteImport } from './routes/lists.$listId'
 import { Route as LeadsNewRouteImport } from './routes/leads.new'
 import { Route as LeadsLeadIdRouteImport } from './routes/leads.$leadId'
 import { Route as EnrollmentEnrollmentIdRouteImport } from './routes/enrollment.$enrollmentId'
@@ -171,6 +173,11 @@ const OfferIndexRoute = OfferIndexRouteImport.update({
   path: '/offer/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ListsIndexRoute = ListsIndexRouteImport.update({
+  id: '/lists/',
+  path: '/lists/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LeadsIndexRoute = LeadsIndexRouteImport.update({
   id: '/leads/',
   path: '/leads/',
@@ -204,6 +211,11 @@ const ProgramsNewRoute = ProgramsNewRouteImport.update({
 const OfferOfferIdRoute = OfferOfferIdRouteImport.update({
   id: '/offer/$offerId',
   path: '/offer/$offerId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ListsListIdRoute = ListsListIdRouteImport.update({
+  id: '/lists/$listId',
+  path: '/lists/$listId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LeadsNewRoute = LeadsNewRouteImport.update({
@@ -291,6 +303,7 @@ export interface FileRoutesByFullPath {
   '/enrollment/$enrollmentId': typeof EnrollmentEnrollmentIdRoute
   '/leads/$leadId': typeof LeadsLeadIdRoute
   '/leads/new': typeof LeadsNewRoute
+  '/lists/$listId': typeof ListsListIdRoute
   '/offer/$offerId': typeof OfferOfferIdRoute
   '/programs/new': typeof ProgramsNewRoute
   '/users/new': typeof UsersNewRoute
@@ -298,6 +311,7 @@ export interface FileRoutesByFullPath {
   '/email-templates/': typeof EmailTemplatesIndexRoute
   '/enrollment/': typeof EnrollmentIndexRoute
   '/leads/': typeof LeadsIndexRoute
+  '/lists/': typeof ListsIndexRoute
   '/offer/': typeof OfferIndexRoute
   '/users/': typeof UsersIndexRoute
   '/email-templates/create/html': typeof EmailTemplatesCreateHtmlRoute
@@ -332,6 +346,7 @@ export interface FileRoutesByTo {
   '/enrollment/$enrollmentId': typeof EnrollmentEnrollmentIdRoute
   '/leads/$leadId': typeof LeadsLeadIdRoute
   '/leads/new': typeof LeadsNewRoute
+  '/lists/$listId': typeof ListsListIdRoute
   '/offer/$offerId': typeof OfferOfferIdRoute
   '/programs/new': typeof ProgramsNewRoute
   '/users/new': typeof UsersNewRoute
@@ -339,6 +354,7 @@ export interface FileRoutesByTo {
   '/email-templates': typeof EmailTemplatesIndexRoute
   '/enrollment': typeof EnrollmentIndexRoute
   '/leads': typeof LeadsIndexRoute
+  '/lists': typeof ListsIndexRoute
   '/offer': typeof OfferIndexRoute
   '/users': typeof UsersIndexRoute
   '/email-templates/create/html': typeof EmailTemplatesCreateHtmlRoute
@@ -376,6 +392,7 @@ export interface FileRoutesById {
   '/enrollment/$enrollmentId': typeof EnrollmentEnrollmentIdRoute
   '/leads/$leadId': typeof LeadsLeadIdRoute
   '/leads/new': typeof LeadsNewRoute
+  '/lists/$listId': typeof ListsListIdRoute
   '/offer/$offerId': typeof OfferOfferIdRoute
   '/programs/new': typeof ProgramsNewRoute
   '/users/new': typeof UsersNewRoute
@@ -383,6 +400,7 @@ export interface FileRoutesById {
   '/email-templates/': typeof EmailTemplatesIndexRoute
   '/enrollment/': typeof EnrollmentIndexRoute
   '/leads/': typeof LeadsIndexRoute
+  '/lists/': typeof ListsIndexRoute
   '/offer/': typeof OfferIndexRoute
   '/users/': typeof UsersIndexRoute
   '/email-templates/create/html': typeof EmailTemplatesCreateHtmlRoute
@@ -421,6 +439,7 @@ export interface FileRouteTypes {
     | '/enrollment/$enrollmentId'
     | '/leads/$leadId'
     | '/leads/new'
+    | '/lists/$listId'
     | '/offer/$offerId'
     | '/programs/new'
     | '/users/new'
@@ -428,6 +447,7 @@ export interface FileRouteTypes {
     | '/email-templates/'
     | '/enrollment/'
     | '/leads/'
+    | '/lists/'
     | '/offer/'
     | '/users/'
     | '/email-templates/create/html'
@@ -462,6 +482,7 @@ export interface FileRouteTypes {
     | '/enrollment/$enrollmentId'
     | '/leads/$leadId'
     | '/leads/new'
+    | '/lists/$listId'
     | '/offer/$offerId'
     | '/programs/new'
     | '/users/new'
@@ -469,6 +490,7 @@ export interface FileRouteTypes {
     | '/email-templates'
     | '/enrollment'
     | '/leads'
+    | '/lists'
     | '/offer'
     | '/users'
     | '/email-templates/create/html'
@@ -505,6 +527,7 @@ export interface FileRouteTypes {
     | '/enrollment/$enrollmentId'
     | '/leads/$leadId'
     | '/leads/new'
+    | '/lists/$listId'
     | '/offer/$offerId'
     | '/programs/new'
     | '/users/new'
@@ -512,6 +535,7 @@ export interface FileRouteTypes {
     | '/email-templates/'
     | '/enrollment/'
     | '/leads/'
+    | '/lists/'
     | '/offer/'
     | '/users/'
     | '/email-templates/create/html'
@@ -548,11 +572,13 @@ export interface RootRouteChildren {
   EnrollmentEnrollmentIdRoute: typeof EnrollmentEnrollmentIdRoute
   LeadsLeadIdRoute: typeof LeadsLeadIdRoute
   LeadsNewRoute: typeof LeadsNewRoute
+  ListsListIdRoute: typeof ListsListIdRoute
   OfferOfferIdRoute: typeof OfferOfferIdRoute
   ProgramsNewRoute: typeof ProgramsNewRoute
   UsersNewRoute: typeof UsersNewRoute
   EnrollmentIndexRoute: typeof EnrollmentIndexRoute
   LeadsIndexRoute: typeof LeadsIndexRoute
+  ListsIndexRoute: typeof ListsIndexRoute
   OfferIndexRoute: typeof OfferIndexRoute
   UsersIndexRoute: typeof UsersIndexRoute
 }
@@ -727,6 +753,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OfferIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lists/': {
+      id: '/lists/'
+      path: '/lists'
+      fullPath: '/lists/'
+      preLoaderRoute: typeof ListsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/leads/': {
       id: '/leads/'
       path: '/leads'
@@ -774,6 +807,13 @@ declare module '@tanstack/react-router' {
       path: '/offer/$offerId'
       fullPath: '/offer/$offerId'
       preLoaderRoute: typeof OfferOfferIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lists/$listId': {
+      id: '/lists/$listId'
+      path: '/lists/$listId'
+      fullPath: '/lists/$listId'
+      preLoaderRoute: typeof ListsListIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/leads/new': {
@@ -911,11 +951,13 @@ const rootRouteChildren: RootRouteChildren = {
   EnrollmentEnrollmentIdRoute: EnrollmentEnrollmentIdRoute,
   LeadsLeadIdRoute: LeadsLeadIdRoute,
   LeadsNewRoute: LeadsNewRoute,
+  ListsListIdRoute: ListsListIdRoute,
   OfferOfferIdRoute: OfferOfferIdRoute,
   ProgramsNewRoute: ProgramsNewRoute,
   UsersNewRoute: UsersNewRoute,
   EnrollmentIndexRoute: EnrollmentIndexRoute,
   LeadsIndexRoute: LeadsIndexRoute,
+  ListsIndexRoute: ListsIndexRoute,
   OfferIndexRoute: OfferIndexRoute,
   UsersIndexRoute: UsersIndexRoute,
 }

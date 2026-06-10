@@ -93,7 +93,7 @@ export default function AutomationPage() {
   return (
     <AppShell>
       <PageHeader
-        breadcrumb="Automation"
+        // breadcrumb="Automation"
         title="Automation"
         subtitle="Create and manage event-driven workflows across the admissions funnel."
         actions={

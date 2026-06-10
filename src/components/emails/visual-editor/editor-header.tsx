@@ -22,7 +22,7 @@ export function EditorHeader({ name, status, setStatus, handleSave, isSaving }: 
   const navigate = useNavigate();
 
   return (
-    <div className="px-5 py-4 border-b border-border bg-card flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
+    <div className="px-5 py-1.5 border-b border-border bg-card flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
       <div className="flex items-center gap-3">
         <Button
           variant="outline"

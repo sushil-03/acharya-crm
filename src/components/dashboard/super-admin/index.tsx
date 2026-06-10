@@ -57,9 +57,11 @@ export function SuperAdminDashboard() {
 
   return (
     <AppShell>
-      <Tabs defaultValue="overview" className="space-y-0">
+      <Tabs defaultValue="overview" className="space-y-0 ">
         <div className="flex items-center justify-between gap-4 mb-6">
-          <h1 className="font-display text-[22px] font-bold leading-tight shrink-0">Dashboard</h1>
+          <h1 className="font-display text-[22px] font-semibold leading-tight shrink-0">
+            Dashboard
+          </h1>
 
           <TabsList className="bg-muted rounded-full p-1 h-auto">
             {TABS.map((tab) => (

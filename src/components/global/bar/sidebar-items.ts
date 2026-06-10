@@ -5,6 +5,7 @@ import {
   FileText,
   Wallet,
   Zap,
+  ListOrdered,
 } from "lucide-react";
 
 export interface NavigationItem {
@@ -30,6 +31,11 @@ export const navItems: NavigationItem[] = [
     label: "Lead Management",
     icon: Users,
     to: "/leads",
+  },
+  {
+    label: "Lists",
+    icon: ListOrdered,
+    to: "/lists",
   },
   {
     label: "Task Management",

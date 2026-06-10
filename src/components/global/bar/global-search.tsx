@@ -7,27 +7,111 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { leads, applications } from "@/lib/mock-data";
+import { Link } from "@tanstack/react-router";
+import { useGetLeads } from "@/components/leads/hook/query/use-get-leads";
+import { useGetApplications } from "@/components/application/hook/query/use-get-applications";
+import { useGetCounsellors } from "@/components/global/hooks/use-get-counsellor";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { LOCAL_STORAGE_KEY } from "@/lib/config";
+import { Badge } from "@/components/ui-kit";
+import { getLeadStatusTone, getApplicationStatusTone } from "@/lib/constant";
 
 type SearchType = "Leads" | "Applications";
 
-export function GlobalSearch() {
+interface GlobalSearchProps {
+  isCollapsed?: boolean;
+}
+
+export function GlobalSearch({ isCollapsed = false }: GlobalSearchProps) {
   const [open, setOpen] = React.useState(false);
   const [searchType, setSearchType] = React.useState<SearchType>("Leads");
   const [query, setQuery] = React.useState("");
   const [selectedItem, setSelectedItem] = React.useState<any>(null);
 
   // Recent searches keywords state
-  const [recentKeywords, setRecentKeywords] = React.useState<string[]>([
-    "8405807927",
-    "Aarav Sharma",
-    "B.Tech",
-  ]);
+  const [recentKeywords, setRecentKeywords] = React.useState<string[]>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY.RECENT_KEYWORDS);
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
+
+  const [recentLeads, setRecentLeads] = React.useState<any[]>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY.RECENT_LEADS);
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
+
+  const [recentApplications, setRecentApplications] = React.useState<any[]>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY.RECENT_APPLICATIONS);
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
 
   // Track removed item IDs for the current session (soft delete from recent list)
   const [removedIds, setRemovedIds] = React.useState<string[]>([]);
 
   const inputRef = React.useRef<HTMLInputElement>(null);
+
+  // Debounced search query state
+  const [debouncedQuery, setDebouncedQuery] = React.useState("");
+
+  React.useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 300);
+
+    return () => clearTimeout(handler);
+  }, [query]);
+
+  // Persist recent keywords
+  React.useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEY.RECENT_KEYWORDS, JSON.stringify(recentKeywords));
+  }, [recentKeywords]);
+
+  // Persist recent leads
+  React.useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEY.RECENT_LEADS, JSON.stringify(recentLeads));
+  }, [recentLeads]);
+
+  // Persist recent applications
+  React.useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEY.RECENT_APPLICATIONS, JSON.stringify(recentApplications));
+  }, [recentApplications]);
+
+  // Call counsellors query hook to resolve counsellor names
+  const { data: counsellors } = useGetCounsellors();
+
+  // Call leads query hook
+  const { data: leadsData, isLoading: isLoadingLeads } = useGetLeads({
+    search: debouncedQuery.trim() || undefined,
+    page: 1,
+    pageSize: 10,
+  });
+
+  // Call applications query hook
+  const { data: appsData, isLoading: isLoadingApps } = useGetApplications({
+    search: debouncedQuery.trim() || undefined,
+  });
+
+  // Helper to resolve counsellor name from assignments array
+  const getCounsellorName = React.useCallback(
+    (assignments: any[]) => {
+      if (!assignments || assignments.length === 0) return "Unassigned";
+      const activeAssignment = assignments.find((a: any) => a.isActive);
+      const id = activeAssignment
+        ? activeAssignment.counsellorId || activeAssignment.id
+        : assignments[0].counsellorId;
+      if (!id) return "Unassigned";
+      return counsellors?.find((c) => c.id === id)?.name || "Unassigned";
+    },
+    [counsellors],
+  );
 
   // Keyboard shortcut listener to open search modal (⌘K / Ctrl+K)
   React.useEffect(() => {
@@ -62,39 +146,102 @@ export function GlobalSearch() {
     }
   };
 
-  // Filter leads based on query
-  const filteredLeads = React.useMemo(() => {
-    const activeLeads = leads.filter((l) => !removedIds.includes(l.id));
-    if (!query.trim()) return activeLeads.slice(0, 5); // Show top 5 as recent search results
+  // Get active raw results based on the search query and selected search type
+  const rawResults = React.useMemo(() => {
+    if (!query.trim()) {
+      return searchType === "Leads" ? recentLeads : recentApplications;
+    }
+    return searchType === "Leads" ? leadsData?.data || [] : appsData || [];
+  }, [query, searchType, recentLeads, recentApplications, leadsData, appsData]);
 
-    const q = query.toLowerCase();
-    return activeLeads
-      .filter(
-        (l) =>
-          l.name.toLowerCase().includes(q) ||
-          l.phone.replace(/[^0-9+]/g, "").includes(q) ||
-          l.email.toLowerCase().includes(q),
-      )
-      .slice(0, 5);
-  }, [query, removedIds]);
+  // Normalize results for the UI list and preview details panel
+  const results = React.useMemo(() => {
+    const activeResults = rawResults.filter((item: any) => !removedIds.includes(item.id));
 
-  // Filter applications based on query
-  const filteredApplications = React.useMemo(() => {
-    const activeApps = applications.filter((app) => !removedIds.includes(app.id));
-    if (!query.trim()) return activeApps.slice(0, 5); // Show top 5 as recent search results
+    return activeResults.map((item: any) => {
+      if (searchType === "Leads") {
+        const score = item.leadScore ?? item.score ?? 0;
+        const intent = score > 75 ? "Hot" : score > 55 ? "Warm" : "Cold";
+        const counsellor = getCounsellorName(item.assignments) || item.counsellor || "Unassigned";
+        return {
+          id: item.id,
+          name: item.name,
+          email: item.email,
+          phone: item.mobile || item.phone || "",
+          program: item.courseInterest || item.program || "",
+          campus: item.campusInterest || item.campusId || item.campus || "",
+          city: item.city || "",
+          country: item.country || "India",
+          score,
+          intent,
+          counsellor,
+          status: item.status || item.stage || "",
+          stage: item.status || item.stage || "",
+          source: item.sourceChannel || item.source || "N/A",
+          createdAt: item.createdAt,
+          _raw: item,
+        };
+      } else {
+        const studentName = item.student?.firstName
+          ? `${item.student.firstName} ${item.student.lastName}`
+          : item.student || "";
+        const programName = item.program?.name || item.program || "";
+        const fee = item.offers?.[0]
+          ? parseFloat(item.offers[0].netFeePayable || item.offers[0].totalFee || "0")
+          : item.fee || 0;
+        const submitted = item.submittedAt
+          ? new Date(item.submittedAt).toLocaleDateString("en-IN", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })
+          : item.submitted || "";
+        return {
+          id: item.id,
+          student: studentName,
+          email: item.student?.email || "",
+          program: programName,
+          campus: item.campusId || item.campus || "",
+          progress: item.completionPercent ?? item.progress ?? 0,
+          status: item.status || "",
+          fee,
+          submitted,
+          _raw: item,
+        };
+      }
+    });
+  }, [rawResults, removedIds, searchType, getCounsellorName]);
 
-    const q = query.toLowerCase();
-    return activeApps
-      .filter(
-        (app) =>
-          app.student.toLowerCase().includes(q) ||
-          app.id.toLowerCase().includes(q) ||
-          app.program.toLowerCase().includes(q),
-      )
-      .slice(0, 5);
-  }, [query, removedIds]);
+  const isLoading = !!query.trim() && (searchType === "Leads" ? isLoadingLeads : isLoadingApps);
 
-  const results = searchType === "Leads" ? filteredLeads : filteredApplications;
+  const handleSelectResult = (item: any) => {
+    setSelectedItem(item);
+    if (searchType === "Leads") {
+      setRecentLeads((prev) => {
+        const rawItem = item._raw || item;
+        const filtered = prev.filter((l) => l.id !== rawItem.id);
+        return [rawItem, ...filtered].slice(0, 5);
+      });
+    } else {
+      setRecentApplications((prev) => {
+        const rawItem = item._raw || item;
+        const filtered = prev.filter((app) => app.id !== rawItem.id);
+        return [rawItem, ...filtered].slice(0, 5);
+      });
+    }
+  };
+
+  const handleRemoveResult = (itemId: string) => {
+    setRemovedIds((prev) => [...prev, itemId]);
+    if (selectedItem?.id === itemId) setSelectedItem(null);
+    if (!query.trim()) {
+      if (searchType === "Leads") {
+        setRecentLeads((prev) => prev.filter((l) => l.id !== itemId));
+      } else {
+        setRecentApplications((prev) => prev.filter((app) => app.id !== itemId));
+      }
+    }
+  };
 
   const handleClear = () => {
     setQuery("");
@@ -104,21 +251,39 @@ export function GlobalSearch() {
 
   return (
     <>
-      {/* Topbar Search Trigger Button */}
-      <button
-        onClick={() => setOpen(true)}
-        className="w-full flex items-center gap-2 rounded-lg border border-border bg-muted/40 hover:bg-muted px-3 h-9 text-[13px] text-muted-foreground transition-all cursor-pointer select-none"
-      >
-        <Search className="size-4 shrink-0" />
-        <span className="truncate">Search students, leads, applications...</span>
-        <kbd className="ml-auto rounded bg-background border border-border px-1.5 py-0.5 text-[10px] font-mono select-none">
-          ⌘K
-        </kbd>
-      </button>
+      {/* Search Trigger Button */}
+      {isCollapsed ? (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => setOpen(true)}
+                className="group flex items-center justify-center rounded-lg size-9 text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors duration-200 cursor-pointer mx-auto"
+              >
+                <Search className="size-4.5 transition-transform duration-200 group-hover:scale-105" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              <span className="font-medium">Search (⌘K)</span>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      ) : (
+        <button
+          onClick={() => setOpen(true)}
+          className="w-full flex items-center gap-2 rounded-lg border border-border bg-muted/40 hover:bg-muted px-3 h-9 text-[13px] text-muted-foreground transition-all cursor-pointer select-none"
+        >
+          <Search className="size-4 shrink-0" />
+          <span className="truncate">Search ...</span>
+          <kbd className="ml-auto rounded bg-background border border-border px-1.5 py-0.5 text-[10px] font-mono select-none">
+            ⌘K
+          </kbd>
+        </button>
+      )}
 
       {/* Search Modal Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-[780px] p-0 overflow-hidden bg-background border-border shadow-2xl [&>button]:hidden rounded-xl">
+        <DialogContent className="max-w-[780px] p-0 gap-0 overflow-hidden bg-background border-border shadow-2xl [&>button]:hidden rounded-xl">
           {/* Header Search Input Bar */}
           <div className="flex items-center gap-2 border-b border-border/80 px-4 h-12 text-[13px]">
             {/* Search Type Dropdown Menu */}
@@ -175,11 +340,6 @@ export function GlobalSearch() {
                   <X className="size-3.5" />
                 </button>
               )}
-              <DialogClose asChild>
-                <button className="text-muted-foreground hover:text-foreground shrink-0 p-1 rounded hover:bg-muted cursor-pointer">
-                  <X className="size-4" />
-                </button>
-              </DialogClose>
             </div>
           </div>
 
@@ -239,109 +399,94 @@ export function GlobalSearch() {
                   {query ? "Search Results" : "Recent Search Results"}
                 </span>
                 <div className="space-y-1.5">
-                  {results.map((item: any) => {
-                    const isSelected = selectedItem?.id === item.id;
-                    const itemName = item.name || item.student;
-                    const itemSubtitle = item.phone || item.id;
-                    const itemInfo = item.email || item.program;
-                    const itemTag = item.counsellor || item.campus;
-                    const itemBadge = item.stage || item.status;
-
-                    // Badge Styles based on Intent or Status
-                    let badgeStyle = "bg-muted text-muted-foreground";
-                    if (searchType === "Leads") {
-                      if (item.intent === "Hot") {
-                        badgeStyle = "bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400";
-                      } else if (item.intent === "Warm") {
-                        badgeStyle =
-                          "bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400";
-                      } else {
-                        badgeStyle =
-                          "bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400";
-                      }
-                    } else {
-                      if (item.status === "Approved") {
-                        badgeStyle =
-                          "bg-green-50 text-green-600 dark:bg-green-950/30 dark:text-green-400";
-                      } else if (item.status === "Rejected") {
-                        badgeStyle = "bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400";
-                      } else if (item.status === "Draft") {
-                        badgeStyle =
-                          "bg-slate-50 text-slate-600 dark:bg-slate-900 dark:text-slate-400";
-                      } else {
-                        badgeStyle =
-                          "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400";
-                      }
-                    }
-
-                    return (
-                      <div
-                        key={item.id}
-                        onClick={() => setSelectedItem(item)}
-                        className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all border ${
-                          isSelected
-                            ? "bg-primary/5 border-primary/20 shadow-sm"
-                            : "border-transparent hover:bg-muted/65"
-                        }`}
-                      >
-                        {/* Icon Wrapper */}
-                        <div
-                          className={`size-8 rounded-full flex items-center justify-center shrink-0 ${
-                            searchType === "Leads"
-                              ? "bg-blue-50 text-blue-500 dark:bg-blue-950/40 dark:text-blue-400"
-                              : "bg-amber-50 text-amber-500 dark:bg-amber-950/40 dark:text-amber-400"
-                          }`}
-                        >
-                          {searchType === "Leads" ? (
-                            <User className="size-4" />
-                          ) : (
-                            <FileText className="size-4" />
-                          )}
-                        </div>
-
-                        {/* Title and Subtitles */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-xs text-foreground truncate">
-                              {itemName}
-                            </span>
-                            <span
-                              className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${badgeStyle}`}
-                            >
-                              {itemBadge}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-0.5 truncate">
-                            <span className="font-mono">{itemSubtitle}</span>
-                            <span>·</span>
-                            <span className="truncate">{itemInfo}</span>
-                          </div>
-                        </div>
-
-                        {/* Right Tag and Remove Button */}
-                        <div className="shrink-0 flex items-center gap-3">
-                          <span className="text-[10px] bg-muted px-2 py-0.5 rounded text-muted-foreground border border-border/40 font-medium">
-                            {itemTag}
-                          </span>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setRemovedIds((prev) => [...prev, item.id]);
-                              if (selectedItem?.id === item.id) setSelectedItem(null);
-                            }}
-                            className="text-muted-foreground hover:text-foreground cursor-pointer p-1 rounded hover:bg-muted/80"
-                          >
-                            <X className="size-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-
-                  {results.length === 0 && (
-                    <div className="py-8 text-center text-muted-foreground text-xs">
-                      No results found matching "{query}"
+                  {isLoading ? (
+                    <div className="py-8 text-center text-muted-foreground text-xs flex items-center justify-center gap-2">
+                      <span className="animate-spin size-4 border-2 border-primary border-t-transparent rounded-full" />
+                      Searching...
                     </div>
+                  ) : (
+                    <>
+                      {results.map((item: any) => {
+                        const isSelected = selectedItem?.id === item.id;
+                        const itemName = item.name || item.student;
+                        const itemSubtitle = item.phone || item.id;
+                        const itemInfo = item.email || item.program;
+                        const itemTag =
+                          searchType === "Leads" ? item.counsellor : `${item.progress}%`;
+                        const itemBadge = item.stage || item.status;
+
+                        // Consistent Badge Tone mapping
+                        const badgeTone = (
+                          searchType === "Leads"
+                            ? getLeadStatusTone(item.status?.toLowerCase())
+                            : getApplicationStatusTone(item.status?.toLowerCase())
+                        ) as any;
+
+                        return (
+                          <div
+                            key={item.id}
+                            onClick={() => handleSelectResult(item)}
+                            className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all border ${
+                              isSelected
+                                ? "bg-primary/5 border-primary/20 shadow-sm"
+                                : "border-transparent hover:bg-muted/65"
+                            }`}
+                          >
+                            {/* Icon Wrapper */}
+                            <div
+                              className={`size-8 rounded-full flex items-center justify-center shrink-0 ${
+                                searchType === "Leads"
+                                  ? "bg-blue-50 text-blue-500 dark:bg-blue-950/40 dark:text-blue-400"
+                                  : "bg-amber-50 text-amber-500 dark:bg-amber-950/40 dark:text-amber-400"
+                              }`}
+                            >
+                              {searchType === "Leads" ? (
+                                <User className="size-4" />
+                              ) : (
+                                <FileText className="size-4" />
+                              )}
+                            </div>
+
+                            {/* Title and Subtitles */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-xs text-foreground truncate">
+                                  {itemName}
+                                </span>
+                                <Badge tone={badgeTone}>{itemBadge}</Badge>
+                              </div>
+                              <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-0.5 truncate">
+                                <span className="font-mono">{itemSubtitle}</span>
+                                <span>·</span>
+                                <span className="truncate">{itemInfo}</span>
+                              </div>
+                            </div>
+
+                            {/* Right Tag and Remove Button */}
+                            <div className="shrink-0 flex items-center gap-3">
+                              <span className="text-[10px] bg-muted px-2 py-0.5 rounded text-muted-foreground border border-border/40 font-medium">
+                                {itemTag}
+                              </span>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveResult(item.id);
+                                }}
+                                className="text-muted-foreground hover:text-foreground cursor-pointer p-1 rounded hover:bg-muted/80"
+                              >
+                                <X className="size-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+
+                      {results.length === 0 && (
+                        <div className="py-8 text-center text-muted-foreground text-xs">
+                          No results found matching "{query}"
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -412,10 +557,10 @@ export function GlobalSearch() {
                           <div className="grid grid-cols-2 gap-2">
                             <div className="space-y-0.5">
                               <span className="text-muted-foreground text-[9px] uppercase tracking-wider font-semibold block">
-                                Campus
+                                Lead Source
                               </span>
-                              <span className="font-medium text-foreground">
-                                {selectedItem.campus}
+                              <span className="font-medium text-foreground truncate block">
+                                {selectedItem.source || "N/A"}
                               </span>
                             </div>
                             <div className="space-y-0.5">
@@ -458,10 +603,10 @@ export function GlobalSearch() {
                           </div>
                           <div className="space-y-0.5">
                             <span className="text-muted-foreground text-[9px] uppercase tracking-wider font-semibold block">
-                              Campus
+                              Student Email
                             </span>
-                            <span className="font-medium text-foreground">
-                              {selectedItem.campus}
+                            <span className="font-medium text-foreground truncate block">
+                              {selectedItem.email || "N/A"}
                             </span>
                           </div>
                           <div className="space-y-1">
@@ -485,9 +630,17 @@ export function GlobalSearch() {
                               <span className="text-muted-foreground text-[9px] uppercase tracking-wider font-semibold block">
                                 Status
                               </span>
-                              <span className="font-medium text-foreground">
-                                {selectedItem.status}
-                              </span>
+                              <div>
+                                <Badge
+                                  tone={
+                                    getApplicationStatusTone(
+                                      selectedItem.status?.toLowerCase(),
+                                    ) as any
+                                  }
+                                >
+                                  {selectedItem.status}
+                                </Badge>
+                              </div>
                             </div>
                             <div className="space-y-0.5">
                               <span className="text-muted-foreground text-[9px] uppercase tracking-wider font-semibold block">
@@ -518,9 +671,25 @@ export function GlobalSearch() {
                   {/* Action button */}
                   <div className="pt-2">
                     <DialogClose asChild>
-                      <button className="w-full bg-primary text-primary-foreground font-semibold py-1.5 rounded-lg text-xs hover:bg-primary/95 transition-all cursor-pointer text-center block shadow-sm">
-                        View Full Profile
-                      </button>
+                      {searchType === "Leads" ? (
+                        <Link
+                          to="/leads/$leadId"
+                          params={{ leadId: selectedItem.id }}
+                          onClick={() => setOpen(false)}
+                          className="w-full bg-primary text-primary-foreground font-semibold py-1.5 rounded-lg text-xs hover:bg-primary/95 transition-all cursor-pointer text-center block shadow-sm"
+                        >
+                          View Full Profile
+                        </Link>
+                      ) : (
+                        <Link
+                          to="/application/$applicationId"
+                          params={{ applicationId: selectedItem.id }}
+                          onClick={() => setOpen(false)}
+                          className="w-full bg-primary text-primary-foreground font-semibold py-1.5 rounded-lg text-xs hover:bg-primary/95 transition-all cursor-pointer text-center block shadow-sm"
+                        >
+                          View Full Profile
+                        </Link>
+                      )}
                     </DialogClose>
                   </div>
                 </div>

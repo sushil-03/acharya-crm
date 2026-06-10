@@ -11,6 +11,8 @@ import {
   AlertCircle,
   XCircle,
 } from "lucide-react";
+import { useStarLead, useUnstarLead } from "@/components/lists/hook/mutation/use-star-lead";
+import { useGetLeadLists } from "@/components/lists/hook/query/use-get-lead-lists";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { useConvertLead } from "../hook/mutation/use-update-lead";
@@ -70,6 +72,10 @@ export function LeadHeader({
   const isCounsellor = user?.role === "counsellor" || user?.role === "councellor";
   const queryClient = useQueryClient();
   const { mutate: convertLead, isPending } = useConvertLead();
+  const { mutate: starLead, isPending: isStarring } = useStarLead();
+  const { mutate: unstarLead, isPending: isUnstarring } = useUnstarLead();
+  const { data: leadLists } = useGetLeadLists(lead.id);
+  const isStarred = leadLists?.some((m) => m.list.isSystem && m.list.name === "Starred") ?? false;
   const { mutate: confirmPayment, isPending: isConfirmPaymentPending } = useConfirmPayment();
   const { mutate: submitApplication, isPending: isSubmitPending } = useSubmitApplication();
   const { mutate: approveApplication, isPending: isApprovePending } = useApproveApplication();
@@ -112,8 +118,15 @@ export function LeadHeader({
           <div className="flex flex-col justify-center">
             <div className="flex items-center gap-2">
               <h1 className="font-semibold text-[15px] leading-none">{lead.name}</h1>
-              <button className="text-muted-foreground hover:text-gold transition">
-                <Star className="size-4" />
+              <button
+                className="text-muted-foreground hover:text-amber-500 transition"
+                disabled={isStarring || isUnstarring}
+                onClick={() => isStarred ? unstarLead(lead.id) : starLead(lead.id)}
+                title={isStarred ? "Remove from Starred" : "Add to Starred"}
+              >
+                <Star
+                  className={`size-4 transition-colors ${isStarred ? "fill-amber-500 text-amber-500" : ""}`}
+                />
               </button>
             </div>
             {applicationData?.status && (

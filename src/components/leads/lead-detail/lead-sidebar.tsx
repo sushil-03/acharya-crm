@@ -15,6 +15,13 @@ import {
   Megaphone,
   FileText,
   Edit2,
+  Tag,
+  Compass,
+  Share2,
+  Type,
+  ListOrdered,
+  Plus,
+  Loader2,
 } from "lucide-react";
 import { getReadableDate } from "@/lib/utils";
 import { useGetLeadAssignment } from "../hook/query/use-get-lead";
@@ -29,6 +36,9 @@ import {
 } from "@/components/ui/accordion";
 import { useState } from "react";
 import { LeadEditSheet } from "./lead-edit-sheet";
+import { useGetLeadLists } from "@/components/lists/hook/query/use-get-lead-lists";
+import { AddToListDialog } from "@/components/lists/add-to-list-dialog";
+import { Link } from "@tanstack/react-router";
 
 interface LeadSidebarProps {
   lead: LeadDetail;
@@ -38,11 +48,25 @@ interface LeadSidebarProps {
 
 export function LeadSidebar({ lead, applicationData, isApplicationDataLoading }: LeadSidebarProps) {
   const [openEditSheet, setOpenEditSheet] = useState(false);
+  const [addToListOpen, setAddToListOpen] = useState(false);
+  const { data: leadLists, isLoading: isLoadingLists } = useGetLeadLists(lead?.id);
   const formattedDob = lead.dob ? getReadableDate(lead.dob) : "N/A";
   const formattedCreatedAt = lead.createdAt ? getReadableDate(lead.createdAt) : "N/A";
 
   const { data: assignmentData } = useGetLeadAssignment(lead?.id);
   const locationString = [lead.city, lead.state, lead.country].filter(Boolean).join(", ");
+
+  const isValueEmpty = (val: string | null | undefined) => {
+    if (!val) return true;
+    const lower = val.trim().toLowerCase();
+    return lower === "" || lower === "n/a" || lower === "na";
+  };
+
+  const utmSource = isValueEmpty(lead.utmSource) ? null : lead.utmSource;
+  const utmMedium = isValueEmpty(lead.utmMedium) ? null : lead.utmMedium;
+  const utmCampaign = isValueEmpty(lead.utmCampaign) ? null : lead.utmCampaign;
+  const utmContent = isValueEmpty(lead.utmContent) ? null : lead.utmContent;
+  const hasAnyUtm = !!(utmSource || utmMedium || utmCampaign || utmContent);
 
   return (
     <div className="w-[300px] shrink-0 border-r border-border bg-background overflow-y-auto h-full flex flex-col">
@@ -262,7 +286,82 @@ export function LeadSidebar({ lead, applicationData, isApplicationDataLoading }:
             </AccordionContent>
           </AccordionItem>
 
-          {/* Section 7: Marketing Attribution (Collapsed by default) */}
+          {/* Section 7: In Lists */}
+          <AccordionItem value="lists" className="border-b border-border">
+            <AccordionTrigger className="py-2.5 px-3 hover:no-underline [&[data-state=open]]:bg-muted/30">
+              <div className="flex items-center justify-between flex-1 mr-2">
+                <div className="flex items-center gap-2 text-[13px] font-semibold text-foreground">
+                  <ListOrdered className="size-3.5 text-muted-foreground" />
+                  <span>In Lists</span>
+                  {leadLists && leadLists.length > 0 && (
+                    <span className="text-[11px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">
+                      {leadLists.length}
+                    </span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  className="size-6 rounded hover:bg-muted grid place-items-center text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setAddToListOpen(true);
+                  }}
+                >
+                  <Plus className="size-3.5" />
+                </button>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-3 pb-3.5 pt-1.5">
+              {isLoadingLists ? (
+                <div className="flex justify-center py-2">
+                  <Loader2 className="size-4 animate-spin text-muted-foreground" />
+                </div>
+              ) : leadLists && leadLists.length > 0 ? (
+                <div className="space-y-1.5">
+                  {leadLists.map((membership) => (
+                    <Link
+                      key={membership.id}
+                      to="/lists/$listId"
+                      params={{ listId: membership.listId }}
+                      className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors group"
+                    >
+                      <span className="text-sm leading-none">{membership.list.icon || "📋"}</span>
+                      <span
+                        className="size-1.5 rounded-full shrink-0"
+                        style={{ backgroundColor: membership.list.color || "#cbd5e1" }}
+                      />
+                      <span className="text-[13px] font-medium truncate flex-1">
+                        {membership.list.name}
+                      </span>
+                    </Link>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setAddToListOpen(true)}
+                    className="w-full text-left flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors text-[12px] text-muted-foreground"
+                  >
+                    <Plus className="size-3.5" />
+                    Add to another list
+                  </button>
+                </div>
+              ) : (
+                <div className="text-center py-2">
+                  <p className="text-[12px] text-muted-foreground mb-2">Not in any list</p>
+                  <button
+                    type="button"
+                    onClick={() => setAddToListOpen(true)}
+                    className="text-[12px] text-primary hover:underline flex items-center gap-1 mx-auto"
+                  >
+                    <Plus className="size-3" />
+                    Add to a list
+                  </button>
+                </div>
+              )}
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Section 8: Marketing Attribution (Collapsed by default) */}
           <AccordionItem value="marketing" className="border-b border-border">
             <AccordionTrigger className="py-2.5 px-3 hover:no-underline [&[data-state=open]]:bg-muted/30">
               <div className="flex items-center gap-2 text-[13px] font-semibold text-foreground">
@@ -270,36 +369,90 @@ export function LeadSidebar({ lead, applicationData, isApplicationDataLoading }:
                 <span>Marketing Attribution</span>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="px-3 pb-3.5 pt-1.5 space-y-4">
+            <AccordionContent className="px-3 pb-3.5 pt-1.5 space-y-3">
               <DetailRow
                 icon={<Link2 className="size-3.5 text-muted-foreground" />}
                 label="Source"
-                value={lead.sourceChannel || "N/A"}
+                value={
+                  !isValueEmpty(lead.sourceChannel) ? (
+                    <span className="font-semibold text-foreground bg-muted px-2 py-0.5 rounded text-[11px] border border-border/40">
+                      {lead.sourceChannel}
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground italic text-[12px]">Not specified</span>
+                  )
+                }
               />
-              <DetailRow
-                icon={<Info className="size-3.5 text-muted-foreground" />}
-                label="UTM Source"
-                value={lead.utmSource || "N/A"}
-              />
-              <DetailRow
-                icon={<Info className="size-3.5 text-muted-foreground" />}
-                label="UTM Medium"
-                value={lead.utmMedium || "N/A"}
-              />
-              <DetailRow
-                icon={<Info className="size-3.5 text-muted-foreground" />}
-                label="UTM Campaign"
-                value={lead.utmCampaign || "N/A"}
-              />
-              <DetailRow
-                icon={<Info className="size-3.5 text-muted-foreground" />}
-                label="UTM Content"
-                value={lead.utmContent || "N/A"}
-              />
+
+              <div className="mt-3 pt-3 border-t border-border/60 space-y-2">
+                <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-0.5">
+                  UTM Parameters
+                </div>
+                {hasAnyUtm ? (
+                  <div className="space-y-2.5 pt-1">
+                    {utmSource && (
+                      <DetailRow
+                        icon={<Compass className="size-3.5 text-blue-500 shrink-0" />}
+                        label="Source"
+                        value={
+                          <span className="font-medium text-blue-700 dark:text-blue-300 bg-blue-500/10 px-1.5 py-0.5 rounded text-[11px] border border-blue-500/20 truncate max-w-[150px]" title={utmSource}>
+                            {utmSource}
+                          </span>
+                        }
+                      />
+                    )}
+                    {utmMedium && (
+                      <DetailRow
+                        icon={<Share2 className="size-3.5 text-purple-500 shrink-0" />}
+                        label="Medium"
+                        value={
+                          <span className="font-medium text-purple-700 dark:text-purple-300 bg-purple-500/10 px-1.5 py-0.5 rounded text-[11px] border border-purple-500/20 truncate max-w-[150px]" title={utmMedium}>
+                            {utmMedium}
+                          </span>
+                        }
+                      />
+                    )}
+                    {utmCampaign && (
+                      <DetailRow
+                        icon={<Tag className="size-3.5 text-emerald-500 shrink-0" />}
+                        label="Campaign"
+                        value={
+                          <span className="font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 px-1.5 py-0.5 rounded text-[11px] border border-emerald-500/20 truncate max-w-[150px]" title={utmCampaign}>
+                            {utmCampaign}
+                          </span>
+                        }
+                      />
+                    )}
+                    {utmContent && (
+                      <DetailRow
+                        icon={<Type className="size-3.5 text-amber-500 shrink-0" />}
+                        label="Content"
+                        value={
+                          <span className="font-medium text-amber-700 dark:text-amber-300 bg-amber-500/10 px-1.5 py-0.5 rounded text-[11px] border border-amber-500/20 truncate max-w-[150px]" title={utmContent}>
+                            {utmContent}
+                          </span>
+                        }
+                      />
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground/80 italic py-1 px-0.5">
+                    <Info className="size-3 text-muted-foreground/50" />
+                    <span>No UTM parameters captured</span>
+                  </div>
+                )}
+              </div>
             </AccordionContent>
           </AccordionItem>
         </Accordion>
       </div>
+
+      <AddToListDialog
+        open={addToListOpen}
+        onOpenChange={setAddToListOpen}
+        leadId={lead.id}
+        leadName={lead.name}
+      />
     </div>
   );
 }
