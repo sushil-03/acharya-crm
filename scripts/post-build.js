@@ -22,11 +22,13 @@ if (fs.existsSync(distClientDir)) {
   console.log('Copied dist/client files to dist root.');
 }
 
-// 2. Copy _shell.html to index.html in dist root
+// 2. Copy _shell.html to index.html in dist root and dist/client
 const distIndexDest = path.join(distDir, 'index.html');
+const clientIndexDest = path.join(distClientDir, 'index.html');
 if (fs.existsSync(shellSrc)) {
   fs.copyFileSync(shellSrc, distIndexDest);
-  console.log(`Copied ${shellSrc} to ${distIndexDest}`);
+  fs.copyFileSync(shellSrc, clientIndexDest);
+  console.log(`Copied ${shellSrc} to ${distIndexDest} and ${clientIndexDest}`);
 }
 
 // 3. Format .vercel/output (for TanStack Start preset compatibility)
