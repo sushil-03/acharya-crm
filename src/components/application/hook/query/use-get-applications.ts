@@ -19,6 +19,10 @@ export interface Application {
   decidedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  graduationName?: string;
+  programName?: string;
+  schoolName?: string;
+  specializationName?: string;
   student: {
     id: string;
     firstName: string;

@@ -26,13 +26,12 @@ import { GlobalSearch } from "./global-search";
 import ItemButton from "./item-button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { AppSidebar } from "./app-sidebar";
-import { SettingsModal } from "@/components/settings/settings-modal";
 
 export function TopBar() {
   const { user } = useUserStore();
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setMounted(true);
@@ -149,7 +148,7 @@ export function TopBar() {
                     type="coming_soon"
                   />
                   <ItemButton
-                    onClick={() => setSettingsOpen(true)}
+                    onClick={() => navigate({ to: "/settings" })}
                     icon={<Settings className="size-4 text-muted-foreground" />}
                     buttonText="Settings"
                   />
@@ -180,7 +179,6 @@ export function TopBar() {
         </div>
       </header>
 
-      <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
     </>
   );
 }

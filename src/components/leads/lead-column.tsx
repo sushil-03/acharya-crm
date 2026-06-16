@@ -124,7 +124,7 @@ export const getLeadsColumn: ColumnDef<any>[] = [
       return (
         <Link to="/leads/$leadId" params={{ leadId: l.id }} className="flex items-center gap-2.5">
           <span className="font-semibold text-foreground hover:text-primary truncate">
-            {l.name}
+            {l.name || "No Name"}
           </span>
         </Link>
       );
@@ -261,9 +261,7 @@ export const getLeadsColumn: ColumnDef<any>[] = [
     header: "Lists",
     meta: { label: "Lists", cell: { variant: "custom", headerIcon: List } },
     size: 220,
-    cell: ({ row }) => (
-      <LeadListsCell leadId={row.original.id} leadName={row.original.name} />
-    ),
+    cell: ({ row }) => <LeadListsCell leadId={row.original.id} leadName={row.original.name} />,
   },
   {
     accessorKey: "lastActivity",

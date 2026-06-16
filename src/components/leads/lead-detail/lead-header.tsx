@@ -121,7 +121,7 @@ export function LeadHeader({
               <button
                 className="text-muted-foreground hover:text-amber-500 transition"
                 disabled={isStarring || isUnstarring}
-                onClick={() => isStarred ? unstarLead(lead.id) : starLead(lead.id)}
+                onClick={() => (isStarred ? unstarLead(lead.id) : starLead(lead.id))}
                 title={isStarred ? "Remove from Starred" : "Add to Starred"}
               >
                 <Star

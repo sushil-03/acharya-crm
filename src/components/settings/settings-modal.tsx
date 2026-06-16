@@ -6,7 +6,6 @@ import {
   Building2,
   Users,
   Puzzle,
-  MessageSquare,
   Palette,
   LayoutTemplate,
   Bot,
@@ -21,6 +20,7 @@ import { WidgetAppearance } from "@/components/communications/settings/widget-ap
 import { TemplateManager } from "@/components/communications/settings/template-manager";
 import { AutoResponses } from "@/components/communications/settings/auto-responses";
 import { AssignmentRules } from "@/components/communications/settings/assignment-rules";
+import { OpenSettingsContent } from "./open-settings-content";
 
 type NavItem = {
   id: string;
@@ -46,6 +46,7 @@ const NAV: NavSection[] = [
   {
     label: "Workspace",
     items: [
+      { id: "users-roles", label: "Users & Roles", icon: Users, available: true },
       { id: "general", label: "General", icon: Building2, available: false },
       { id: "team", label: "Team Members", icon: Users, available: false },
       { id: "integrations", label: "Integrations", icon: Puzzle, available: false },
@@ -63,10 +64,26 @@ const NAV: NavSection[] = [
 ];
 
 const CONTENT_META: Record<string, { title: string; subtitle: string }> = {
-  "chat-appearance": { title: "Widget Appearance", subtitle: "Customize the look and feel of your chat widget." },
-  "chat-templates": { title: "Templates & Quick Replies", subtitle: "Manage reusable message templates for faster replies." },
-  "chat-autoresponse": { title: "Auto-Responses", subtitle: "Configure automatic replies for common queries." },
-  "chat-assignment": { title: "Assignment Rules", subtitle: "Auto-route incoming conversations to the right counsellor." },
+  "users-roles": {
+    title: "Users & Roles",
+    subtitle: "Open the full settings workspace for role mappings and user management.",
+  },
+  "chat-appearance": {
+    title: "Widget Appearance",
+    subtitle: "Customize the look and feel of your chat widget.",
+  },
+  "chat-templates": {
+    title: "Templates & Quick Replies",
+    subtitle: "Manage reusable message templates for faster replies.",
+  },
+  "chat-autoresponse": {
+    title: "Auto-Responses",
+    subtitle: "Configure automatic replies for common queries.",
+  },
+  "chat-assignment": {
+    title: "Assignment Rules",
+    subtitle: "Auto-route incoming conversations to the right counsellor.",
+  },
 };
 
 function ComingSoon() {
@@ -83,7 +100,8 @@ function ComingSoon() {
   );
 }
 
-function ContentBody({ id }: { id: string }) {
+function ContentBody({ id, onOpenChange }: { id: string; onOpenChange: (value: boolean) => void }) {
+  if (id === "users-roles") return <OpenSettingsContent onOpenChange={onOpenChange} />;
   if (id === "chat-appearance") return <WidgetAppearance />;
   if (id === "chat-templates") return <TemplateManager />;
   if (id === "chat-autoresponse") return <AutoResponses />;
@@ -109,7 +127,10 @@ export function SettingsModal({
       <DialogContent className="p-0 gap-0 max-w-5xl w-[95vw] h-[82vh] overflow-hidden flex flex-col [&>button]:hidden rounded-2xl">
         <div className="flex flex-1 min-h-0">
           {/* ── Left sidebar ─────────────────────────────────────────── */}
-          <aside className="w-56 shrink-0 flex flex-col border-r border-border h-full" style={{ background: "oklch(var(--muted) / 0.35)" }}>
+          <aside
+            className="w-56 shrink-0 flex flex-col border-r border-border h-full"
+            style={{ background: "oklch(var(--muted) / 0.35)" }}
+          >
             {/* Sidebar header */}
             <div className="px-5 pt-6 pb-4 shrink-0">
               <span className="font-bold text-[16px] tracking-tight">Settings</span>
@@ -161,7 +182,9 @@ export function SettingsModal({
                   {user?.email?.substring(0, 2).toUpperCase() ?? "U"}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-[12px] font-semibold truncate leading-tight">{user?.email ?? "User"}</div>
+                  <div className="text-[12px] font-semibold truncate leading-tight">
+                    {user?.email ?? "User"}
+                  </div>
                   <div className="text-[11px] text-muted-foreground capitalize truncate leading-tight mt-0.5">
                     {user?.role?.replace(/_/g, " ") ?? ""}
                   </div>
@@ -175,16 +198,17 @@ export function SettingsModal({
             {/* Content header */}
             <div className="flex items-start justify-between gap-4 px-8 pt-6 pb-4 border-b border-border shrink-0">
               <div>
-                <h2 className="font-bold text-[20px] leading-tight">
-                  {meta?.title ?? "Settings"}
-                </h2>
+                <h2 className="font-bold text-[20px] leading-tight">{meta?.title ?? "Settings"}</h2>
                 {meta?.subtitle && (
                   <p className="text-[13px] text-muted-foreground mt-0.5">{meta.subtitle}</p>
                 )}
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <button
-                  onClick={() => { logout(); onOpenChange(false); }}
+                  onClick={() => {
+                    logout();
+                    onOpenChange(false);
+                  }}
                   className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-border text-[12px] font-medium hover:bg-muted transition-colors text-muted-foreground"
                 >
                   <LogOut className="size-3.5" /> Log out
@@ -200,7 +224,7 @@ export function SettingsModal({
 
             {/* Scrollable content */}
             <div className="flex-1 overflow-y-auto px-8 py-6">
-              <ContentBody id={active} />
+              <ContentBody id={active} onOpenChange={onOpenChange} />
             </div>
           </div>
         </div>

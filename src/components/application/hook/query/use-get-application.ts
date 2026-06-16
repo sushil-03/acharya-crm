@@ -6,8 +6,21 @@ export interface IApplicationDetails {
   id: string;
   leadId: string;
   studentId: string;
-  programId: string;
-  campusId: string;
+  programId?: string;
+  campusId: string | null;
+  erpSchoolId?: number;
+  erpGraduationId?: number;
+  erpCoreId?: number;
+  erpProgramAssignmentId?: number;
+  erpProgramId?: number;
+  erpSpecializationId?: number;
+  erpAcademicYearId?: number;
+  programName?: string;
+  specializationName?: string;
+  schoolName?: string;
+  graduationName?: string;
+  coreName?: string;
+  academicYearName?: string;
   status: string;
   completionPercent: number;
   formData: Record<string, any>;
@@ -17,16 +30,20 @@ export interface IApplicationDetails {
   submittedAt: string | null;
   reviewedAt: string | null;
   decidedAt: string | null;
+  declarationConsent?: boolean;
+  declarationPlace?: string | null;
+  declarationSignedAt?: string | null;
   createdAt: string;
   updatedAt: string;
   student: {
     id: string;
+    userId?: string;
     firstName: string;
     lastName: string;
     email: string;
     mobile: string;
   };
-  program: {
+  program?: {
     id: string;
     name: string;
     code: string;

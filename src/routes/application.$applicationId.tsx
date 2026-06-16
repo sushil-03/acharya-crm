@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/app-shell";
 import { useGetLead } from "@/components/leads/hook/query/use-get-lead";
 import { LeadHeader } from "@/components/leads/lead-detail/lead-header";
-import { LeadSidebar } from "@/components/leads/lead-detail/lead-sidebar";
-import { LeadMainContent } from "@/components/leads/lead-detail/lead-main-content";
+import { ApplicationSidebar } from "@/components/application/application-sidebar";
+import { ApplicationMainContent } from "@/components/application/application-main-content";
 import { useGetApplication } from "@/components/application/hook/query/use-get-application";
 
 export const Route = createFileRoute("/application/$applicationId")({
@@ -36,7 +36,7 @@ function ApplicationDetail() {
   };
 
   return (
-    <AppShell noPadding>
+    <AppShell noPadding className="h-screen scrollbar-thin">
       <div className="flex flex-col h-full bg-background overflow-hidden w-full">
         <LeadHeader
           lead={lead}
@@ -44,12 +44,8 @@ function ApplicationDetail() {
           isApplicationDataLoading={applicationLoading}
         />
         <div className="flex flex-1 overflow-hidden min-h-0">
-          <LeadSidebar
-            lead={leadData}
-            applicationData={applicationData}
-            isApplicationDataLoading={applicationLoading}
-          />
-          <LeadMainContent
+          <ApplicationSidebar applicationData={applicationData} isLoading={applicationLoading} />
+          <ApplicationMainContent
             lead={lead}
             applicationData={applicationData}
             isApplicationDataLoading={applicationLoading}

@@ -1,25 +1,20 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Activity,
-  LayoutDashboard,
-  Mail,
-  Inbox,
   FileText,
   File,
   CheckSquare,
   Clock,
 } from "lucide-react";
-import { LeadActivityTimeline } from "./lead-activity-timeline";
-import { LeadInteraction } from "./lead-interaction";
+import { LeadActivityTimeline } from "@/components/leads/lead-detail/lead-activity-timeline";
+import { LeadInteraction } from "@/components/leads/lead-detail/lead-interaction";
 import { LeadDetail } from "@/types/lead";
 import { IApplicationDetails } from "@/components/application/hook/query/use-get-application";
-import { LeadFiles } from "./lead-files";
-import { LeadTask } from "./lead-task";
-import { LeadStudentTimeline } from "./lead-student-timeline";
-import { LeadApplications } from "./lead-applications";
-import { ClipboardList } from "lucide-react";
+import { LeadFiles } from "@/components/leads/lead-detail/lead-files";
+import { LeadTask } from "@/components/leads/lead-detail/lead-task";
+import { LeadStudentTimeline } from "@/components/leads/lead-detail/lead-student-timeline";
 
-export function LeadMainContent({
+export function ApplicationMainContent({
   lead,
   applicationData,
   isApplicationDataLoading,
@@ -33,12 +28,6 @@ export function LeadMainContent({
     <div className="flex-1 bg-background h-full overflow-hidden flex flex-col min-h-0">
       <Tabs defaultValue="timeline" className="w-full h-full flex flex-col min-h-0">
         <TabsList className="w-full justify-start border-b border-border rounded-none h-12 bg-transparent p-0 px-4 shrink-0">
-          {/* <TabsTrigger
-            value="overview"
-            className="h-full rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-0"
-          >
-            <LayoutDashboard className="size-4 mr-2" /> Overview
-          </TabsTrigger> */}
           <TabsTrigger
             value="timeline"
             className="h-full rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4"
@@ -60,35 +49,6 @@ export function LeadMainContent({
               {lead.interactions.length}
             </span>
           </TabsTrigger>
-          {/* <TabsTrigger
-            value="email"
-            className="h-full rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4"
-          >
-            <Mail className="size-4 mr-2" /> Email{" "}
-            <span className="ml-1.5 text-[10px] bg-muted px-1.5 py-0.5 rounded text-muted-foreground">
-              0
-            </span>
-          </TabsTrigger> */}
-          {/* <TabsTrigger
-            value="inbox"
-            className="h-full rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-0"
-          >
-            <Inbox className="size-4 mr-2" /> Inbox{" "}
-            <span className="ml-1.5 text-[10px] bg-muted px-1.5 py-0.5 rounded text-muted-foreground">
-              0
-            </span>
-          </TabsTrigger> */}
-
-          <TabsTrigger
-            value="applications"
-            className="h-full rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4"
-          >
-            <ClipboardList className="size-4 mr-2" /> Applications{" "}
-            <span className="ml-1.5 text-[10px] bg-muted px-1.5 py-0.5 rounded text-muted-foreground">
-              {lead.applications?.length || 0}
-            </span>
-          </TabsTrigger>
-
           <TabsTrigger
             value="files"
             className="h-full rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4"
@@ -102,36 +62,21 @@ export function LeadMainContent({
             value="tasks"
             className="h-full rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4"
           >
-            <CheckSquare className="size-4 mr-2" /> Tasks{" "}
-            {/* <span className="ml-1.5 text-[10px] bg-muted px-1.5 py-0.5 rounded text-muted-foreground">
-              0
-            </span> */}
+            <CheckSquare className="size-4 mr-2" /> Tasks
           </TabsTrigger>
         </TabsList>
 
         <div className="p-4 flex-1 overflow-y-auto min-h-0">
-          <TabsContent value="overview" className="mt-0 outline-none">
-            <LeadActivityTimeline lead={lead} />
+          <TabsContent value="timeline" className="mt-0 outline-none">
+            <LeadStudentTimeline leadId={lead.id} />
           </TabsContent>
 
           <TabsContent value="communication" className="mt-0 outline-none">
             <LeadActivityTimeline lead={lead} />
           </TabsContent>
 
-          <TabsContent value="email" className="mt-0 outline-none text-sm text-muted-foreground">
-            No emails found.
-          </TabsContent>
-
-          <TabsContent value="inbox" className="mt-0 outline-none text-sm text-muted-foreground">
-            No messages found.
-          </TabsContent>
-
           <TabsContent value="interaction" className="mt-0 outline-none">
             <LeadInteraction lead={lead} />
-          </TabsContent>
-
-          <TabsContent value="applications" className="mt-0 outline-none">
-            <LeadApplications lead={lead} />
           </TabsContent>
 
           <TabsContent value="files" className="mt-0 outline-none text-sm text-muted-foreground">
@@ -144,10 +89,6 @@ export function LeadMainContent({
 
           <TabsContent value="tasks" className="mt-0 outline-none">
             <LeadTask lead={lead} />
-          </TabsContent>
-
-          <TabsContent value="timeline" className="mt-0 outline-none">
-            <LeadStudentTimeline leadId={lead.id} />
           </TabsContent>
         </div>
       </Tabs>

@@ -116,7 +116,10 @@ export function DataGrid<TData>({
         data-slot="grid"
         tabIndex={0}
         ref={dataGridRef}
-        className="relative grid grid-rows-[auto_1fr_auto] select-none overflow-auto scrollbar-thin rounded-md focus:outline-none flex-1 min-h-0"
+        className={cn(
+          "relative grid grid-rows-[auto_1fr_auto] select-none scrollbar-thin rounded-md focus:outline-none flex-1 min-h-0",
+          stretchColumns ? "overflow-y-auto overflow-x-hidden" : "overflow-auto",
+        )}
         style={{
           ...columnSizeVars,
           "--table-total-size": `${table.getTotalSize()}px`,

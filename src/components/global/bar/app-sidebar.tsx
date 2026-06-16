@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   ChevronRight,
   ChevronLeft,
@@ -12,6 +12,9 @@ import {
   Moon,
   User,
   MoreHorizontal,
+  ArrowLeft,
+  UserCog,
+  MessageSquare,
 } from "lucide-react";
 import { useUserStore } from "@/store/use-user-store";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -19,7 +22,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useLogout } from "@/components/auth/hook/query/use-logout";
 import { useTheme } from "next-themes";
 import ItemButton from "./item-button";
-import { SettingsModal } from "@/components/settings/settings-modal";
 import { navItems, NavigationItem } from "./sidebar-items";
 import { GlobalSearch } from "./global-search";
 
@@ -212,9 +214,10 @@ export function AppSidebar({
   const user = useUserStore((state) => state.user);
   const { logout } = useLogout();
   const { theme, setTheme, resolvedTheme } = useTheme();
+  const navigate = useNavigate();
 
   const [mounted, setMounted] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const isSettingsPath = path.startsWith("/settings") || path.startsWith("/chat-settings");
   const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>(() => {
     const initialOpenStates: Record<string, boolean> = {};
     navItems.forEach((item) => {
@@ -332,30 +335,63 @@ export function AppSidebar({
           )}
         >
           <ul className="space-y-1">
-            {filteredItems.map((item) => {
-              if (item.items?.length) {
+            {isSettingsPath ? (
+              <>
+                <SidebarLink
+                  item={{
+                    label: isActuallyCollapsed ? "Back" : "Back to Dashboard",
+                    icon: ArrowLeft,
+                    to: "/dashboard",
+                  }}
+                  path={path}
+                  isCollapsed={isActuallyCollapsed}
+                />
+                <div className="my-2 border-t border-sidebar-border/50" />
+                <SidebarLink
+                  item={{
+                    label: "Users & Roles",
+                    icon: UserCog,
+                    to: "/settings",
+                  }}
+                  path={path}
+                  isCollapsed={isActuallyCollapsed}
+                />
+                <SidebarLink
+                  item={{
+                    label: "Chat Widget",
+                    icon: MessageSquare,
+                    to: "/chat-settings",
+                  }}
+                  path={path}
+                  isCollapsed={isActuallyCollapsed}
+                />
+              </>
+            ) : (
+              filteredItems.map((item) => {
+                if (item.items?.length) {
+                  return (
+                    <SidebarSubmenu
+                      key={item.label}
+                      item={item}
+                      path={path}
+                      isCollapsed={isActuallyCollapsed}
+                      isOpen={!!openSubmenus[item.label]}
+                      onToggle={() => toggleSubmenu(item.label)}
+                      onExpand={() => setIsCollapsed(false)}
+                    />
+                  );
+                }
+
                 return (
-                  <SidebarSubmenu
+                  <SidebarLink
                     key={item.label}
                     item={item}
                     path={path}
                     isCollapsed={isActuallyCollapsed}
-                    isOpen={!!openSubmenus[item.label]}
-                    onToggle={() => toggleSubmenu(item.label)}
-                    onExpand={() => setIsCollapsed(false)}
                   />
                 );
-              }
-
-              return (
-                <SidebarLink
-                  key={item.label}
-                  item={item}
-                  path={path}
-                  isCollapsed={isActuallyCollapsed}
-                />
-              );
-            })}
+              })
+            )}
           </ul>
         </nav>
 
@@ -410,12 +446,17 @@ export function AppSidebar({
             <div className="flex justify-center">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button
-                    onClick={() => setSettingsOpen(true)}
-                    className="group flex items-center justify-center rounded-lg size-9 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors duration-200 cursor-pointer"
+                  <Link
+                    to="/settings"
+                    className={cn(
+                      "group flex items-center justify-center rounded-lg size-9 transition-colors duration-200",
+                      path.startsWith("/settings")
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-xs"
+                        : "text-sidebar-foreground/75 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
+                    )}
                   >
                     <Settings className="size-4.5" />
-                  </button>
+                  </Link>
                 </TooltipTrigger>
                 <TooltipContent side="right">
                   <span className="font-medium">Settings</span>
@@ -423,13 +464,25 @@ export function AppSidebar({
               </Tooltip>
             </div>
           ) : (
-            <button
-              onClick={() => setSettingsOpen(true)}
-              className="w-full group flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium text-left text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors duration-200 cursor-pointer"
+            <Link
+              to="/settings"
+              className={cn(
+                "w-full group flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium text-left transition-colors duration-200",
+                path.startsWith("/settings")
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+                  : "text-sidebar-foreground/75 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
+              )}
             >
-              <Settings className="size-4 text-sidebar-foreground group-hover:text-sidebar-accent-foreground transition-colors" />
+              <Settings
+                className={cn(
+                  "size-4 transition-colors",
+                  path.startsWith("/settings")
+                    ? "text-sidebar-accent-foreground"
+                    : "text-sidebar-foreground/60 group-hover:text-sidebar-accent-foreground",
+                )}
+              />
               <span className="flex-1 truncate">Settings</span>
-            </button>
+            </Link>
           )}
 
           {/* Collapse sidebar toggle button (if collapsible is true) */}
@@ -504,7 +557,7 @@ export function AppSidebar({
                     type="coming_soon"
                   />
                   <ItemButton
-                    onClick={() => setSettingsOpen(true)}
+                    onClick={() => navigate({ to: "/settings" })}
                     icon={<Settings className="size-4 text-muted-foreground" />}
                     buttonText="Settings"
                   />
@@ -535,7 +588,6 @@ export function AppSidebar({
         </div>
       </aside>
 
-      <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
     </TooltipProvider>
   );
 }
