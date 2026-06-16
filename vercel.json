@@ -1,11 +1,5 @@
 {
-  "framework": "vite",
+  "buildCommand": "pnpm run build",
   "outputDirectory": "dist",
-  "cleanUrls": true,
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ]
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
