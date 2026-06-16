@@ -31,52 +31,16 @@ if (fs.existsSync(shellSrc)) {
   console.log(`Copied ${shellSrc} to ${distIndexDest} and ${clientIndexDest}`);
 }
 
-// 3. Format .vercel/output (for TanStack Start preset compatibility)
-const vercelOutputDir = path.join(rootDir, '.vercel/output');
-const vercelStaticDir = path.join(vercelOutputDir, 'static');
-const vercelConfigPath = path.join(vercelOutputDir, 'config.json');
-const vercelFunctionsDir = path.join(vercelOutputDir, 'functions');
+// 3. Delete .vercel and .output folders to prevent Vercel Build Output API/Serverless conflicts.
+// This forces Vercel to deploy the 'dist' directory as a static SPA and respect vercel.json.
+const vercelDir = path.join(rootDir, '.vercel');
+if (fs.existsSync(vercelDir)) {
+  fs.rmSync(vercelDir, { recursive: true, force: true });
+  console.log('Deleted .vercel directory to prevent Build Output API conflicts.');
+}
 
-if (fs.existsSync(vercelOutputDir)) {
-  // Ensure static directory exists
-  if (!fs.existsSync(vercelStaticDir)) {
-    fs.mkdirSync(vercelStaticDir, { recursive: true });
-  }
-
-  // Copy shell to .vercel/output/static/index.html
-  const vercelIndexDest = path.join(vercelStaticDir, 'index.html');
-  if (fs.existsSync(shellSrc)) {
-    fs.copyFileSync(shellSrc, vercelIndexDest);
-    console.log(`Copied ${shellSrc} to ${vercelIndexDest}`);
-  }
-
-  // Remove functions folder if it exists
-  if (fs.existsSync(vercelFunctionsDir)) {
-    fs.rmSync(vercelFunctionsDir, { recursive: true, force: true });
-    console.log(`Removed ${vercelFunctionsDir}`);
-  }
-
-  // Write static config.json
-  const staticConfig = {
-    version: 3,
-    cleanUrls: true,
-    routes: [
-      {
-        src: "/assets/(.*)",
-        headers: {
-          "cache-control": "public, max-age=31536000, immutable"
-        }
-      },
-      {
-        handle: "filesystem"
-      },
-      {
-        src: "/(.*)",
-        dest: "/index.html"
-      }
-    ]
-  };
-
-  fs.writeFileSync(vercelConfigPath, JSON.stringify(staticConfig, null, 2), 'utf-8');
-  console.log(`Updated ${vercelConfigPath} with static routing rules.`);
+const outputDir = path.join(rootDir, '.output');
+if (fs.existsSync(outputDir)) {
+  fs.rmSync(outputDir, { recursive: true, force: true });
+  console.log('Deleted .output directory.');
 }
