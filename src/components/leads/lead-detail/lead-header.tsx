@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { useStarLead, useUnstarLead } from "@/components/lists/hook/mutation/use-star-lead";
 import { useGetLeadLists } from "@/components/lists/hook/query/use-get-lead-lists";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { useConvertLead } from "../hook/mutation/use-update-lead";
 import {
@@ -69,6 +69,7 @@ export function LeadHeader({
   isApplicationDataLoading?: boolean;
 }) {
   const { user } = useUserStore();
+  const router = useRouter();
   const isCounsellor = user?.role === "counsellor" || user?.role === "councellor";
   const queryClient = useQueryClient();
   const { mutate: convertLead, isPending } = useConvertLead();
@@ -105,9 +106,12 @@ export function LeadHeader({
   return (
     <div className="flex items-center justify-between px-3 py-2 border-b border-border bg-background shrink-0 ">
       <div className="flex items-center gap-4">
-        <Link to="/applications" className="text-muted-foreground hover:text-foreground transition">
+        <button
+          onClick={() => router.history.back()}
+          className="text-muted-foreground hover:text-foreground transition cursor-pointer"
+        >
           <ArrowLeft className="size-4" />
-        </Link>
+        </button>
         <div className="flex items-center gap-3">
           <div className="size-8 rounded-full bg-gradient-brand grid place-items-center text-white font-bold text-xs">
             {lead.name

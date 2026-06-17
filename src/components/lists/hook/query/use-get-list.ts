@@ -36,12 +36,12 @@ export interface ListDetail {
   meta: { total: number; page: number; pageSize: number };
 }
 
-export const useGetList = (listId: string | undefined, page = 1, pageSize = 50) => {
+export const useGetList = (listId: string | undefined, page = 1, pageSize = 50, search?: string) => {
   return useQuery({
-    queryKey: [QUERY_KEYS.GET_LIST_BY_ID, listId, page, pageSize],
+    queryKey: [QUERY_KEYS.GET_LIST_BY_ID, listId, page, pageSize, search],
     queryFn: async () => {
       const { data } = await Axios.get<ListDetail>(`/api/v1/lists/${listId}`, {
-        params: { page, pageSize },
+        params: { page, pageSize, search: search || undefined },
       });
       return data;
     },

@@ -14,6 +14,8 @@ export const useAddLeadsToList = () => {
       toast.success(`${data.added} lead(s) added to list`);
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_LIST_BY_ID, data.listId] });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_LEAD_LISTS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_LEADS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_LEADS_BY_ID] });
     },
     onError: (error: any) => {
       toast.error(error?.message || "Failed to add leads");

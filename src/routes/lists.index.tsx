@@ -282,7 +282,7 @@ function ListActionsMenu({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-36">
-        <DropdownMenuItem onClick={onEdit} disabled={list.isSystem}>
+        <DropdownMenuItem onClick={onEdit}>
           <Pencil className="size-3.5 mr-2" />
           Edit
         </DropdownMenuItem>

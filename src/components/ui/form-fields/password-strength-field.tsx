@@ -67,6 +67,7 @@ export function PasswordStrengthField<TFieldValues extends FieldValues>({
           id={name}
           type={isVisible ? 'text' : 'password'}
           placeholder={placeholder}
+          autoComplete="new-password"
           className={error ? 'border-destructive' : ''}
           aria-invalid={!!error}
         />

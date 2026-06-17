@@ -22,6 +22,7 @@ import { Route as FinanceRouteImport } from './routes/finance'
 import { Route as EmailTemplatesRouteImport } from './routes/email-templates'
 import { Route as DistributionRouteImport } from './routes/distribution'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CouponsRouteImport } from './routes/coupons'
 import { Route as CounsellorRouteImport } from './routes/counsellor'
 import { Route as CommunicationsRouteImport } from './routes/communications'
 import { Route as ChatSettingsRouteImport } from './routes/chat-settings'
@@ -116,6 +117,11 @@ const DistributionRoute = DistributionRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CouponsRoute = CouponsRouteImport.update({
+  id: '/coupons',
+  path: '/coupons',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CounsellorRoute = CounsellorRouteImport.update({
@@ -284,6 +290,7 @@ export interface FileRoutesByFullPath {
   '/chat-settings': typeof ChatSettingsRoute
   '/communications': typeof CommunicationsRoute
   '/counsellor': typeof CounsellorRoute
+  '/coupons': typeof CouponsRoute
   '/dashboard': typeof DashboardRoute
   '/distribution': typeof DistributionRoute
   '/email-templates': typeof EmailTemplatesRouteWithChildren
@@ -328,6 +335,7 @@ export interface FileRoutesByTo {
   '/chat-settings': typeof ChatSettingsRoute
   '/communications': typeof CommunicationsRoute
   '/counsellor': typeof CounsellorRoute
+  '/coupons': typeof CouponsRoute
   '/dashboard': typeof DashboardRoute
   '/distribution': typeof DistributionRoute
   '/finance': typeof FinanceRoute
@@ -373,6 +381,7 @@ export interface FileRoutesById {
   '/chat-settings': typeof ChatSettingsRoute
   '/communications': typeof CommunicationsRoute
   '/counsellor': typeof CounsellorRoute
+  '/coupons': typeof CouponsRoute
   '/dashboard': typeof DashboardRoute
   '/distribution': typeof DistributionRoute
   '/email-templates': typeof EmailTemplatesRouteWithChildren
@@ -420,6 +429,7 @@ export interface FileRouteTypes {
     | '/chat-settings'
     | '/communications'
     | '/counsellor'
+    | '/coupons'
     | '/dashboard'
     | '/distribution'
     | '/email-templates'
@@ -464,6 +474,7 @@ export interface FileRouteTypes {
     | '/chat-settings'
     | '/communications'
     | '/counsellor'
+    | '/coupons'
     | '/dashboard'
     | '/distribution'
     | '/finance'
@@ -508,6 +519,7 @@ export interface FileRouteTypes {
     | '/chat-settings'
     | '/communications'
     | '/counsellor'
+    | '/coupons'
     | '/dashboard'
     | '/distribution'
     | '/email-templates'
@@ -554,6 +566,7 @@ export interface RootRouteChildren {
   ChatSettingsRoute: typeof ChatSettingsRoute
   CommunicationsRoute: typeof CommunicationsRoute
   CounsellorRoute: typeof CounsellorRoute
+  CouponsRoute: typeof CouponsRoute
   DashboardRoute: typeof DashboardRoute
   DistributionRoute: typeof DistributionRoute
   EmailTemplatesRoute: typeof EmailTemplatesRouteWithChildren
@@ -674,6 +687,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coupons': {
+      id: '/coupons'
+      path: '/coupons'
+      fullPath: '/coupons'
+      preLoaderRoute: typeof CouponsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/counsellor': {
@@ -933,6 +953,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChatSettingsRoute: ChatSettingsRoute,
   CommunicationsRoute: CommunicationsRoute,
   CounsellorRoute: CounsellorRoute,
+  CouponsRoute: CouponsRoute,
   DashboardRoute: DashboardRoute,
   DistributionRoute: DistributionRoute,
   EmailTemplatesRoute: EmailTemplatesRouteWithChildren,

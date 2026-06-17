@@ -117,8 +117,7 @@ export function DataGrid<TData>({
         tabIndex={0}
         ref={dataGridRef}
         className={cn(
-          "relative grid grid-rows-[auto_1fr_auto] select-none scrollbar-thin rounded-md focus:outline-none flex-1 min-h-0",
-          stretchColumns ? "overflow-y-auto overflow-x-hidden" : "overflow-auto",
+          "relative grid grid-rows-[auto_1fr_auto] select-none scrollbar-thin rounded-md focus:outline-none flex-1 min-h-0 overflow-auto",
         )}
         style={{
           ...columnSizeVars,

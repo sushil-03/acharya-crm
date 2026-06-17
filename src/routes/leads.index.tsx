@@ -68,18 +68,6 @@ function LeadsPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(100);
 
-  React.useEffect(() => {
-    localStorage.setItem("leads_table_status", tab);
-  }, [tab]);
-
-  React.useEffect(() => {
-    localStorage.setItem("leads_table_source", sourceChannel);
-  }, [sourceChannel]);
-
-  React.useEffect(() => {
-    localStorage.setItem("leads_table_search", q);
-  }, [q]);
-
   const { user, counsellorId } = useUserStore();
   const { data: counsellors, isLoading: isLoadingCounsellors } = useGetCounsellors();
 
@@ -102,8 +90,6 @@ function LeadsPage() {
     page,
     pageSize,
   });
-
-  const totalPages = data?.meta ? Math.ceil(data.meta.total / data.meta.pageSize) : 1;
 
   const filtered = React.useMemo(() => {
     if (!data) return [];
@@ -134,17 +120,6 @@ function LeadsPage() {
       lastActivity: l.lastContactedAt ?? l.createdAt,
     }));
   }, [data, isCounsellor, resolvedCounsellorId]);
-
-  // Display a loading state if we are still resolving the counselor profile for a counselor
-  if (isCounsellor && !resolvedCounsellorId && isLoadingCounsellors) {
-    return (
-      <AppShell>
-        <div className="flex h-screen w-full items-center justify-center bg-background">
-          <Loader2 className="size-8 animate-spin text-primary" />
-        </div>
-      </AppShell>
-    );
-  }
 
   const leadsColumns = useMemo(
     () => [getDataGridSelectColumn<any>({ enableRowMarkers: true }), ...getLeadsColumn],
@@ -197,6 +172,17 @@ function LeadsPage() {
   );
 
   const [bulkListDialogOpen, setBulkListDialogOpen] = useState(false);
+
+  // Display a loading state if we are still resolving the counselor profile for a counselor
+  if (isCounsellor && !resolvedCounsellorId && isLoadingCounsellors) {
+    return (
+      <AppShell>
+        <div className="flex h-screen w-full items-center justify-center bg-background">
+          <Loader2 className="size-8 animate-spin text-primary" />
+        </div>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell className="h-screen overflow-hidden" noPadding>

@@ -112,6 +112,7 @@ export const LEAD_SOURCES = [
   { label: "Referral", value: "referral" },
   { label: "Phone", value: "phone" },
   { label: "CSV Import", value: "csv_import" },
+  { label: "Self Registration", value: "self_registration" },
 ];
 export const CAMPUSES = [
   { label: "Acharya Bangalore Main Campus", value: "f4ab6e99-0d6a-47aa-9d75-161721687437" },
@@ -150,6 +151,7 @@ export function getLeadSourceTone(source: string): BadgeTone {
       return "danger-light";
     case "website":
     case "csv_import":
+    case "self_registration":
       return "primary-light";
     case "whatsapp":
     case "phone":
@@ -249,7 +251,6 @@ export const LANGUAGE_OPTIONS = [
   { value: "Malayalam", label: "Malayalam" },
 ];
 
-
 export const getOfferAlertConfig = (status?: string) => {
   switch (status?.toLowerCase()) {
     case "draft":
@@ -347,3 +348,4 @@ export const getRouteTitle = (pathname: string): string => {
     .join(" ");
 };
 
+export const CRM_ENCRYPT_KEY = "crm_auth_secret_key_789";

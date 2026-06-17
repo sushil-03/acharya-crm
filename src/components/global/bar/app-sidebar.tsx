@@ -15,6 +15,7 @@ import {
   ArrowLeft,
   UserCog,
   MessageSquare,
+  Ticket,
 } from "lucide-react";
 import { useUserStore } from "@/store/use-user-store";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -106,9 +107,11 @@ function SidebarSubmenu({
   onExpand,
 }: SidebarSubmenuProps) {
   const Icon = item.icon;
-  const hasActiveChild = item.items?.some(
-    (child) => path === child.to || (child.to !== "/" && path.startsWith(child.to)),
-  );
+  const activeChildIdx =
+    item.items?.findIndex(
+      (child) => path === child.to || (child.to !== "/" && path.startsWith(child.to)),
+    ) ?? -1;
+  const hasActiveChild = activeChildIdx !== -1;
 
   if (isCollapsed) {
     return (
@@ -147,9 +150,7 @@ function SidebarSubmenu({
         )}
       >
         <Icon
-          className={cn(
-            "size-4 shrink-0 transition-transform duration-200 group-hover:scale-105 text-sidebar-accent-foreground",
-          )}
+          className={cn("size-4 shrink-0 transition-transform duration-200 group-hover:scale-105 ")}
         />
         <span className="flex-1 truncate">{item.label}</span>
         <ChevronDown
@@ -170,18 +171,41 @@ function SidebarSubmenu({
             return (
               <li key={child.to} className="relative pl-5">
                 {/* Connection Lines */}
-                {/* 1. Curved connection from left to child */}
-                <div className="absolute left-0 top-0 w-3.5 h-3.5 border-l border-b border-border rounded-bl-[5px] pointer-events-none" />
+                {/* 1. Straight vertical line - Top segment (above the branch) */}
+                <div
+                  className={cn(
+                    "absolute left-0 w-px pointer-events-none transition-colors duration-200",
+                    isFirst ? "-top-2.5 h-[20px]" : "top-0 h-2.5",
+                    activeChildIdx >= idx ? "bg-sidebar-accent-foreground" : "bg-border",
+                  )}
+                />
 
-                {/* 2. Top extension line for the first item to connect to the parent icon */}
-                {isFirst && (
-                  <div className="absolute left-0 -top-2.5 h-3 w-px bg-border pointer-events-none" />
-                )}
-
-                {/* 3. Continuation line going down to the next items */}
+                {/* 2. Straight vertical line - Bottom segment (below the branch) */}
                 {!isLast && (
-                  <div className="absolute left-0 top-3.5 bottom-0 w-px bg-border pointer-events-none" />
+                  <div
+                    className={cn(
+                      "absolute left-0 top-2.5 bottom-[-5px] w-px pointer-events-none transition-colors duration-200",
+                      activeChildIdx > idx ? "bg-sidebar-accent-foreground" : "bg-border",
+                    )}
+                  />
                 )}
+
+                {/* 3. Curved branch bend to the child */}
+                <svg
+                  className={cn(
+                    "absolute left-0 top-0 w-3.5 h-3.5 pointer-events-none transition-colors duration-200",
+                    childActive ? "text-sidebar-accent-foreground" : "text-border",
+                  )}
+                  viewBox="0 0 14 14"
+                  fill="none"
+                >
+                  <path
+                    d="M 0.5 8.5 A 5 5 0 0 0 5.5 13.5 L 14 13.5"
+                    stroke="currentColor"
+                    strokeWidth="1"
+                    strokeLinecap="round"
+                  />
+                </svg>
 
                 <Link
                   to={child.to}
@@ -217,7 +241,10 @@ export function AppSidebar({
   const navigate = useNavigate();
 
   const [mounted, setMounted] = useState(false);
-  const isSettingsPath = path.startsWith("/settings") || path.startsWith("/chat-settings");
+  const isSettingsPath =
+    path.startsWith("/settings") ||
+    path.startsWith("/chat-settings") ||
+    path.startsWith("/coupons");
   const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>(() => {
     const initialOpenStates: Record<string, boolean> = {};
     navItems.forEach((item) => {
@@ -287,7 +314,7 @@ export function AppSidebar({
     <TooltipProvider>
       <aside
         className={cn(
-          "hidden lg:flex flex-col shrink-0 bg-sidebar text-sidebar-foreground border-r border-sidebar-border h-screen sticky top-0 transition-all duration-300 ease-in-out z-30",
+          "flex flex-col shrink-0 bg-sidebar text-sidebar-foreground border-r border-sidebar-border h-screen sticky top-0 transition-all duration-300 ease-in-out z-30",
           isActuallyCollapsed ? "w-[56px]" : "w-60",
           className,
         )}
@@ -347,15 +374,17 @@ export function AppSidebar({
                   isCollapsed={isActuallyCollapsed}
                 />
                 <div className="my-2 border-t border-sidebar-border/50" />
-                <SidebarLink
-                  item={{
-                    label: "Users & Roles",
-                    icon: UserCog,
-                    to: "/settings",
-                  }}
-                  path={path}
-                  isCollapsed={isActuallyCollapsed}
-                />
+                {!isCounsellor && (
+                  <SidebarLink
+                    item={{
+                      label: "Users & Roles",
+                      icon: UserCog,
+                      to: "/settings",
+                    }}
+                    path={path}
+                    isCollapsed={isActuallyCollapsed}
+                  />
+                )}
                 <SidebarLink
                   item={{
                     label: "Chat Widget",
@@ -365,6 +394,17 @@ export function AppSidebar({
                   path={path}
                   isCollapsed={isActuallyCollapsed}
                 />
+                {!isCounsellor && (
+                  <SidebarLink
+                    item={{
+                      label: "Coupons",
+                      icon: Ticket,
+                      to: "/coupons",
+                    }}
+                    path={path}
+                    isCollapsed={isActuallyCollapsed}
+                  />
+                )}
               </>
             ) : (
               filteredItems.map((item) => {
@@ -442,48 +482,49 @@ export function AppSidebar({
           */}
 
           {/* Settings trigger */}
-          {isActuallyCollapsed ? (
-            <div className="flex justify-center">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    to="/settings"
-                    className={cn(
-                      "group flex items-center justify-center rounded-lg size-9 transition-colors duration-200",
-                      path.startsWith("/settings")
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-xs"
-                        : "text-sidebar-foreground/75 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
-                    )}
-                  >
-                    <Settings className="size-4.5" />
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right">
-                  <span className="font-medium">Settings</span>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          ) : (
-            <Link
-              to="/settings"
-              className={cn(
-                "w-full group flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium text-left transition-colors duration-200",
-                path.startsWith("/settings")
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
-                  : "text-sidebar-foreground/75 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
-              )}
-            >
-              <Settings
+          {!isSettingsPath &&
+            (isActuallyCollapsed ? (
+              <div className="flex justify-center">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link
+                      to={isCounsellor ? "/chat-settings" : "/settings"}
+                      className={cn(
+                        "group flex items-center justify-center rounded-lg size-9 transition-colors duration-200",
+                        path.startsWith("/settings") || path.startsWith("/chat-settings")
+                          ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-xs"
+                          : "text-sidebar-foreground/75 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
+                      )}
+                    >
+                      <Settings className="size-4.5" />
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    <span className="font-medium">Settings</span>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            ) : (
+              <Link
+                to={isCounsellor ? "/chat-settings" : "/settings"}
                 className={cn(
-                  "size-4 transition-colors",
-                  path.startsWith("/settings")
-                    ? "text-sidebar-accent-foreground"
-                    : "text-sidebar-foreground/60 group-hover:text-sidebar-accent-foreground",
+                  "w-full group flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium text-left transition-colors duration-200",
+                  path.startsWith("/settings") || path.startsWith("/chat-settings")
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+                    : "text-sidebar-foreground/75 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
                 )}
-              />
-              <span className="flex-1 truncate">Settings</span>
-            </Link>
-          )}
+              >
+                <Settings
+                  className={cn(
+                    "size-4 transition-colors",
+                    path.startsWith("/settings") || path.startsWith("/chat-settings")
+                      ? "text-sidebar-accent-foreground"
+                      : "text-sidebar-foreground/60 group-hover:text-sidebar-accent-foreground",
+                  )}
+                />
+                <span className="flex-1 truncate">Settings</span>
+              </Link>
+            ))}
 
           {/* Collapse sidebar toggle button (if collapsible is true) */}
           {collapsible && (
@@ -557,7 +598,7 @@ export function AppSidebar({
                     type="coming_soon"
                   />
                   <ItemButton
-                    onClick={() => navigate({ to: "/settings" })}
+                    onClick={() => navigate({ to: isCounsellor ? "/chat-settings" : "/settings" })}
                     icon={<Settings className="size-4 text-muted-foreground" />}
                     buttonText="Settings"
                   />
@@ -587,7 +628,6 @@ export function AppSidebar({
           </div>
         </div>
       </aside>
-
     </TooltipProvider>
   );
 }

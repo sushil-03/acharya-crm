@@ -1,6 +1,8 @@
 export const QUERY_KEYS = {
   GET_USER: "get-user",
   GET_ERP_ROLES: "get-erp-roles",
+  GET_ROLES_SUMMARY: "get-roles-summary",
+  GET_COUPONS: "get-coupons",
   GET_LEADS: "get-leads",
   GET_LEADS_BY_ID: "get-leads-by-id",
   COUNSELLORS: "get-counsellors",

@@ -47,7 +47,7 @@ function NewUserPage() {
     defaultValues: {
       email: "",
       password: "",
-      role: "counsellor",
+      role: "",
       campusId: "",
     },
   });
@@ -80,6 +80,7 @@ function NewUserPage() {
                       <Input
                         placeholder="counsellor@acharyainstitutions.com"
                         type="email"
+                        autoComplete="new-email"
                         {...field}
                       />
                     </FormControl>

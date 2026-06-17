@@ -14,6 +14,8 @@ export const useRemoveLeadsFromList = () => {
       toast.success(`${data.removed} lead(s) removed from list`);
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_LIST_BY_ID, data.listId] });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_LEAD_LISTS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_LEADS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_LEADS_BY_ID] });
     },
     onError: (error: any) => {
       toast.error(error?.message || "Failed to remove leads");

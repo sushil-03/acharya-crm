@@ -32,6 +32,7 @@ export function TopBar() {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const navigate = useNavigate();
+  const isCounsellor = user?.role === "counsellor" || user?.role === "councellor";
 
   useEffect(() => {
     setMounted(true);
@@ -148,7 +149,7 @@ export function TopBar() {
                     type="coming_soon"
                   />
                   <ItemButton
-                    onClick={() => navigate({ to: "/settings" })}
+                    onClick={() => navigate({ to: isCounsellor ? "/chat-settings" : "/settings" })}
                     icon={<Settings className="size-4 text-muted-foreground" />}
                     buttonText="Settings"
                   />

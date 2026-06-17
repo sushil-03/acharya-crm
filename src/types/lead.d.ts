@@ -59,6 +59,15 @@ export interface LeadDetail {
     id: string;
     status: string;
   }[];
+  listItems?: {
+    addedAt: string;
+    list: {
+      id: string;
+      name: string;
+      color: string;
+      icon: string;
+    };
+  }[];
 }
 
 export interface CounsellorDetail {

@@ -16,7 +16,7 @@ export const useGetErpRoles = () => {
   return useQuery<ErpRole[]>({
     queryKey: [QUERY_KEYS.GET_ERP_ROLES],
     queryFn: async () => {
-      const { data } = await Axios.get("/api/v1/auth/erp-roles");
+      const { data } = await Axios.get("/api/v1/auth/erp-roles/all");
       return data;
     },
     staleTime: 1000 * 60 * 5,

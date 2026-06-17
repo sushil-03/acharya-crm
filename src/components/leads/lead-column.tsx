@@ -199,7 +199,7 @@ export const getLeadsColumn: ColumnDef<any>[] = [
         // options: LEAD_SOURCES,
       },
     },
-    size: 100,
+    size: 150,
     cell: ({ row }) => {
       const source = row.original.source as string;
       const tone = getLeadSourceTone(source);
@@ -261,7 +261,13 @@ export const getLeadsColumn: ColumnDef<any>[] = [
     header: "Lists",
     meta: { label: "Lists", cell: { variant: "custom", headerIcon: List } },
     size: 220,
-    cell: ({ row }) => <LeadListsCell leadId={row.original.id} leadName={row.original.name} />,
+    cell: ({ row }) => (
+      <LeadListsCell
+        leadId={row.original.id}
+        leadName={row.original.name}
+        listItems={row.original.listItems}
+      />
+    ),
   },
   {
     accessorKey: "lastActivity",

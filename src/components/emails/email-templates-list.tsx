@@ -206,10 +206,10 @@ export function EmailTemplatesList() {
   }
 
   return (
-    <AppShell>
+    <AppShell noPadding>
       <PageHeader
         title="Email Library"
-        subtitle="Manage, structure, and edit email templates for student communications."
+        // subtitle="Manage, structure, and edit email templates for student communications."
         actions={
           <Button
             onClick={() => setIsCreateOpen(true)}
@@ -219,114 +219,114 @@ export function EmailTemplatesList() {
           </Button>
         }
       />
-
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-        <StatCard
-          label="Total Templates"
-          value={stats.total.toString()}
-          icon={<Mail className="size-4" />}
-          accent="primary"
-        />
-        <StatCard
-          label="Visual Editor"
-          value={stats.visual.toString()}
-          icon={<Sparkles className="size-4" />}
-          accent="info"
-        />
-        <StatCard
-          label="HTML & Rich Text"
-          value={(stats.html + stats.richText).toString()}
-          icon={<FileCode2 className="size-4" />}
-          accent="gold"
-        />
-        <StatCard
-          label="Active Templates"
-          value={stats.active.toString()}
-          icon={<CheckCircle2 className="size-4" />}
-          accent="success"
-        />
-      </div>
-
-      {/* Filter and Search Section */}
-      <div className="flex flex-col md:flex-row md:items-center gap-4 pb-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search templates by name, key, or subject..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 h-8 text-sm"
+      <div className="p-3 flex flex-col min-h-0 h-full">
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+          <StatCard
+            label="Total Templates"
+            value={stats.total.toString()}
+            icon={<Mail className="size-4" />}
+            accent="primary"
+          />
+          <StatCard
+            label="Visual Editor"
+            value={stats.visual.toString()}
+            icon={<Sparkles className="size-4" />}
+            accent="info"
+          />
+          <StatCard
+            label="HTML & Rich Text"
+            value={(stats.html + stats.richText).toString()}
+            icon={<FileCode2 className="size-4" />}
+            accent="gold"
+          />
+          <StatCard
+            label="Active Templates"
+            value={stats.active.toString()}
+            icon={<CheckCircle2 className="size-4" />}
+            accent="success"
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <div>
-            <Select
-              value={categoryFilter}
-              onValueChange={(val) => {
-                setCategoryFilter(val);
-                setPage(1);
-              }}
-            >
-              <SelectTrigger size={"sm"} className="w-[130px] ">
-                <SelectValue placeholder="All Categories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category.charAt(0).toUpperCase() + category.slice(1)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        {/* Filter and Search Section */}
+        <div className="flex flex-col md:flex-row md:items-center gap-4 pb-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search templates by name, key, or subject..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 h-8 text-sm"
+            />
           </div>
 
-          <div>
-            <Select
-              value={statusFilter}
-              onValueChange={(val) => {
-                setStatusFilter(val);
-                setPage(1);
-              }}
-            >
-              <SelectTrigger size={"sm"} className="w-[130px] ">
-                <SelectValue placeholder="All Statuses" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <div>
+              <Select
+                value={categoryFilter}
+                onValueChange={(val) => {
+                  setCategoryFilter(val);
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger size={"sm"} className="w-[130px] ">
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category.charAt(0).toUpperCase() + category.slice(1)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-          <div className="flex items-center gap-2 border-s pl-3 border-border">
-            <DataGridViewMenu table={dataGrid.table} />
-            <DataGridRowHeightMenu table={dataGrid.table} />
+            <div>
+              <Select
+                value={statusFilter}
+                onValueChange={(val) => {
+                  setStatusFilter(val);
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger size={"sm"} className="w-[130px] ">
+                  <SelectValue placeholder="All Statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center gap-2 border-s pl-3 border-border">
+              <DataGridViewMenu table={dataGrid.table} />
+              <DataGridRowHeightMenu table={dataGrid.table} />
+            </div>
           </div>
         </div>
+        {/* DataGrid Component */}
+        <div className="flex flex-col h-full min-h-0 flex-1">
+          <Card className="overflow-hidden h-full flex flex-col relative">
+            {isLoading ? (
+              <div className="flex items-center justify-center min-h-[400px]">
+                <Loader2 className="size-8 animate-spin text-primary" />
+              </div>
+            ) : (
+              <DataGrid
+                {...dataGrid}
+                stretchColumns
+                showPagination
+                totalElements={templatesResponse?.meta?.total || templates.length}
+                className="flex-1"
+              />
+            )}
+          </Card>
+        </div>
       </div>
-      {/* DataGrid Component */}
-      <div className="flex flex-col h-full min-h-0 flex-1">
-        <Card className="overflow-hidden h-full flex flex-col relative">
-          {isLoading ? (
-            <div className="flex items-center justify-center min-h-[400px]">
-              <Loader2 className="size-8 animate-spin text-primary" />
-            </div>
-          ) : (
-            <DataGrid
-              {...dataGrid}
-              stretchColumns
-              showPagination
-              totalElements={templatesResponse?.meta?.total || templates.length}
-              className="flex-1"
-            />
-          )}
-        </Card>
-      </div>
-
       {/* Editor Choice Dialog (Create From Scratch) */}
       <EditorChoiceDialog
         open={isCreateOpen}

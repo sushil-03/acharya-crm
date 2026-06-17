@@ -449,6 +449,7 @@ export function LeadSidebar({ lead, applicationData, isApplicationDataLoading }:
         onOpenChange={setAddToListOpen}
         leadId={lead.id}
         leadName={lead.name}
+        listItems={lead.listItems}
       />
     </div>
   );

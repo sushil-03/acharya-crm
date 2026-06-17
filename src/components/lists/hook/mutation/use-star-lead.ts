@@ -13,6 +13,8 @@ export const useStarLead = () => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_LEAD_LISTS, data.leadId] });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_LISTS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_LEADS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_LEADS_BY_ID, data.leadId] });
     },
     onError: (error: any) => {
       toast.error(error?.message || "Failed to star lead");
@@ -30,6 +32,8 @@ export const useUnstarLead = () => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_LEAD_LISTS, data.leadId] });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_LISTS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_LEADS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_LEADS_BY_ID, data.leadId] });
     },
     onError: (error: any) => {
       toast.error(error?.message || "Failed to unstar lead");

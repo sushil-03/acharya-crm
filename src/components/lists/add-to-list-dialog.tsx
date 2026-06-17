@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ListIconBadge } from "./list-icon";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,19 +21,43 @@ interface AddToListDialogProps {
   onOpenChange: (open: boolean) => void;
   leadId: string;
   leadName?: string;
+  listItems?: {
+    addedAt: string;
+    list: {
+      id: string;
+      name: string;
+      color: string | null;
+      icon: string | null;
+    };
+  }[];
 }
 
-export function AddToListDialog({ open, onOpenChange, leadId, leadName }: AddToListDialogProps) {
+export function AddToListDialog({ open, onOpenChange, leadId, leadName, listItems }: AddToListDialogProps) {
   const { data: allLists, isLoading: isLoadingLists } = useGetLists();
-  const { data: memberships, isLoading: isLoadingMemberships } = useGetLeadLists(leadId);
-  const { mutate: addToLists, isPending: isAdding } = useAddLeadToLists();
-  const { mutate: removeFromList, isPending: isRemoving } = useRemoveLeadsFromList();
+  const { data: memberships, isLoading: isLoadingMemberships } = useGetLeadLists(
+    listItems ? undefined : leadId
+  );
+  const { mutateAsync: addToLists } = useAddLeadToLists();
+  const { mutateAsync: removeFromList } = useRemoveLeadsFromList();
 
   const [search, setSearch] = useState("");
-  const [toggling, setToggling] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [saving, setSaving] = useState(false);
 
-  const memberListIds = new Set((memberships || []).map((m) => m.listId));
-  const isLoading = isLoadingLists || isLoadingMemberships;
+  // Initialize selectedIds when dialog opens or data loads
+  useEffect(() => {
+    if (open) {
+      if (listItems) {
+        setSelectedIds(new Set(listItems.map((item) => item.list.id)));
+      } else if (memberships) {
+        setSelectedIds(new Set(memberships.map((m) => m.listId)));
+      } else {
+        setSelectedIds(new Set());
+      }
+    }
+  }, [open, listItems, memberships]);
+
+  const isLoading = isLoadingLists || (!listItems && isLoadingMemberships);
 
   const filtered = search.trim()
     ? (allLists ?? []).filter((l) =>
@@ -43,17 +66,47 @@ export function AddToListDialog({ open, onOpenChange, leadId, leadName }: AddToL
     : (allLists ?? []);
 
   function handleToggle(listId: string) {
-    setToggling(listId);
-    if (memberListIds.has(listId)) {
-      removeFromList(
-        { listId, leadIds: [leadId] },
-        { onSettled: () => setToggling(null) },
-      );
-    } else {
-      addToLists(
-        { leadId, listIds: [listId] },
-        { onSettled: () => setToggling(null) },
-      );
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(listId)) {
+        next.delete(listId);
+      } else {
+        next.add(listId);
+      }
+      return next;
+    });
+  }
+
+  async function handleSave() {
+    const initialListIds = listItems
+      ? new Set(listItems.map((item) => item.list.id))
+      : new Set((memberships || []).map((m) => m.listId));
+
+    const added = [...selectedIds].filter((id) => !initialListIds.has(id));
+    const removed = [...initialListIds].filter((id) => !selectedIds.has(id));
+
+    if (added.length === 0 && removed.length === 0) {
+      handleClose();
+      return;
+    }
+
+    setSaving(true);
+    try {
+      if (removed.length > 0) {
+        await Promise.all(
+          removed.map((listId) =>
+            removeFromList({ listId, leadIds: [leadId] })
+          )
+        );
+      }
+      if (added.length > 0) {
+        await addToLists({ leadId, listIds: added });
+      }
+      handleClose();
+    } catch (err) {
+      console.error("Failed to update lists", err);
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -100,14 +153,13 @@ export function AddToListDialog({ open, onOpenChange, leadId, leadName }: AddToL
             )}
             {!isLoading &&
               filtered.map((list) => {
-                const isMember = memberListIds.has(list.id);
-                const isTogglingThis = toggling === list.id;
+                const isMember = selectedIds.has(list.id);
                 return (
                   <button
                     key={list.id}
                     type="button"
                     onClick={() => handleToggle(list.id)}
-                    disabled={isTogglingThis || isAdding || isRemoving}
+                    disabled={saving}
                     className={cn(
                       "w-full flex items-center gap-2.5 px-2 py-1.5 rounded-md text-left transition-colors group",
                       isMember
@@ -133,11 +185,7 @@ export function AddToListDialog({ open, onOpenChange, leadId, leadName }: AddToL
                           : "border-border group-hover:border-muted-foreground/50",
                       )}
                     >
-                      {isTogglingThis ? (
-                        <Loader2 className="size-2.5 animate-spin text-white" />
-                      ) : isMember ? (
-                        <Check className="size-2.5 text-white" />
-                      ) : null}
+                      {isMember ? <Check className="size-2.5 text-white" /> : null}
                     </div>
                   </button>
                 );
@@ -148,11 +196,11 @@ export function AddToListDialog({ open, onOpenChange, leadId, leadName }: AddToL
         {/* Footer */}
         <div className="px-4 py-3 flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
-            {memberListIds.size > 0
-              ? `In ${memberListIds.size} list${memberListIds.size > 1 ? "s" : ""}`
+            {selectedIds.size > 0
+              ? `In ${selectedIds.size} list${selectedIds.size > 1 ? "s" : ""}`
               : "Not in any list"}
           </span>
-          <Button size="sm" onClick={handleClose}>
+          <Button size="sm" onClick={handleSave} loading={saving} disabled={saving}>
             Done
           </Button>
         </div>

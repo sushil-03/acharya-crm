@@ -1,10 +1,28 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader, Card } from "@/components/ui-kit";
-import { ArrowLeft, Star, Trash2, Loader2, MoveRight, UserPlus } from "lucide-react";
+import {
+  ArrowLeft,
+  Star,
+  Trash2,
+  Loader2,
+  MoveRight,
+  UserPlus,
+  MoreHorizontal,
+  Pencil,
+  MoreVertical,
+} from "lucide-react";
 import { ListIconBadge } from "@/components/lists/list-icon";
 import { getListIconComponent } from "@/components/lists/list-icons";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { CreateListDialog } from "@/components/lists/create-list-dialog";
+import { useDeleteList } from "@/components/lists/hook/mutation/use-delete-list";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +51,7 @@ import { DataGridViewMenu } from "@/components/data-grid/data-grid-view-menu";
 import { DataGridRowHeightMenu } from "@/components/data-grid/data-grid-row-height-menu";
 import { getDataGridSelectColumn } from "@/components/data-grid/data-grid-select-column";
 import { getLeadsColumn } from "@/components/leads/lead-column";
+import InputSearch from "@/components/global/input-search";
 
 export const Route = createFileRoute("/lists/$listId")({
   component: ListDetailPage,
@@ -43,7 +62,8 @@ function ListDetailPage() {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [pageSize] = useState(100);
-  const { data: list, isLoading } = useGetList(listId, page, pageSize);
+  const [q, setQ] = useState("");
+  const { data: list, isLoading } = useGetList(listId, page, pageSize, q);
   const { data: allLists } = useGetLists();
   const { mutate: removeLeads, isPending: isRemoving } = useRemoveLeadsFromList();
   const { mutate: moveLeads, isPending: isMoving } = useBulkMoveLeads();
@@ -51,6 +71,10 @@ function ListDetailPage() {
   const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
   const [moveToListId, setMoveToListId] = useState<string>("");
   const [moveDialogOpen, setMoveDialogOpen] = useState(false);
+
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteListDialogOpen, setDeleteListDialogOpen] = useState(false);
+  const { mutate: deleteList, isPending: isDeletingList } = useDeleteList();
 
   const tableData = useMemo(() => {
     if (!list?.leads) return [];
@@ -66,9 +90,17 @@ function ListDetailPage() {
     }));
   }, [list?.leads]);
 
-  const dataGrid = useDataGrid({
+  const leadsColumns = useMemo(
+    () => [
+      getDataGridSelectColumn<any>({ enableRowMarkers: true }),
+      ...getLeadsColumn.filter((col) => col.id !== "lists"),
+    ],
+    [],
+  );
+
+  const dataGrid = useDataGrid<any>({
     data: tableData,
-    columns: [getDataGridSelectColumn(), ...getLeadsColumn],
+    columns: leadsColumns,
     readOnly: true,
     manualPagination: true,
     persistedKey: "list_leads_table",
@@ -142,7 +174,7 @@ function ListDetailPage() {
           </div>
         </div>
 
-        {selectedLeadIds.length > 0 && (
+        {selectedLeadIds.length > 0 ? (
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground font-medium">
               {selectedLeadIds.length} selected
@@ -166,15 +198,40 @@ function ListDetailPage() {
               Remove
             </Button>
           </div>
+        ) : (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="size-8">
+                <MoreVertical className="size-4.5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-36">
+              <DropdownMenuItem onClick={() => setEditDialogOpen(true)}>
+                <Pencil className="size-3.5 mr-2" />
+                Edit List
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setDeleteListDialogOpen(true)}
+                disabled={list.isSystem}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="size-3.5 mr-2" />
+                Delete List
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
 
       <div className="flex flex-col min-h-0 flex-1">
         <Card className="overflow-hidden flex flex-col min-h-0 flex-1 border-none">
           <div className="p-3 border-b border-border flex items-center justify-between gap-3">
-            <span className="text-sm text-muted-foreground">
-              <span className="font-semibold text-foreground">{list.meta.total}</span> leads
-            </span>
+            <InputSearch
+              searchTerm={q}
+              setSearchTerm={setQ}
+              className="h-7"
+              placeholder="Search by name or ID..."
+            />
             <div className="flex items-center gap-2 ml-auto">
               <DataGridViewMenu table={dataGrid.table} />
               <DataGridRowHeightMenu table={dataGrid.table} />
@@ -234,7 +291,7 @@ function ListDetailPage() {
           </AlertDialogHeader>
           <div className="py-3">
             <Select value={moveToListId} onValueChange={setMoveToListId}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a list…" />
               </SelectTrigger>
               <SelectContent>
@@ -243,7 +300,10 @@ function ListDetailPage() {
                   return (
                     <SelectItem key={l.id} value={l.id}>
                       <span className="flex items-center gap-2">
-                        <Icon className="size-3.5 shrink-0" style={{ color: l.color ?? undefined }} />
+                        <Icon
+                          className="size-3.5 shrink-0"
+                          style={{ color: l.color ?? undefined }}
+                        />
                         {l.name}
                       </span>
                     </SelectItem>
@@ -272,6 +332,41 @@ function ListDetailPage() {
             >
               {isMoving ? <Loader2 className="size-4 animate-spin mr-1.5" /> : null}
               Move
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <CreateListDialog
+        key={list.id}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        editList={list as any}
+      />
+
+      <AlertDialog open={deleteListDialogOpen} onOpenChange={setDeleteListDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete "{list.name}"?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove the list and all its lead memberships. The leads themselves won't be
+              affected.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90 text-white"
+              onClick={() => {
+                deleteList(listId, {
+                  onSuccess: () => {
+                    setDeleteListDialogOpen(false);
+                    navigate({ to: "/lists" });
+                  },
+                });
+              }}
+            >
+              {isDeletingList ? <Loader2 className="size-4 animate-spin mr-1.5" /> : null}
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
