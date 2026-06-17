@@ -20,6 +20,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as InternationalRouteImport } from './routes/international'
 import { Route as FinanceRouteImport } from './routes/finance'
 import { Route as EmailTemplatesRouteImport } from './routes/email-templates'
+import { Route as EmailCampaignsRouteImport } from './routes/email-campaigns'
 import { Route as DistributionRouteImport } from './routes/distribution'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CouponsRouteImport } from './routes/coupons'
@@ -38,6 +39,7 @@ import { Route as ListsIndexRouteImport } from './routes/lists.index'
 import { Route as LeadsIndexRouteImport } from './routes/leads.index'
 import { Route as EnrollmentIndexRouteImport } from './routes/enrollment.index'
 import { Route as EmailTemplatesIndexRouteImport } from './routes/email-templates.index'
+import { Route as EmailCampaignsIndexRouteImport } from './routes/email-campaigns.index'
 import { Route as AutomationIndexRouteImport } from './routes/automation.index'
 import { Route as UsersNewRouteImport } from './routes/users.new'
 import { Route as ProgramsNewRouteImport } from './routes/programs.new'
@@ -46,6 +48,8 @@ import { Route as ListsListIdRouteImport } from './routes/lists.$listId'
 import { Route as LeadsNewRouteImport } from './routes/leads.new'
 import { Route as LeadsLeadIdRouteImport } from './routes/leads.$leadId'
 import { Route as EnrollmentEnrollmentIdRouteImport } from './routes/enrollment.$enrollmentId'
+import { Route as EmailCampaignsNewRouteImport } from './routes/email-campaigns.new'
+import { Route as EmailCampaignsCampaignIdRouteImport } from './routes/email-campaigns.$campaignId'
 import { Route as AutomationAutomationIdRouteImport } from './routes/automation.$automationId'
 import { Route as ApplicationStartRouteImport } from './routes/application.start'
 import { Route as ApplicationApplicationIdRouteImport } from './routes/application.$applicationId'
@@ -107,6 +111,11 @@ const FinanceRoute = FinanceRouteImport.update({
 const EmailTemplatesRoute = EmailTemplatesRouteImport.update({
   id: '/email-templates',
   path: '/email-templates',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmailCampaignsRoute = EmailCampaignsRouteImport.update({
+  id: '/email-campaigns',
+  path: '/email-campaigns',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DistributionRoute = DistributionRouteImport.update({
@@ -199,6 +208,11 @@ const EmailTemplatesIndexRoute = EmailTemplatesIndexRouteImport.update({
   path: '/',
   getParentRoute: () => EmailTemplatesRoute,
 } as any)
+const EmailCampaignsIndexRoute = EmailCampaignsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => EmailCampaignsRoute,
+} as any)
 const AutomationIndexRoute = AutomationIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -239,6 +253,17 @@ const EnrollmentEnrollmentIdRoute = EnrollmentEnrollmentIdRouteImport.update({
   path: '/enrollment/$enrollmentId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EmailCampaignsNewRoute = EmailCampaignsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => EmailCampaignsRoute,
+} as any)
+const EmailCampaignsCampaignIdRoute =
+  EmailCampaignsCampaignIdRouteImport.update({
+    id: '/$campaignId',
+    path: '/$campaignId',
+    getParentRoute: () => EmailCampaignsRoute,
+  } as any)
 const AutomationAutomationIdRoute = AutomationAutomationIdRouteImport.update({
   id: '/$automationId',
   path: '/$automationId',
@@ -293,6 +318,7 @@ export interface FileRoutesByFullPath {
   '/coupons': typeof CouponsRoute
   '/dashboard': typeof DashboardRoute
   '/distribution': typeof DistributionRoute
+  '/email-campaigns': typeof EmailCampaignsRouteWithChildren
   '/email-templates': typeof EmailTemplatesRouteWithChildren
   '/finance': typeof FinanceRoute
   '/international': typeof InternationalRoute
@@ -307,6 +333,8 @@ export interface FileRoutesByFullPath {
   '/application/$applicationId': typeof ApplicationApplicationIdRoute
   '/application/start': typeof ApplicationStartRoute
   '/automation/$automationId': typeof AutomationAutomationIdRoute
+  '/email-campaigns/$campaignId': typeof EmailCampaignsCampaignIdRoute
+  '/email-campaigns/new': typeof EmailCampaignsNewRoute
   '/enrollment/$enrollmentId': typeof EnrollmentEnrollmentIdRoute
   '/leads/$leadId': typeof LeadsLeadIdRoute
   '/leads/new': typeof LeadsNewRoute
@@ -315,6 +343,7 @@ export interface FileRoutesByFullPath {
   '/programs/new': typeof ProgramsNewRoute
   '/users/new': typeof UsersNewRoute
   '/automation/': typeof AutomationIndexRoute
+  '/email-campaigns/': typeof EmailCampaignsIndexRoute
   '/email-templates/': typeof EmailTemplatesIndexRoute
   '/enrollment/': typeof EnrollmentIndexRoute
   '/leads/': typeof LeadsIndexRoute
@@ -351,6 +380,8 @@ export interface FileRoutesByTo {
   '/application/$applicationId': typeof ApplicationApplicationIdRoute
   '/application/start': typeof ApplicationStartRoute
   '/automation/$automationId': typeof AutomationAutomationIdRoute
+  '/email-campaigns/$campaignId': typeof EmailCampaignsCampaignIdRoute
+  '/email-campaigns/new': typeof EmailCampaignsNewRoute
   '/enrollment/$enrollmentId': typeof EnrollmentEnrollmentIdRoute
   '/leads/$leadId': typeof LeadsLeadIdRoute
   '/leads/new': typeof LeadsNewRoute
@@ -359,6 +390,7 @@ export interface FileRoutesByTo {
   '/programs/new': typeof ProgramsNewRoute
   '/users/new': typeof UsersNewRoute
   '/automation': typeof AutomationIndexRoute
+  '/email-campaigns': typeof EmailCampaignsIndexRoute
   '/email-templates': typeof EmailTemplatesIndexRoute
   '/enrollment': typeof EnrollmentIndexRoute
   '/leads': typeof LeadsIndexRoute
@@ -384,6 +416,7 @@ export interface FileRoutesById {
   '/coupons': typeof CouponsRoute
   '/dashboard': typeof DashboardRoute
   '/distribution': typeof DistributionRoute
+  '/email-campaigns': typeof EmailCampaignsRouteWithChildren
   '/email-templates': typeof EmailTemplatesRouteWithChildren
   '/finance': typeof FinanceRoute
   '/international': typeof InternationalRoute
@@ -398,6 +431,8 @@ export interface FileRoutesById {
   '/application/$applicationId': typeof ApplicationApplicationIdRoute
   '/application/start': typeof ApplicationStartRoute
   '/automation/$automationId': typeof AutomationAutomationIdRoute
+  '/email-campaigns/$campaignId': typeof EmailCampaignsCampaignIdRoute
+  '/email-campaigns/new': typeof EmailCampaignsNewRoute
   '/enrollment/$enrollmentId': typeof EnrollmentEnrollmentIdRoute
   '/leads/$leadId': typeof LeadsLeadIdRoute
   '/leads/new': typeof LeadsNewRoute
@@ -406,6 +441,7 @@ export interface FileRoutesById {
   '/programs/new': typeof ProgramsNewRoute
   '/users/new': typeof UsersNewRoute
   '/automation/': typeof AutomationIndexRoute
+  '/email-campaigns/': typeof EmailCampaignsIndexRoute
   '/email-templates/': typeof EmailTemplatesIndexRoute
   '/enrollment/': typeof EnrollmentIndexRoute
   '/leads/': typeof LeadsIndexRoute
@@ -432,6 +468,7 @@ export interface FileRouteTypes {
     | '/coupons'
     | '/dashboard'
     | '/distribution'
+    | '/email-campaigns'
     | '/email-templates'
     | '/finance'
     | '/international'
@@ -446,6 +483,8 @@ export interface FileRouteTypes {
     | '/application/$applicationId'
     | '/application/start'
     | '/automation/$automationId'
+    | '/email-campaigns/$campaignId'
+    | '/email-campaigns/new'
     | '/enrollment/$enrollmentId'
     | '/leads/$leadId'
     | '/leads/new'
@@ -454,6 +493,7 @@ export interface FileRouteTypes {
     | '/programs/new'
     | '/users/new'
     | '/automation/'
+    | '/email-campaigns/'
     | '/email-templates/'
     | '/enrollment/'
     | '/leads/'
@@ -490,6 +530,8 @@ export interface FileRouteTypes {
     | '/application/$applicationId'
     | '/application/start'
     | '/automation/$automationId'
+    | '/email-campaigns/$campaignId'
+    | '/email-campaigns/new'
     | '/enrollment/$enrollmentId'
     | '/leads/$leadId'
     | '/leads/new'
@@ -498,6 +540,7 @@ export interface FileRouteTypes {
     | '/programs/new'
     | '/users/new'
     | '/automation'
+    | '/email-campaigns'
     | '/email-templates'
     | '/enrollment'
     | '/leads'
@@ -522,6 +565,7 @@ export interface FileRouteTypes {
     | '/coupons'
     | '/dashboard'
     | '/distribution'
+    | '/email-campaigns'
     | '/email-templates'
     | '/finance'
     | '/international'
@@ -536,6 +580,8 @@ export interface FileRouteTypes {
     | '/application/$applicationId'
     | '/application/start'
     | '/automation/$automationId'
+    | '/email-campaigns/$campaignId'
+    | '/email-campaigns/new'
     | '/enrollment/$enrollmentId'
     | '/leads/$leadId'
     | '/leads/new'
@@ -544,6 +590,7 @@ export interface FileRouteTypes {
     | '/programs/new'
     | '/users/new'
     | '/automation/'
+    | '/email-campaigns/'
     | '/email-templates/'
     | '/enrollment/'
     | '/leads/'
@@ -569,6 +616,7 @@ export interface RootRouteChildren {
   CouponsRoute: typeof CouponsRoute
   DashboardRoute: typeof DashboardRoute
   DistributionRoute: typeof DistributionRoute
+  EmailCampaignsRoute: typeof EmailCampaignsRouteWithChildren
   EmailTemplatesRoute: typeof EmailTemplatesRouteWithChildren
   FinanceRoute: typeof FinanceRoute
   InternationalRoute: typeof InternationalRoute
@@ -673,6 +721,13 @@ declare module '@tanstack/react-router' {
       path: '/email-templates'
       fullPath: '/email-templates'
       preLoaderRoute: typeof EmailTemplatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/email-campaigns': {
+      id: '/email-campaigns'
+      path: '/email-campaigns'
+      fullPath: '/email-campaigns'
+      preLoaderRoute: typeof EmailCampaignsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/distribution': {
@@ -801,6 +856,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EmailTemplatesIndexRouteImport
       parentRoute: typeof EmailTemplatesRoute
     }
+    '/email-campaigns/': {
+      id: '/email-campaigns/'
+      path: '/'
+      fullPath: '/email-campaigns/'
+      preLoaderRoute: typeof EmailCampaignsIndexRouteImport
+      parentRoute: typeof EmailCampaignsRoute
+    }
     '/automation/': {
       id: '/automation/'
       path: '/'
@@ -856,6 +918,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/enrollment/$enrollmentId'
       preLoaderRoute: typeof EnrollmentEnrollmentIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/email-campaigns/new': {
+      id: '/email-campaigns/new'
+      path: '/new'
+      fullPath: '/email-campaigns/new'
+      preLoaderRoute: typeof EmailCampaignsNewRouteImport
+      parentRoute: typeof EmailCampaignsRoute
+    }
+    '/email-campaigns/$campaignId': {
+      id: '/email-campaigns/$campaignId'
+      path: '/$campaignId'
+      fullPath: '/email-campaigns/$campaignId'
+      preLoaderRoute: typeof EmailCampaignsCampaignIdRouteImport
+      parentRoute: typeof EmailCampaignsRoute
     }
     '/automation/$automationId': {
       id: '/automation/$automationId'
@@ -923,6 +999,22 @@ const AutomationRouteWithChildren = AutomationRoute._addFileChildren(
   AutomationRouteChildren,
 )
 
+interface EmailCampaignsRouteChildren {
+  EmailCampaignsCampaignIdRoute: typeof EmailCampaignsCampaignIdRoute
+  EmailCampaignsNewRoute: typeof EmailCampaignsNewRoute
+  EmailCampaignsIndexRoute: typeof EmailCampaignsIndexRoute
+}
+
+const EmailCampaignsRouteChildren: EmailCampaignsRouteChildren = {
+  EmailCampaignsCampaignIdRoute: EmailCampaignsCampaignIdRoute,
+  EmailCampaignsNewRoute: EmailCampaignsNewRoute,
+  EmailCampaignsIndexRoute: EmailCampaignsIndexRoute,
+}
+
+const EmailCampaignsRouteWithChildren = EmailCampaignsRoute._addFileChildren(
+  EmailCampaignsRouteChildren,
+)
+
 interface EmailTemplatesRouteChildren {
   EmailTemplatesIndexRoute: typeof EmailTemplatesIndexRoute
   EmailTemplatesCreateHtmlRoute: typeof EmailTemplatesCreateHtmlRoute
@@ -956,6 +1048,7 @@ const rootRouteChildren: RootRouteChildren = {
   CouponsRoute: CouponsRoute,
   DashboardRoute: DashboardRoute,
   DistributionRoute: DistributionRoute,
+  EmailCampaignsRoute: EmailCampaignsRouteWithChildren,
   EmailTemplatesRoute: EmailTemplatesRouteWithChildren,
   FinanceRoute: FinanceRoute,
   InternationalRoute: InternationalRoute,

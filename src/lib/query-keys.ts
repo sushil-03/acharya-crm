@@ -21,4 +21,8 @@ export const QUERY_KEYS = {
   GET_LISTS: "get-lists",
   GET_LIST_BY_ID: "get-list-by-id",
   GET_LEAD_LISTS: "get-lead-lists",
+  GET_EMAIL_CAMPAIGNS: "get-email-campaigns",
+  GET_EMAIL_CAMPAIGN: "get-email-campaign",
+  GET_CAMPAIGN_RECIPIENTS: "get-campaign-recipients",
+  GET_PREVIEW_RECIPIENTS: "get-preview-recipients",
 } as const;

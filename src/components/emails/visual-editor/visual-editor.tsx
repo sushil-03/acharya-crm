@@ -14,9 +14,12 @@ import { useGetEmailTemplateDetails } from "../hooks/query/use-get-email-templat
 import { useGetEmailTemplateCategories } from "../hooks/query/use-get-email-template-categories";
 import { useCreateEmailTemplate } from "../hooks/mutation/use-create-email-template";
 import { useUpdateEmailTemplate } from "../hooks/mutation/use-update-email-template";
-
+import { CampaignStepper } from "@/components/emails/campaigns/campaign-stepper";
+import { CampaignNavBar } from "@/components/emails/campaigns/campaign-nav-bar";
+import { useCampaignCreationStore } from "@/store/use-campaign-creation-store";
 
 export function VisualEditor({ id }: { id?: string }) {
+  const campaignStep = useCampaignCreationStore((s) => s.step);
   const navigate = useNavigate();
 
   const [name, setName] = useState("");
@@ -29,7 +32,9 @@ export function VisualEditor({ id }: { id?: string }) {
   const [status, setStatus] = useState<"Draft" | "Published">("Draft");
   const [template, setTemplate] = useState<any>(null);
 
-  const [activeTab, setActiveTab] = useState<"content" | "rows" | "settings" | "variables">("content");
+  const [activeTab, setActiveTab] = useState<"content" | "rows" | "settings" | "variables">(
+    "content",
+  );
   const [selectedType, setSelectedType] = useState<string>("None");
   const [isPreviewActive, setIsPreviewActive] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -49,9 +54,13 @@ export function VisualEditor({ id }: { id?: string }) {
   const { mutateAsync: updateTemplate, isPending: isUpdating } = useUpdateEmailTemplate();
   const isSaving = isCreating || isUpdating;
 
-  const templateKey = id && templateDetails?.key
-    ? templateDetails.key
-    : (name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "") || "test_template");
+  const templateKey =
+    id && templateDetails?.key
+      ? templateDetails.key
+      : name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "_")
+          .replace(/^_+|_+$/g, "") || "test_template";
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -280,8 +289,6 @@ export function VisualEditor({ id }: { id?: string }) {
   const undo = () => editorRef.current?.UndoManager.undo();
   const redo = () => editorRef.current?.UndoManager.redo();
 
-
-
   const getEditorHtmlContent = () => {
     if (editorRef.current) {
       return editorRef.current.getHtml() + `<style>${editorRef.current.getCss()}</style>`;
@@ -348,10 +355,11 @@ export function VisualEditor({ id }: { id?: string }) {
 
   return (
     <AppShell noPadding>
+      {campaignStep > 0 && <CampaignStepper />}
       <div
         ref={containerRef}
         className={`flex flex-col overflow-hidden bg-background ${
-          isFullscreen ? "h-screen w-screen" : "h-[calc(100vh-64px)]"
+          isFullscreen ? "h-screen w-screen" : campaignStep > 0 ? "flex-1 min-h-0" : "h-[calc(100vh-64px)]"
         }`}
       >
         <EditorHeader
@@ -360,6 +368,7 @@ export function VisualEditor({ id }: { id?: string }) {
           setStatus={setStatus}
           handleSave={handleSave}
           isSaving={isSaving}
+          isEditing={!!id}
         />
         <EditorInputs
           name={name}
@@ -429,7 +438,7 @@ export function VisualEditor({ id }: { id?: string }) {
               </div>
             </div>
             <div className="flex-1 relative overflow-hidden">
-              <div id="gjs" className="gjs-editor-container" />
+              <div id="gjs" className="gjs-editor-container h-full" />
             </div>
           </div>
           <EditorSidebar
@@ -443,6 +452,9 @@ export function VisualEditor({ id }: { id?: string }) {
             className={isPreviewActive ? "!hidden" : ""}
           />
         </div>
+        {campaignStep > 0 && (
+          <CampaignNavBar statusText="Save your design then proceed to select recipients." />
+        )}
       </div>
       <EditorModals
         linkModalOpen={linkModalOpen}

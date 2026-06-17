@@ -3,8 +3,9 @@ import { PageHeader, Card, StatCard, Badge } from "@/components/ui-kit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Search, Mail, Sparkles, FileCode2, CheckCircle2, Loader2 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { useCampaignCreationStore } from "@/store/use-campaign-creation-store";
 import { toast } from "sonner";
 import { useGetEmailTemplates } from "./hooks/query/use-get-email-templates";
 import { useGetEmailTemplateCategories } from "./hooks/query/use-get-email-template-categories";
@@ -38,6 +39,12 @@ import {
 
 export function EmailTemplatesList() {
   const navigate = useNavigate();
+  const resetCampaignStore = useCampaignCreationStore((s) => s.reset);
+
+  useEffect(() => {
+    resetCampaignStore();
+  }, []);
+
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -189,9 +196,7 @@ export function EmailTemplatesList() {
 
   const handleProceed = (editorType: "visual" | "rich-text" | "plain-text" | "html") => {
     setIsCreateOpen(false);
-    navigate({
-      to: `/email-templates/create/${editorType}`,
-    });
+    navigate({ to: `/email-templates/create/${editorType}` });
   };
 
   if (error) {
@@ -327,7 +332,6 @@ export function EmailTemplatesList() {
           </Card>
         </div>
       </div>
-      {/* Editor Choice Dialog (Create From Scratch) */}
       <EditorChoiceDialog
         open={isCreateOpen}
         onOpenChange={setIsCreateOpen}

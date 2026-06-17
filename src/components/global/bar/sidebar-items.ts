@@ -59,6 +59,7 @@ export const navItems: NavigationItem[] = [
     items: [
       { label: "Flows", to: "/automation" },
       { label: "Email Library", to: "/email-templates" },
+      { label: "Email Campaigns", to: "/email-campaigns" },
     ],
   },
 ];

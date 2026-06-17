@@ -27,6 +27,7 @@
     sans-serif !important;
   color: var(--foreground) !important;
   background-color: var(--background) !important;
+  height: 100% !important;
 }
 
 .gjs-cv-canvas {

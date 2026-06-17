@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
-import { useNavigate } from "@tanstack/react-router";
+import { useRouter } from "@tanstack/react-router";
 import {
   Select,
   SelectContent,
@@ -16,10 +16,11 @@ interface EditorHeaderProps {
   setStatus: (status: "Draft" | "Published") => void;
   onSave: () => void;
   isSaving?: boolean;
+  isEditing?: boolean;
 }
 
-export function EditorHeader({ name, status, setStatus, onSave, isSaving }: EditorHeaderProps) {
-  const navigate = useNavigate();
+export function EditorHeader({ name, status, setStatus, onSave, isSaving, isEditing }: EditorHeaderProps) {
+  const router = useRouter();
 
   return (
     <div className="px-5 py-4 border-b border-border bg-card flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
@@ -27,7 +28,7 @@ export function EditorHeader({ name, status, setStatus, onSave, isSaving }: Edit
         <Button
           variant="outline"
           size="icon"
-          onClick={() => navigate({ to: "/email-templates" })}
+          onClick={() => router.history.back()}
           className="size-8"
           disabled={isSaving}
         >
@@ -69,7 +70,7 @@ export function EditorHeader({ name, status, setStatus, onSave, isSaving }: Edit
             </>
           ) : (
             <>
-              <Save className="size-4" /> Save Template
+              <Save className="size-4" /> {isEditing ? "Update Template" : "Save Template"}
             </>
           )}
         </Button>

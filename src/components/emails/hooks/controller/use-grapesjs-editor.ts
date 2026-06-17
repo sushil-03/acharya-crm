@@ -311,13 +311,11 @@ export function useGrapesJsEditor({
         if (model) {
           const type = model.get("type") || "Element";
           setSelectedType(type.charAt(0).toUpperCase() + type.slice(1));
-          // Remove the useless "title" trait (sets HTML tooltip only) from every component
           const traits = model.get("traits");
           if (traits) {
             const titleTrait = traits.where({ name: "title" })[0];
             if (titleTrait) traits.remove(titleTrait);
           }
-          setActiveTab("settings");
         }
       });
       editor.on("component:deselected", () => setSelectedType("None"));

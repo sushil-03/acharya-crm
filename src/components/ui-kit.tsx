@@ -1,35 +1,54 @@
-import { ReactNode } from "react";
+import { ReactNode, HTMLAttributes } from "react";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "./ui/button";
 
 export function PageHeader({
   title,
   subtitle,
   actions,
   breadcrumb,
+  handleBack,
 }: {
   title: string;
   subtitle?: string;
   actions?: ReactNode;
   breadcrumb?: string;
+  handleBack?: () => void;
 }) {
   return (
-    <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 p-2">
-      <div>
-        {breadcrumb && (
-          <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-semibold mb-1.5">
-            {breadcrumb}
-          </div>
+    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-2">
+      <div className="flex items-center gap-3">
+        {handleBack && (
+          <Button
+            onClick={handleBack}
+            size={"sm"}
+            variant={"outline"}
+            // className="size-9 rounded-lg border border-border bg-background hover:bg-muted text-muted-foreground hover:text-foreground transition-all shadow-sm shrink-0"
+            aria-label="Go back"
+          >
+            <ArrowLeft />
+          </Button>
         )}
-        <h1 className="font-display text-[22px] font-semibold leading-tight">{title}</h1>
-        {/* {subtitle && <p className="text-sm text-muted-foreground mt-1 max-w-2xl">{subtitle}</p>} */}
+        <div>
+          {breadcrumb && (
+            <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-semibold mb-1">
+              {breadcrumb}
+            </div>
+          )}
+          <h1 className="font-display text-[22px] font-semibold leading-tight">{title}</h1>
+        </div>
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
     </div>
   );
 }
 
-export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
+export function Card({ children, className = "", ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={`rounded-xl bg-card border border-border shadow-elev-1 ${className}`}>
+    <div
+      className={`rounded-xl bg-card border border-border shadow-elev-1 ${className}`}
+      {...props}
+    >
       {children}
     </div>
   );

@@ -7,22 +7,29 @@ import { EditorPane } from "./editor-pane";
 import { EditorSidebar } from "./editor-sidebar";
 import { Loader2 } from "lucide-react";
 
-interface RichTextEditorProps {
-  id?: string;
-}
+import { CampaignStepper } from "@/components/emails/campaigns/campaign-stepper";
+import { CampaignNavBar } from "@/components/emails/campaigns/campaign-nav-bar";
+import { useCampaignCreationStore } from "@/store/use-campaign-creation-store";
 
-export function RichTextEditor({ id }: RichTextEditorProps) {
+export function RichTextEditor({ id }: { id?: string }) {
   const editor = useRichTextEditor(id);
+  const campaignStep = useCampaignCreationStore((s) => s.step);
 
   return (
     <AppShell noPadding>
-      <div className="flex flex-col h-[calc(100vh-64px)] overflow-hidden bg-background">
+      {campaignStep > 0 && <CampaignStepper />}
+      <div
+        className={`flex flex-col overflow-hidden bg-background ${
+          campaignStep > 0 ? "flex-1 min-h-0" : "h-[calc(100vh-64px)]"
+        }`}
+      >
         <EditorHeader
           name={editor.name}
           status={editor.status}
           setStatus={editor.setStatus}
           onSave={editor.handleSave}
           isSaving={editor.isSaving}
+          isEditing={!!id}
         />
 
         <EditorInputs
@@ -48,7 +55,9 @@ export function RichTextEditor({ id }: RichTextEditorProps) {
           {id && editor.isLoadingDetails && (
             <div className="absolute inset-0 bg-background/80 z-[10000] flex flex-col items-center justify-center gap-3 backdrop-blur-[2px]">
               <Loader2 className="size-8 animate-spin text-primary" />
-              <p className="text-muted-foreground text-sm font-medium">Loading rich text template details...</p>
+              <p className="text-muted-foreground text-sm font-medium">
+                Loading rich text template details...
+              </p>
             </div>
           )}
           <EditorPane />
@@ -62,8 +71,11 @@ export function RichTextEditor({ id }: RichTextEditorProps) {
             content={editor.content}
           />
         </div>
+
+        {campaignStep > 0 && (
+          <CampaignNavBar statusText="Save your template then proceed to select recipients." />
+        )}
       </div>
     </AppShell>
   );
 }
-

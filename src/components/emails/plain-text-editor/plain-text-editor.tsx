@@ -1,5 +1,8 @@
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useRouter } from "@tanstack/react-router";
 import { AppShell } from "@/components/app-shell";
+import { CampaignStepper } from "@/components/emails/campaigns/campaign-stepper";
+import { CampaignNavBar } from "@/components/emails/campaigns/campaign-nav-bar";
+import { useCampaignCreationStore } from "@/store/use-campaign-creation-store";
 import { Card } from "@/components/ui-kit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,12 +36,10 @@ import { useEmailVariables } from "../hooks/use-email-variables";
 import { SendTestEmail } from "../components/send-test-email";
 
 
-interface PlainTextEditorProps {
-  id?: string;
-}
-
-export function PlainTextEditor({ id }: PlainTextEditorProps) {
+export function PlainTextEditor({ id }: { id?: string }) {
+  const campaignStep = useCampaignCreationStore((s) => s.step);
   const navigate = useNavigate();
+  const router = useRouter();
 
   const [name, setName] = useState("");
   const [subject, setSubject] = useState("");
@@ -199,14 +200,15 @@ Acharya Admissions Desk`);
 
   return (
     <AppShell noPadding>
-      <div className="flex flex-col h-[calc(100vh-64px)] overflow-hidden bg-background">
+      {campaignStep > 0 && <CampaignStepper />}
+      <div className={`flex flex-col overflow-hidden bg-background ${campaignStep > 0 ? "flex-1 min-h-0" : "h-[calc(100vh-64px)]"}`}>
         {/* Editor Header Bar */}
         <div className="px-5 py-4 border-b border-border bg-card flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
           <div className="flex items-center gap-3">
             <Button
               variant="outline"
               size="icon"
-              onClick={() => navigate({ to: "/email-templates" })}
+              onClick={() => router.history.back()}
               className="size-8"
               disabled={isSaving}
             >
@@ -248,7 +250,7 @@ Acharya Admissions Desk`);
                 </>
               ) : (
                 <>
-                  <Save className="size-4" /> Save Template
+                  <Save className="size-4" /> {id ? "Update Template" : "Save Template"}
                 </>
               )}
             </Button>
@@ -440,6 +442,9 @@ Acharya Admissions Desk`);
             />
           </div>
         </div>
+        {campaignStep > 0 && (
+          <CampaignNavBar statusText="Save your template then proceed to select recipients." />
+        )}
       </div>
     </AppShell>
   );
