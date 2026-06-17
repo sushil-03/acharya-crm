@@ -4,7 +4,7 @@ export interface EmailTemplate {
   subject: string;
   type: "visual" | "rich-text" | "html" | "plain-text";
   content: string; // HTML string or plain text
-  visualData?: string; // GrapesJS specific JSON string representing layout state
+  visualData?: string; // JSON string representing visual editor layout state
   tags: string[];
   createdBy: string;
   modifiedBy: string;

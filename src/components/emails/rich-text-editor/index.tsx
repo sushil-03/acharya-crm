@@ -5,6 +5,7 @@ import { EditorHeader } from "./editor-header";
 import { EditorInputs } from "./editor-inputs";
 import { EditorPane } from "./editor-pane";
 import { EditorSidebar } from "./editor-sidebar";
+import { TemplatePickerModal } from "./template-picker-modal";
 import { Loader2 } from "lucide-react";
 
 import { CampaignStepper } from "@/components/emails/campaigns/campaign-stepper";
@@ -17,10 +18,15 @@ export function RichTextEditor({ id }: { id?: string }) {
 
   return (
     <AppShell noPadding>
+      <TemplatePickerModal
+        open={editor.showTemplatePicker}
+        onClose={() => editor.setShowTemplatePicker(false)}
+        onSelect={editor.insertTemplate}
+      />
       {campaignStep > 0 && <CampaignStepper />}
       <div
         className={`flex flex-col overflow-hidden bg-background ${
-          campaignStep > 0 ? "flex-1 min-h-0" : "h-[calc(100vh-64px)]"
+          campaignStep > 0 ? "flex-1 min-h-0" : "flex-1"
         }`}
       >
         <EditorHeader

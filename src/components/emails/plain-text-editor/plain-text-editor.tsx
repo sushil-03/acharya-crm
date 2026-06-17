@@ -3,20 +3,21 @@ import { AppShell } from "@/components/app-shell";
 import { CampaignStepper } from "@/components/emails/campaigns/campaign-stepper";
 import { CampaignNavBar } from "@/components/emails/campaigns/campaign-nav-bar";
 import { useCampaignCreationStore } from "@/store/use-campaign-creation-store";
+import { TemplatePickerModal } from "@/components/emails/rich-text-editor/template-picker-modal";
 import { Card } from "@/components/ui-kit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   ArrowLeft,
   Save,
-  Send,
   Sparkles,
   FileText,
   Loader2,
   Plus,
   Trash2,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  LayoutTemplate,
 } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
@@ -50,6 +51,7 @@ export function PlainTextEditor({ id }: { id?: string }) {
   const [status, setStatus] = useState<"Draft" | "Published">("Draft");
   const [newVarLabel, setNewVarLabel] = useState("");
   const [showAllVars, setShowAllVars] = useState(false);
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false);
   const lastFocusedRef = useRef<"subject" | "content">("content");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const isLoadedRef = useRef(false);
@@ -198,10 +200,30 @@ Acharya Admissions Desk`);
   };
 
 
+  const handleTemplateSelect = (content: string) => {
+    setContent(content);
+  };
+
+  const plainTextTransform = (htmlBody: string, textBody: string): string => {
+    if (textBody) return textBody;
+    try {
+      const doc = new DOMParser().parseFromString(htmlBody, "text/html");
+      return doc.body.textContent || "";
+    } catch {
+      return htmlBody.replace(/<[^>]+>/g, "");
+    }
+  };
+
   return (
     <AppShell noPadding>
+      <TemplatePickerModal
+        open={showTemplatePicker}
+        onClose={() => setShowTemplatePicker(false)}
+        onSelect={handleTemplateSelect}
+        transformContent={plainTextTransform}
+      />
       {campaignStep > 0 && <CampaignStepper />}
-      <div className={`flex flex-col overflow-hidden bg-background ${campaignStep > 0 ? "flex-1 min-h-0" : "h-[calc(100vh-64px)]"}`}>
+      <div className={`flex flex-col overflow-hidden bg-background ${campaignStep > 0 ? "flex-1 min-h-0" : "flex-1"}`}>
         {/* Editor Header Bar */}
         <div className="px-5 py-4 border-b border-border bg-card flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
           <div className="flex items-center gap-3">
@@ -333,10 +355,21 @@ Acharya Admissions Desk`);
           )}
 
           {/* Text Editor Area */}
-          <div className="flex-1 flex flex-col h-full bg-slate-50 p-6 overflow-y-auto">
-            <Card className="max-w-[700px] w-full mx-auto flex flex-col h-full overflow-hidden shadow-elev-2 bg-white">
-              <div className="px-4 py-2 border-b border-border bg-muted/20 text-muted-foreground text-[11px] font-semibold flex items-center gap-1.5 shrink-0">
-                <FileText className="size-3.5" /> plain-text-message.txt
+          <div className="flex-1 flex flex-col h-full bg-slate-50 p-2 overflow-y-auto">
+            <Card className="w-full flex flex-col h-full overflow-hidden shadow-elev-2 bg-white">
+              <div className="px-4 py-2 border-b border-border bg-muted/20 text-muted-foreground text-[11px] font-semibold flex items-center justify-between gap-1.5 shrink-0">
+                <div className="flex items-center gap-1.5">
+                  <FileText className="size-3.5" /> plain-text-message.txt
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowTemplatePicker(true)}
+                  className="h-6 text-[11px] gap-1 px-2 font-semibold"
+                >
+                  <LayoutTemplate className="size-3" /> Use Template
+                </Button>
               </div>
               <textarea
                 ref={textareaRef}

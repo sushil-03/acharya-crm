@@ -1,7 +1,6 @@
 @import "tailwindcss";
 /* @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap"); */
 @import "tw-animate-css";
-@import "./grapesjs-editor.css";
 
 @source "../src";
 @custom-variant dark (&:is(.dark *));

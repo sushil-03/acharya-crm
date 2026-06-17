@@ -3,36 +3,59 @@ import { useState, useEffect } from "react";
 export interface EmailVariable {
   key: string;
   label: string;
+  category?: string;
   isCustom?: boolean;
 }
 
 export const DEFAULT_VARIABLES: EmailVariable[] = [
-  { label: "First Name", key: "FirstName" },
-  { label: "Last Name", key: "LastName" },
-  { label: "Course Name", key: "CourseName" },
-  { label: "Application ID", key: "ApplicationID" },
-  { label: "Parent Name", key: "ParentName" },
-  { label: "Parent Number", key: "ParentNumber" },
-  { label: "Campus Name", key: "CampusName" },
-  { label: "Counsellor Name", key: "CounsellorName" },
-  { label: "Fee Amount", key: "FeeAmount" },
-  { label: "Scholarship Percentage", key: "ScholarshipPercentage" },
+  { label: "First Name", key: "FirstName", category: "Student" },
+  { label: "Last Name", key: "LastName", category: "Student" },
+  { label: "Course Name", key: "CourseName", category: "Application" },
+  { label: "Application ID", key: "ApplicationID", category: "Application" },
+  { label: "Parent Name", key: "ParentName", category: "Contact" },
+  { label: "Parent Number", key: "ParentNumber", category: "Contact" },
+  { label: "Campus Name", key: "CampusName", category: "Institution" },
+  { label: "Counsellor Name", key: "CounsellorName", category: "Institution" },
+  { label: "Fee Amount", key: "FeeAmount", category: "Finance" },
+  { label: "Scholarship Percentage", key: "ScholarshipPercentage", category: "Finance" },
 ];
 
-export function useEmailVariables() {
-  const [variables, setVariables] = useState<EmailVariable[]>(() => {
-    try {
-      const stored = localStorage.getItem("email_template_variables");
-      if (stored) {
-        const parsed = JSON.parse(stored) as EmailVariable[];
-        const customOnly = parsed.filter(v => !DEFAULT_VARIABLES.some(d => d.key === v.key));
-        return [...DEFAULT_VARIABLES, ...customOnly.map(v => ({ ...v, isCustom: true }))];
-      }
-    } catch (e) {
-      console.error("Failed to parse stored variables", e);
+export function loadAllVariables(): EmailVariable[] {
+  try {
+    const stored = localStorage.getItem("email_template_variables");
+    if (stored) {
+      const parsed: EmailVariable[] = JSON.parse(stored);
+      const customOnly = parsed.filter((v) => !DEFAULT_VARIABLES.some((d) => d.key === v.key));
+      return [...DEFAULT_VARIABLES, ...customOnly.map((v) => ({ ...v, isCustom: true }))];
     }
-    return DEFAULT_VARIABLES;
+  } catch {}
+  return [...DEFAULT_VARIABLES];
+}
+
+export function buildUnlayerMergeTags(
+  vars: EmailVariable[],
+): Record<string, { name: string; mergeTags: Record<string, { name: string; value: string; sample: string }> }> {
+  const groups: Record<string, EmailVariable[]> = {};
+  vars.forEach((v) => {
+    const cat = v.category ?? (v.isCustom ? "Custom" : "General");
+    if (!groups[cat]) groups[cat] = [];
+    groups[cat].push(v);
   });
+  return Object.fromEntries(
+    Object.entries(groups).map(([catName, catVars]) => [
+      catName.toLowerCase().replace(/[^a-z0-9]+/g, "_"),
+      {
+        name: catName,
+        mergeTags: Object.fromEntries(
+          catVars.map((v) => [v.key, { name: v.label, value: `{{${v.key}}}`, sample: v.label }]),
+        ),
+      },
+    ]),
+  );
+}
+
+export function useEmailVariables() {
+  const [variables, setVariables] = useState<EmailVariable[]>(loadAllVariables);
 
   const addVariable = (label: string, keyInput?: string) => {
     const trimmedLabel = label.trim();

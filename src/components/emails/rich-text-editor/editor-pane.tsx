@@ -6,7 +6,7 @@ import { EDITOR_ID } from "./constants";
 export function EditorPane() {
   return (
     <div className="flex-1 flex flex-col h-full bg-slate-50 p-2 overflow-y-auto">
-      <Card className="max-w-[800px] w-full mx-auto flex flex-col h-full overflow-hidden p-0 shadow-elev-2 bg-white min-h-[400px]">
+      <Card className="w-full flex flex-col h-full overflow-hidden p-0 shadow-elev-2 bg-white min-h-[400px]">
         <div className="flex-1 w-full bg-white relative">
           <textarea
             id={EDITOR_ID}

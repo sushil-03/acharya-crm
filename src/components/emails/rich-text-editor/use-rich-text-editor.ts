@@ -20,9 +20,14 @@ export function useRichTextEditor(id?: string) {
   const [status, setStatus] = useState<"Draft" | "Published">("Draft");
   const [testEmails, setTestEmails] = useState("");
 
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false);
+
   const lastFocusedRef = useRef<"subject" | "content">("content");
   const contentValRef = useRef("");
   const isLoadedRef = useRef(false);
+  // Kept up-to-date each render so TinyMCE callback is never stale
+  const openTemplatePickerRef = useRef(() => setShowTemplatePicker(true));
+  openTemplatePickerRef.current = () => setShowTemplatePicker(true);
 
   // Queries & Mutations
   const { data: templateDetails, isLoading: isLoadingDetails } = useGetEmailTemplateDetails(id);
@@ -74,7 +79,7 @@ export function useRichTextEditor(id?: string) {
     const initTiny = () => {
       if (!active || !(window as any).tinymce) return;
       (window as any).tinymce.remove(`#${EDITOR_ID}`);
-      (window as any).tinymce.init(buildTinyConfig(contentValRef, setContent, lastFocusedRef));
+      (window as any).tinymce.init(buildTinyConfig(contentValRef, setContent, lastFocusedRef, openTemplatePickerRef));
     };
 
     if (!script) {
@@ -162,6 +167,16 @@ export function useRichTextEditor(id?: string) {
     }
   }
 
+  function insertTemplate(htmlBody: string) {
+    const editor = (window as any).tinymce?.get(EDITOR_ID);
+    if (editor) {
+      editor.setContent(htmlBody);
+      setContent(htmlBody);
+    } else {
+      setContent(htmlBody);
+    }
+  }
+
   function insertMergeField(key: string) {
     const placeholder = `{{${key}}}`;
     if (lastFocusedRef.current === "subject") {
@@ -208,9 +223,12 @@ export function useRichTextEditor(id?: string) {
     handleRemoveTag,
     handleSave,
     insertMergeField,
+    insertTemplate,
     handleSendTest,
     isSaving,
     isLoadingDetails,
+    showTemplatePicker,
+    setShowTemplatePicker,
   };
 }
 
@@ -223,6 +241,7 @@ function buildTinyConfig(
   contentValRef: MutableRefObject<string>,
   setContent: (c: string) => void,
   lastFocusedRef: MutableRefObject<"subject" | "content">,
+  openTemplatePickerRef: MutableRefObject<() => void>,
 ) {
   return {
     selector: `#${EDITOR_ID}`,
@@ -250,7 +269,7 @@ function buildTinyConfig(
     ],
     toolbar: [
       "fontfamily fontsize | forecolor backcolor | bold italic underline strikethrough | subscript superscript | removeformat",
-      "alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link anchor | image media table | emoticons charmap | mailmergefields | code fullscreen preview",
+      "alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link anchor | image media table | emoticons charmap | mailmergefields | usetemplatebutton | code fullscreen preview",
     ],
     toolbar_mode: "wrap" as const,
     image_advtab: true,
@@ -282,6 +301,12 @@ function buildTinyConfig(
       "body { font-family:'Plus Jakarta Sans',Helvetica,Arial,sans-serif; font-size:14px; color: #1e293b; padding: 10px; margin: 0; }",
     branding: false,
     setup: (editor: any) => {
+      editor.ui.registry.addButton("usetemplatebutton", {
+        text: "Use Template",
+        tooltip: "Load content from an existing template",
+        onAction: () => openTemplatePickerRef.current(),
+      });
+
       editor.ui.registry.addMenuButton("mailmergefields", {
         text: "Mail Merge Fields",
         tooltip: "Insert a personalization field",
