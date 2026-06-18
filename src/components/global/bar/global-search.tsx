@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Search, ChevronDown, X, User, FileText } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -20,9 +21,10 @@ type SearchType = "Leads" | "Applications";
 
 interface GlobalSearchProps {
   isCollapsed?: boolean;
+  iconOnly?: boolean;
 }
 
-export function GlobalSearch({ isCollapsed = false }: GlobalSearchProps) {
+export function GlobalSearch({ isCollapsed = false, iconOnly = false }: GlobalSearchProps) {
   const [open, setOpen] = React.useState(false);
   const [searchType, setSearchType] = React.useState<SearchType>("Leads");
   const [query, setQuery] = React.useState("");
@@ -252,19 +254,23 @@ export function GlobalSearch({ isCollapsed = false }: GlobalSearchProps) {
   return (
     <>
       {/* Search Trigger Button */}
-      {isCollapsed ? (
+      {isCollapsed || iconOnly ? (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <button
                 onClick={() => setOpen(true)}
-                className="group flex items-center justify-center rounded-lg size-9 text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors duration-200 cursor-pointer mx-auto"
+                className={cn(
+                  "group flex items-center justify-center rounded-lg transition-colors duration-200 cursor-pointer text-sidebar-foreground/75 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
+                  iconOnly ? "size-7" : "size-9",
+                )}
               >
-                <Search className="size-4.5 transition-transform duration-200 group-hover:scale-105" />
+                <Search className={cn(iconOnly ? "size-4" : "size-4.5", "transition-transform duration-200 group-hover:scale-105")} />
               </button>
             </TooltipTrigger>
-            <TooltipContent side="right">
-              <span className="font-medium">Search (⌘K)</span>
+            <TooltipContent side={iconOnly ? "bottom" : "right"}>
+              <span className="font-medium">Search</span>
+              <kbd className="ml-1.5 rounded bg-muted px-1 py-0.5 text-[10px] font-mono text-muted-foreground">⌘K</kbd>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

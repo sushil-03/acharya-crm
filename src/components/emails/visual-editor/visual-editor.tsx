@@ -9,6 +9,8 @@ import { EditorHeader } from "./editor-header";
 import { EditorInputs } from "./editor-inputs";
 import { VariablesTabPanel } from "./variables-tab-panel";
 import { MergeTagPicker } from "./merge-tag-picker";
+import { SendTestEmail } from "../components/send-test-email";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useGetEmailTemplateDetails } from "../hooks/query/use-get-email-template-details";
 import { useGetEmailTemplateCategories } from "../hooks/query/use-get-email-template-categories";
 import { useCreateEmailTemplate } from "../hooks/mutation/use-create-email-template";
@@ -17,7 +19,6 @@ import { CampaignStepper } from "@/components/emails/campaigns/campaign-stepper"
 import { CampaignNavBar } from "@/components/emails/campaigns/campaign-nav-bar";
 import { useCampaignCreationStore } from "@/store/use-campaign-creation-store";
 
-
 export function VisualEditor({ id }: { id?: string }) {
   const campaignStep = useCampaignCreationStore((s) => s.step);
   const navigate = useNavigate();
@@ -25,13 +26,14 @@ export function VisualEditor({ id }: { id?: string }) {
   const [name, setName] = useState("");
   const [subject, setSubject] = useState("");
   const [category, setCategory] = useState("");
-  const [, setContent] = useState("");
+  const [content, setContent] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [status, setStatus] = useState<"Draft" | "Published">("Draft");
 
   const [isEditorReady, setIsEditorReady] = useState(false);
   const [showMergeTagPicker, setShowMergeTagPicker] = useState(false);
+  const [showTestEmailModal, setShowTestEmailModal] = useState(false);
 
   const emailEditorRef = useRef<EditorRef>(null);
   const isLoadedRef = useRef(false);
@@ -85,7 +87,73 @@ export function VisualEditor({ id }: { id?: string }) {
           console.error("Error loading design JSON", err);
         }
       }
-      // Fall back to blank if no valid design
+
+      // No Unlayer design JSON — try to load the raw htmlBody into a single HTML block
+      // so pre-existing HTML templates are visible and editable.
+      if (templateDetails.htmlBody) {
+        let bodyContent = templateDetails.htmlBody;
+        try {
+          const doc = new DOMParser().parseFromString(templateDetails.htmlBody, "text/html");
+          // Preserve <style> blocks from <head> so class-based styles still apply
+          const headStyles = Array.from(doc.querySelectorAll("head style"))
+            .map((s) => s.outerHTML)
+            .join("\n");
+          bodyContent =
+            (headStyles ? headStyles + "\n" : "") +
+            (doc.body.innerHTML || templateDetails.htmlBody);
+        } catch {
+          // keep raw html as-is
+        }
+
+        unlayer.loadDesign({
+          schemaVersion: 14,
+          body: {
+            rows: [
+              {
+                cells: [1],
+                columns: [
+                  {
+                    contents: [
+                      {
+                        type: "html",
+                        values: {
+                          html: bodyContent,
+                          _meta: { htmlID: "u_content_html_1", htmlClassNames: "u_content_html" },
+                        },
+                      },
+                    ],
+                    values: {
+                      _meta: { htmlID: "u_column_1", htmlClassNames: "u_column" },
+                      border: {},
+                      padding: "0px",
+                      backgroundColor: "",
+                    },
+                  },
+                ],
+                values: {
+                  _meta: { htmlID: "u_row_1", htmlClassNames: "u_row" },
+                  padding: "0px",
+                  backgroundColor: "",
+                  columnsBackgroundColor: "",
+                },
+              },
+            ],
+            values: {
+              backgroundColor: "#f4f4f4",
+              contentWidth: "600px",
+              contentAlign: "center",
+              fontFamily: {
+                label: "Arial",
+                value: "'Arial','Helvetica Neue',Helvetica,Arial,sans-serif",
+              },
+              _meta: { htmlID: "u_body", htmlClassNames: "u_body" },
+            },
+          },
+          counters: { u_row: 1, u_column: 1, u_content_html: 1 },
+        } as any);
+        return;
+      }
+
       unlayer.loadBlank();
     }
   }, [isEditorReady, id, templateDetails]);
@@ -193,6 +261,19 @@ export function VisualEditor({ id }: { id?: string }) {
 
   return (
     <AppShell noPadding>
+      <Dialog open={showTestEmailModal} onOpenChange={setShowTestEmailModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-base">Send Test Email</DialogTitle>
+          </DialogHeader>
+          <SendTestEmail
+            templateKey={templateKey}
+            subject={subject}
+            content={content}
+            disabled={isSaving}
+          />
+        </DialogContent>
+      </Dialog>
       <MergeTagPicker
         open={showMergeTagPicker}
         onClose={() => setShowMergeTagPicker(false)}
@@ -209,6 +290,7 @@ export function VisualEditor({ id }: { id?: string }) {
           status={status}
           setStatus={setStatus}
           handleSave={handleSave}
+          onSendTestEmail={() => setShowTestEmailModal(true)}
           isSaving={isSaving}
           isEditing={!!id}
         />
@@ -241,28 +323,31 @@ export function VisualEditor({ id }: { id?: string }) {
               ref={emailEditorRef}
               onReady={onReady}
               minHeight="100%"
-              options={{
-                displayMode: "email",
-                features: {
-                  textEditor: {
-                    inlineFontControls: true,
-                    emojis: true,
-                    cleanPaste: "basic",
-                    customButtons: [
-                      {
-                        name: "merge_tags",
-                        text: "Merge Tags",
-                        icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1"/><path d="M16 21h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"/></svg>',
-                        onAction: (_data: unknown, callback: (text: string) => void) => {
-                          mergeTagCallbackRef.current = callback;
-                          setShowMergeTagPicker(true);
+              options={
+                {
+                  displayMode: "email",
+                  branding: { enabled: false },
+                  features: {
+                    textEditor: {
+                      inlineFontControls: true,
+                      emojis: true,
+                      cleanPaste: "basic",
+                      customButtons: [
+                        {
+                          name: "merge_tags",
+                          text: "Merge Tags",
+                          icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1"/><path d="M16 21h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"/></svg>',
+                          onAction: (_data: unknown, callback: (text: string) => void) => {
+                            mergeTagCallbackRef.current = callback;
+                            setShowMergeTagPicker(true);
+                          },
                         },
-                      },
-                    ],
-                  },
-                  undoRedo: true,
-                } as any,
-              }}
+                      ],
+                    },
+                    undoRedo: true,
+                  } as any,
+                } as any
+              }
             />
           </div>
         </div>

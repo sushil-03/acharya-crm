@@ -93,6 +93,7 @@ export function ApplicationTableView() {
         {...dataGrid}
         stretchColumns
         showPagination
+        loading={isLoading}
         totalElements={filteredData.length}
         className="flex-1 min-h-0"
       />

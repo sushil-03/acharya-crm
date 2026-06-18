@@ -239,6 +239,7 @@ function FinancePage() {
               {...dataGrid}
               stretchColumns
               showPagination
+              loading={isLoading}
               totalElements={filteredData.length}
               className="h-full border-0 rounded-none"
             />

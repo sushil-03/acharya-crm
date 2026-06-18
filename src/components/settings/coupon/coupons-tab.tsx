@@ -93,17 +93,7 @@ export function CouponsTab({
 
       {/* Table */}
       <div className="flex-1 min-h-0 relative">
-        {isLoading ? (
-          <div className="space-y-0 divide-y divide-border">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-4 px-4 py-3.5">
-                <div className="h-3 w-24 bg-muted rounded animate-pulse" />
-                <div className="h-3 w-20 bg-muted rounded animate-pulse" />
-                <div className="h-3 w-16 bg-muted rounded animate-pulse" />
-              </div>
-            ))}
-          </div>
-        ) : coupons.length === 0 ? (
+        {!isLoading && coupons.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-3 text-center py-16">
             <div className="size-12 rounded-2xl bg-muted grid place-items-center">
               <Ticket className="size-5 text-muted-foreground" />
@@ -118,6 +108,7 @@ export function CouponsTab({
             {...dataGrid}
             stretchColumns
             showPagination
+            loading={isLoading}
             totalElements={total}
             className="flex-1 h-full min-h-0"
           />

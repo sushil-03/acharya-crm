@@ -35,7 +35,7 @@ export function PageHeader({
               {breadcrumb}
             </div>
           )}
-          <h1 className="font-display text-[22px] font-semibold leading-tight">{title}</h1>
+          <h1 className="font-display text-[20px] font-medium leading-tight leading-4">{title}</h1>
         </div>
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}

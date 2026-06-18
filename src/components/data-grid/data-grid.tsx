@@ -8,6 +8,7 @@ import { DataGridPasteDialog } from "@/components/data-grid/data-grid-paste-dial
 import { DataGridRow } from "@/components/data-grid/data-grid-row";
 import { DataGridSearch } from "@/components/data-grid/data-grid-search";
 import { DataGridPagination } from "@/components/data-grid/data-grid-pagination";
+import { DataGridSkeleton } from "@/components/data-grid/data-grid-skeleton";
 import { useAsRef } from "@/hooks/use-as-ref";
 import type { useDataGrid } from "@/hooks/use-data-grid";
 import { flexRender, getColumnBorderVisibility, getColumnPinningStyle } from "@/lib/data-grid";
@@ -26,6 +27,7 @@ interface DataGridProps<TData>
   showPagination?: boolean;
   totalElements?: number;
   pageSizeOptions?: number[];
+  loading?: boolean;
 }
 
 export function DataGrid<TData>({
@@ -57,6 +59,7 @@ export function DataGrid<TData>({
   showPagination = false,
   totalElements,
   pageSizeOptions,
+  loading = false,
   className,
   ...props
 }: DataGridProps<TData>) {
@@ -92,6 +95,15 @@ export function DataGrid<TData>({
     },
     [onRowAddRef],
   );
+
+  if (loading) {
+    return (
+      <DataGridSkeleton
+        columnCount={columns.length}
+        className={className}
+      />
+    );
+  }
 
   return (
     <div

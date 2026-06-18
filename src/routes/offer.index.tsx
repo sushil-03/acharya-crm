@@ -97,6 +97,7 @@ function OfferPage() {
             {...dataGrid}
             stretchColumns
             showPagination
+            loading={isLoading}
             totalElements={filtered.length}
             className="flex-1 "
           />

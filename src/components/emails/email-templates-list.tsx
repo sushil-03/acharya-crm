@@ -2,7 +2,7 @@ import { AppShell } from "@/components/app-shell";
 import { PageHeader, Card, StatCard, Badge } from "@/components/ui-kit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Mail, Sparkles, FileCode2, CheckCircle2, Loader2 } from "lucide-react";
+import { Plus, Search, Mail, Sparkles, FileCode2, CheckCircle2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useCampaignCreationStore } from "@/store/use-campaign-creation-store";
@@ -316,19 +316,14 @@ export function EmailTemplatesList() {
         {/* DataGrid Component */}
         <div className="flex flex-col h-full min-h-0 flex-1">
           <Card className="overflow-hidden h-full flex flex-col relative">
-            {isLoading ? (
-              <div className="flex items-center justify-center min-h-[400px]">
-                <Loader2 className="size-8 animate-spin text-primary" />
-              </div>
-            ) : (
-              <DataGrid
-                {...dataGrid}
-                stretchColumns
-                showPagination
-                totalElements={templatesResponse?.meta?.total || templates.length}
-                className="flex-1"
-              />
-            )}
+            <DataGrid
+              {...dataGrid}
+              stretchColumns
+              showPagination
+              loading={isLoading}
+              totalElements={templatesResponse?.meta?.total || templates.length}
+              className="flex-1"
+            />
           </Card>
         </div>
       </div>

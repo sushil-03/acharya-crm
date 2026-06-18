@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Send } from "lucide-react";
 import { useRouter } from "@tanstack/react-router";
 import {
   Select,
@@ -15,11 +15,12 @@ interface EditorHeaderProps {
   status: "Draft" | "Published";
   setStatus: (status: "Draft" | "Published") => void;
   handleSave: () => void;
+  onSendTestEmail?: () => void;
   isSaving?: boolean;
   isEditing?: boolean;
 }
 
-export function EditorHeader({ name, status, setStatus, handleSave, isSaving, isEditing }: EditorHeaderProps) {
+export function EditorHeader({ name, status, setStatus, handleSave, onSendTestEmail, isSaving, isEditing }: EditorHeaderProps) {
   const router = useRouter();
 
   return (
@@ -44,6 +45,17 @@ export function EditorHeader({ name, status, setStatus, handleSave, isSaving, is
         </div>
       </div>
       <div className="flex items-center gap-3">
+        {onSendTestEmail && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onSendTestEmail}
+            disabled={isSaving}
+            className="h-9 gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground"
+          >
+            <Send className="size-3.5" /> Send Test Email
+          </Button>
+        )}
         <div>
           <Select
             value={status}

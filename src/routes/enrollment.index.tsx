@@ -139,6 +139,7 @@ function EnrollmentPage() {
             {...dataGrid}
             stretchColumns
             showPagination
+            loading={isLoading}
             totalElements={filteredData.length}
             className="flex-1"
           />

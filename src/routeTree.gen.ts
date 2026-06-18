@@ -31,6 +31,7 @@ import { Route as AutomationRouteImport } from './routes/automation'
 import { Route as ApplicationsRouteImport } from './routes/applications'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AdmissionsRouteImport } from './routes/admissions'
+import { Route as ActivitiesRouteImport } from './routes/activities'
 import { Route as AcharyawebsiteRouteImport } from './routes/acharyawebsite'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UsersIndexRouteImport } from './routes/users.index'
@@ -45,6 +46,7 @@ import { Route as UsersNewRouteImport } from './routes/users.new'
 import { Route as ProgramsNewRouteImport } from './routes/programs.new'
 import { Route as OfferOfferIdRouteImport } from './routes/offer.$offerId'
 import { Route as ListsListIdRouteImport } from './routes/lists.$listId'
+import { Route as LeadsSmartRouteImport } from './routes/leads.smart'
 import { Route as LeadsNewRouteImport } from './routes/leads.new'
 import { Route as LeadsLeadIdRouteImport } from './routes/leads.$leadId'
 import { Route as EnrollmentEnrollmentIdRouteImport } from './routes/enrollment.$enrollmentId'
@@ -168,6 +170,11 @@ const AdmissionsRoute = AdmissionsRouteImport.update({
   path: '/admissions',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ActivitiesRoute = ActivitiesRouteImport.update({
+  id: '/activities',
+  path: '/activities',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AcharyawebsiteRoute = AcharyawebsiteRouteImport.update({
   id: '/acharyawebsite',
   path: '/acharyawebsite',
@@ -236,6 +243,11 @@ const OfferOfferIdRoute = OfferOfferIdRouteImport.update({
 const ListsListIdRoute = ListsListIdRouteImport.update({
   id: '/lists/$listId',
   path: '/lists/$listId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LeadsSmartRoute = LeadsSmartRouteImport.update({
+  id: '/leads/smart',
+  path: '/leads/smart',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LeadsNewRoute = LeadsNewRouteImport.update({
@@ -308,6 +320,7 @@ const EmailTemplatesCreateHtmlRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/acharyawebsite': typeof AcharyawebsiteRoute
+  '/activities': typeof ActivitiesRoute
   '/admissions': typeof AdmissionsRoute
   '/analytics': typeof AnalyticsRoute
   '/applications': typeof ApplicationsRoute
@@ -338,6 +351,7 @@ export interface FileRoutesByFullPath {
   '/enrollment/$enrollmentId': typeof EnrollmentEnrollmentIdRoute
   '/leads/$leadId': typeof LeadsLeadIdRoute
   '/leads/new': typeof LeadsNewRoute
+  '/leads/smart': typeof LeadsSmartRoute
   '/lists/$listId': typeof ListsListIdRoute
   '/offer/$offerId': typeof OfferOfferIdRoute
   '/programs/new': typeof ProgramsNewRoute
@@ -358,6 +372,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/acharyawebsite': typeof AcharyawebsiteRoute
+  '/activities': typeof ActivitiesRoute
   '/admissions': typeof AdmissionsRoute
   '/analytics': typeof AnalyticsRoute
   '/applications': typeof ApplicationsRoute
@@ -385,6 +400,7 @@ export interface FileRoutesByTo {
   '/enrollment/$enrollmentId': typeof EnrollmentEnrollmentIdRoute
   '/leads/$leadId': typeof LeadsLeadIdRoute
   '/leads/new': typeof LeadsNewRoute
+  '/leads/smart': typeof LeadsSmartRoute
   '/lists/$listId': typeof ListsListIdRoute
   '/offer/$offerId': typeof OfferOfferIdRoute
   '/programs/new': typeof ProgramsNewRoute
@@ -406,6 +422,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/acharyawebsite': typeof AcharyawebsiteRoute
+  '/activities': typeof ActivitiesRoute
   '/admissions': typeof AdmissionsRoute
   '/analytics': typeof AnalyticsRoute
   '/applications': typeof ApplicationsRoute
@@ -436,6 +453,7 @@ export interface FileRoutesById {
   '/enrollment/$enrollmentId': typeof EnrollmentEnrollmentIdRoute
   '/leads/$leadId': typeof LeadsLeadIdRoute
   '/leads/new': typeof LeadsNewRoute
+  '/leads/smart': typeof LeadsSmartRoute
   '/lists/$listId': typeof ListsListIdRoute
   '/offer/$offerId': typeof OfferOfferIdRoute
   '/programs/new': typeof ProgramsNewRoute
@@ -458,6 +476,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/acharyawebsite'
+    | '/activities'
     | '/admissions'
     | '/analytics'
     | '/applications'
@@ -488,6 +507,7 @@ export interface FileRouteTypes {
     | '/enrollment/$enrollmentId'
     | '/leads/$leadId'
     | '/leads/new'
+    | '/leads/smart'
     | '/lists/$listId'
     | '/offer/$offerId'
     | '/programs/new'
@@ -508,6 +528,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/acharyawebsite'
+    | '/activities'
     | '/admissions'
     | '/analytics'
     | '/applications'
@@ -535,6 +556,7 @@ export interface FileRouteTypes {
     | '/enrollment/$enrollmentId'
     | '/leads/$leadId'
     | '/leads/new'
+    | '/leads/smart'
     | '/lists/$listId'
     | '/offer/$offerId'
     | '/programs/new'
@@ -555,6 +577,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/acharyawebsite'
+    | '/activities'
     | '/admissions'
     | '/analytics'
     | '/applications'
@@ -585,6 +608,7 @@ export interface FileRouteTypes {
     | '/enrollment/$enrollmentId'
     | '/leads/$leadId'
     | '/leads/new'
+    | '/leads/smart'
     | '/lists/$listId'
     | '/offer/$offerId'
     | '/programs/new'
@@ -606,6 +630,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AcharyawebsiteRoute: typeof AcharyawebsiteRoute
+  ActivitiesRoute: typeof ActivitiesRoute
   AdmissionsRoute: typeof AdmissionsRoute
   AnalyticsRoute: typeof AnalyticsRoute
   ApplicationsRoute: typeof ApplicationsRoute
@@ -633,6 +658,7 @@ export interface RootRouteChildren {
   EnrollmentEnrollmentIdRoute: typeof EnrollmentEnrollmentIdRoute
   LeadsLeadIdRoute: typeof LeadsLeadIdRoute
   LeadsNewRoute: typeof LeadsNewRoute
+  LeadsSmartRoute: typeof LeadsSmartRoute
   ListsListIdRoute: typeof ListsListIdRoute
   OfferOfferIdRoute: typeof OfferOfferIdRoute
   ProgramsNewRoute: typeof ProgramsNewRoute
@@ -800,6 +826,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdmissionsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/activities': {
+      id: '/activities'
+      path: '/activities'
+      fullPath: '/activities'
+      preLoaderRoute: typeof ActivitiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/acharyawebsite': {
       id: '/acharyawebsite'
       path: '/acharyawebsite'
@@ -896,6 +929,13 @@ declare module '@tanstack/react-router' {
       path: '/lists/$listId'
       fullPath: '/lists/$listId'
       preLoaderRoute: typeof ListsListIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/leads/smart': {
+      id: '/leads/smart'
+      path: '/leads/smart'
+      fullPath: '/leads/smart'
+      preLoaderRoute: typeof LeadsSmartRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/leads/new': {
@@ -1038,6 +1078,7 @@ const EmailTemplatesRouteWithChildren = EmailTemplatesRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AcharyawebsiteRoute: AcharyawebsiteRoute,
+  ActivitiesRoute: ActivitiesRoute,
   AdmissionsRoute: AdmissionsRoute,
   AnalyticsRoute: AnalyticsRoute,
   ApplicationsRoute: ApplicationsRoute,
@@ -1065,6 +1106,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnrollmentEnrollmentIdRoute: EnrollmentEnrollmentIdRoute,
   LeadsLeadIdRoute: LeadsLeadIdRoute,
   LeadsNewRoute: LeadsNewRoute,
+  LeadsSmartRoute: LeadsSmartRoute,
   ListsListIdRoute: ListsListIdRoute,
   OfferOfferIdRoute: OfferOfferIdRoute,
   ProgramsNewRoute: ProgramsNewRoute,

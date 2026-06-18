@@ -290,6 +290,8 @@ export const getOfferAlertConfig = (status?: string) => {
 export const ROUTE_TITLE_MAP: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/leads": "Lead Management",
+  "/leads/smart": "Smart Leads",
+  "/activities": "Activities Log",
   "/tasks": "Task Management",
   "/applications": "Applications",
   "/finance": "Finance & Payments",

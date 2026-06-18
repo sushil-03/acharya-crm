@@ -30,22 +30,17 @@ export const navItems: NavigationItem[] = [
   {
     label: "Lead Management",
     icon: Users,
-    to: "/leads",
+    items: [
+      { label: "Smart Leads", to: "/leads/smart" },
+      { label: "Leads", to: "/leads" },
+      { label: "Application", to: "/applications" },
+      { label: "Activities", to: "/activities" },
+    ],
   },
   {
     label: "Lists",
     icon: ListOrdered,
     to: "/lists",
-  },
-  {
-    label: "Task Management",
-    icon: CheckSquare,
-    to: "/tasks",
-  },
-  {
-    label: "Applications",
-    icon: FileText,
-    to: "/applications",
   },
   {
     label: "Finance & Payments",
