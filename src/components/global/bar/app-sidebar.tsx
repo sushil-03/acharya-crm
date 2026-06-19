@@ -9,12 +9,19 @@ import {
   UserCog,
   MessageSquare,
   Ticket,
+  LayoutGrid,
 } from "lucide-react";
 import { useUserStore } from "@/store/use-user-store";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { navItems, NavigationItem } from "./sidebar-items";
+import { NavigationItem } from "./sidebar-items";
 import { GlobalSearch } from "./global-search";
 import { UserProfilePopover } from "./user-profile-popover";
+import { useGetMySubmenus } from "@/hooks/query/use-get-my-submenus";
+import type { NavMenu, NavModule } from "@/types/nav";
+import { Icon } from "@iconify/react";
+import { navItems } from "./sidebar-items";
+
+const DYNAMIC_NAV = import.meta.env.VITE_DYNAMIC_NAV === "true";
 
 interface SidebarLinkProps {
   item: NavigationItem;
@@ -242,18 +249,30 @@ export function AppSidebar({
     path.startsWith("/settings") ||
     path.startsWith("/chat-settings") ||
     path.startsWith("/coupons");
+  const { data: navTree = [] } = useGetMySubmenus(DYNAMIC_NAV && !!user);
+
+  // Flatten all menus from all modules (only used when DYNAMIC_NAV is on)
+  const allMenus: NavMenu[] = navTree.flatMap((mod: NavModule) => mod.menus);
+
   const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>(() => {
     const initialOpenStates: Record<string, boolean> = {};
-    navItems.forEach((item) => {
-      if (item.items) {
-        const hasActiveChild = item.items.some(
-          (child) => path === child.to || (child.to !== "/" && path.startsWith(child.to)),
+    if (DYNAMIC_NAV) {
+      allMenus.forEach((menu) => {
+        const hasActiveChild = menu.subMenus.some(
+          (sub) => path === sub.path || (sub.path !== "/" && path.startsWith(sub.path)),
         );
-        if (hasActiveChild) {
-          initialOpenStates[item.label] = true;
+        if (hasActiveChild) initialOpenStates[String(menu.id)] = true;
+      });
+    } else {
+      navItems.forEach((item) => {
+        if (item.items) {
+          const hasActiveChild = item.items.some(
+            (child) => path === child.to || (child.to !== "/" && path.startsWith(child.to)),
+          );
+          if (hasActiveChild) initialOpenStates[item.label] = true;
         }
-      }
-    });
+      });
+    }
     return initialOpenStates;
   });
 
@@ -268,38 +287,36 @@ export function AppSidebar({
     localStorage.setItem("sidebar_collapsed", String(isCollapsed));
   }, [isCollapsed]);
 
-  // Auto-expand submenus if a child item is active
+  // Auto-expand menus when active path changes
   useEffect(() => {
-    const initialOpenStates: Record<string, boolean> = {};
-    navItems.forEach((item) => {
-      if (item.items) {
-        const hasActiveChild = item.items.some(
-          (child) => path === child.to || (child.to !== "/" && path.startsWith(child.to)),
+    const updates: Record<string, boolean> = {};
+    if (DYNAMIC_NAV) {
+      allMenus.forEach((menu) => {
+        const hasActiveChild = menu.subMenus.some(
+          (sub) => path === sub.path || (sub.path !== "/" && path.startsWith(sub.path)),
         );
-        if (hasActiveChild) {
-          initialOpenStates[item.label] = true;
+        if (hasActiveChild) updates[String(menu.id)] = true;
+      });
+    } else {
+      navItems.forEach((item) => {
+        if (item.items) {
+          const hasActiveChild = item.items.some(
+            (child) => path === child.to || (child.to !== "/" && path.startsWith(child.to)),
+          );
+          if (hasActiveChild) updates[item.label] = true;
         }
-      }
-    });
-    setOpenSubmenus((prev) => ({ ...prev, ...initialOpenStates }));
-  }, [path]);
+      });
+    }
+    if (Object.keys(updates).length > 0) {
+      setOpenSubmenus((prev) => ({ ...prev, ...updates }));
+    }
+  }, [path, navTree]);
 
   const isActuallyCollapsed = isCollapsed && collapsible;
   const isCounsellor = user?.role === "counsellor" || user?.role === "councellor";
 
-  // Filter items according to role
-  const filteredItems = navItems.filter((item) => {
-    if (isCounsellor && item.isAdminOnly) {
-      return false;
-    }
-    return true;
-  });
-
-  const toggleSubmenu = (label: string) => {
-    setOpenSubmenus((prev) => ({
-      ...prev,
-      [label]: !prev[label],
-    }));
+  const toggleSubmenu = (key: string) => {
+    setOpenSubmenus((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   return (
@@ -424,9 +441,21 @@ export function AppSidebar({
                   />
                 )}
               </>
-            ) : (
-              filteredItems.map((item) => {
-                if (item.items?.length) {
+            ) : !DYNAMIC_NAV ? (
+              // ── Static nav (VITE_DYNAMIC_NAV=false) ──
+              navItems
+                .filter((item) => !item.isAdminOnly || !isCounsellor)
+                .map((item) => {
+                  if (!item.items) {
+                    return (
+                      <SidebarLink
+                        key={item.label}
+                        item={item}
+                        path={path}
+                        isCollapsed={isActuallyCollapsed}
+                      />
+                    );
+                  }
                   return (
                     <SidebarSubmenu
                       key={item.label}
@@ -438,15 +467,152 @@ export function AppSidebar({
                       onExpand={() => setIsCollapsed(false)}
                     />
                   );
+                })
+            ) : allMenus.length === 0 ? (
+              !isActuallyCollapsed && (
+                <li className="px-3 py-6 flex flex-col items-center gap-2 text-center">
+                  <LayoutGrid className="size-8 text-sidebar-foreground/20" />
+                  <p className="text-[11px] text-sidebar-foreground/40">
+                    No navigation configured
+                  </p>
+                </li>
+              )
+            ) : (
+              allMenus.map((menu) => {
+                const menuKey = String(menu.id);
+                const isOpen = !!openSubmenus[menuKey];
+                const hasActiveChild = menu.subMenus.some(
+                  (sub) => path === sub.path || (sub.path !== "/" && path.startsWith(sub.path)),
+                );
+
+                if (menu.subMenus.length === 0) return null;
+
+                if (menu.subMenus.length === 1) {
+                  const sub = menu.subMenus[0];
+                  const active = path === sub.path || (sub.path !== "/" && path.startsWith(sub.path));
+                  return (
+                    <li key={menu.id}>
+                      <Link
+                        to={sub.path}
+                        className={cn(
+                          "group flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors duration-200",
+                          active
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+                            : "text-sidebar-foreground/75 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
+                        )}
+                      >
+                        <span className="flex-1 truncate">{sub.name}</span>
+                      </Link>
+                    </li>
+                  );
+                }
+
+                if (isActuallyCollapsed) {
+                  return (
+                    <li key={menu.id} className="flex justify-center">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() => setIsCollapsed(false)}
+                            className={cn(
+                              "group flex items-center justify-center rounded-lg size-9 transition-colors duration-200 cursor-pointer",
+                              hasActiveChild
+                                ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-xs"
+                                : "text-sidebar-foreground/75 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
+                            )}
+                          >
+                            <Icon icon={menu.icon || "lucide:layout-grid"} className="size-4.5" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="right">
+                          <span className="font-medium">{menu.name} (Expand)</span>
+                        </TooltipContent>
+                      </Tooltip>
+                    </li>
+                  );
                 }
 
                 return (
-                  <SidebarLink
-                    key={item.label}
-                    item={item}
-                    path={path}
-                    isCollapsed={isActuallyCollapsed}
-                  />
+                  <li key={menu.id} className="space-y-0.5">
+                    <button
+                      onClick={() => toggleSubmenu(menuKey)}
+                      className={cn(
+                        "w-full group flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors duration-200 text-left cursor-pointer",
+                        hasActiveChild
+                          ? "text-sidebar-accent-foreground"
+                          : "text-sidebar-foreground/75 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
+                      )}
+                    >
+                      <Icon icon={menu.icon || "lucide:layout-grid"} className="size-4 shrink-0" />
+                      <span className="flex-1 truncate">{menu.name}</span>
+                      <ChevronDown
+                        className={cn(
+                          "size-3.5 text-sidebar-foreground/50 transition-transform duration-200",
+                          isOpen && "rotate-180",
+                        )}
+                      />
+                    </button>
+                    {isOpen && (
+                      <ul className="relative ml-[20px] pl-0 pr-1 py-1 space-y-1">
+                        {menu.subMenus.map((sub, idx) => {
+                          const subActive =
+                            path === sub.path ||
+                            (sub.path !== "/" && path.startsWith(sub.path));
+                          const activeIdx = menu.subMenus.findIndex(
+                            (s) => path === s.path || (s.path !== "/" && path.startsWith(s.path)),
+                          );
+                          const isFirst = idx === 0;
+                          const isLast = idx === menu.subMenus.length - 1;
+
+                          return (
+                            <li key={sub.id} className="relative pl-5">
+                              <div
+                                className={cn(
+                                  "absolute left-0 w-px pointer-events-none transition-colors duration-200",
+                                  isFirst ? "-top-2.5 h-[20px]" : "top-0 h-2.5",
+                                  activeIdx >= idx ? "bg-sidebar-accent-foreground" : "bg-border",
+                                )}
+                              />
+                              {!isLast && (
+                                <div
+                                  className={cn(
+                                    "absolute left-0 top-2.5 bottom-[-5px] w-px pointer-events-none transition-colors duration-200",
+                                    activeIdx > idx ? "bg-sidebar-accent-foreground" : "bg-border",
+                                  )}
+                                />
+                              )}
+                              <svg
+                                className={cn(
+                                  "absolute left-0 top-0 w-3.5 h-3.5 pointer-events-none transition-colors duration-200",
+                                  subActive ? "text-sidebar-accent-foreground" : "text-border",
+                                )}
+                                viewBox="0 0 14 14"
+                                fill="none"
+                              >
+                                <path
+                                  d="M 0.5 8.5 A 5 5 0 0 0 5.5 13.5 L 14 13.5"
+                                  stroke="currentColor"
+                                  strokeWidth="1"
+                                  strokeLinecap="round"
+                                />
+                              </svg>
+                              <Link
+                                to={sub.path}
+                                className={cn(
+                                  "group flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors duration-200",
+                                  subActive
+                                    ? "text-sidebar-accent-foreground bg-sidebar-accent/30"
+                                    : "text-sidebar-foreground/70 hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/20",
+                                )}
+                              >
+                                <span className="flex-1 truncate">{sub.name}</span>
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </li>
                 );
               })
             )}

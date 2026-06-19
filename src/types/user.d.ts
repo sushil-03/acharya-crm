@@ -6,6 +6,7 @@ export type LoginResponse = {
     email?: string;
     role: string;
     campusId: string | null;
+    crmRoleId?: number | null;
   };
 };
 

@@ -1,5 +1,5 @@
 import { useMemo, useState, useRef } from "react";
-import { RefreshCw, Shield, CheckCircle2, AlertCircle, Plus, Users, Network } from "lucide-react";
+import { RefreshCw, Shield, CheckCircle2, AlertCircle, Plus, Users, Network, ShieldCheck, LayoutGrid } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader, StatCard } from "@/components/ui-kit";
 import { Button } from "@/components/ui/button";
@@ -11,12 +11,16 @@ import { useUpdateErpRole } from "@/components/user/hook/mutation/use-update-erp
 import { ErpRolesTable } from "./erp-roles-table";
 import { ErpRoleFormModal } from "./erp-role-form-modal";
 import { UsersPermissionsTab } from "./users-permissions-tab";
+import { CrmRolesTab } from "./roles-nav/crm-roles-tab";
+import { NavBuilderTab } from "./roles-nav/nav-builder-tab";
 
-type SettingsTab = "users" | "erp-roles";
+type SettingsTab = "users" | "erp-roles" | "crm-roles" | "nav-builder";
 
 const TABS: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: "users", label: "Users & Permissions", icon: Users },
   { id: "erp-roles", label: "ERP Role Mapping", icon: Network },
+  { id: "crm-roles", label: "CRM Roles", icon: ShieldCheck },
+  { id: "nav-builder", label: "Navigation Builder", icon: LayoutGrid },
 ];
 
 export function SettingsContent() {
@@ -45,6 +49,7 @@ export function SettingsContent() {
       <PageHeader
         title="Settings & Roles"
         actions={
+          (activeTab === "crm-roles" || activeTab === "nav-builder") ? null :
           activeTab === "users" ? (
             <div className="flex items-center gap-2">
               <Button
@@ -118,6 +123,18 @@ export function SettingsContent() {
               onRefetchRef={onRefetchUsersRef}
               onFetchingChange={setIsUsersFetching}
             />
+          </div>
+        )}
+
+        {activeTab === "crm-roles" && (
+          <div className="flex-1 min-h-0 p-4 overflow-hidden flex flex-col">
+            <CrmRolesTab />
+          </div>
+        )}
+
+        {activeTab === "nav-builder" && (
+          <div className="flex-1 min-h-0 p-4 overflow-hidden flex flex-col">
+            <NavBuilderTab />
           </div>
         )}
 

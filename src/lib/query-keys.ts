@@ -25,4 +25,8 @@ export const QUERY_KEYS = {
   GET_EMAIL_CAMPAIGN: "get-email-campaign",
   GET_CAMPAIGN_RECIPIENTS: "get-campaign-recipients",
   GET_PREVIEW_RECIPIENTS: "get-preview-recipients",
+  GET_MY_SUBMENUS: "get-my-submenus",
+  GET_CRM_ROLES: "get-crm-roles",
+  GET_NAV_MODULES: "get-nav-modules",
+  GET_NAV_TREE_FOR_ROLE: "get-nav-tree-for-role",
 } as const;
