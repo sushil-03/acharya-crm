@@ -1,14 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import {
-  Plus,
-  Search,
-  Mail,
-  Send,
-  CheckCircle2,
-  Loader2,
-  Clock,
-} from "lucide-react";
+import { Plus, Search, Mail, Send, CheckCircle2, Loader2, Clock } from "lucide-react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/app-shell";
@@ -182,7 +174,7 @@ export function EmailCampaignsList() {
         }
       />
 
-      <div className="p-3 flex flex-col min-h-0 h-full gap-4">
+      <div className="p-3 border-t flex flex-col min-h-0 h-full gap-4">
         {/* Stat cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard
@@ -287,10 +279,7 @@ export function EmailCampaignsList() {
       />
 
       {/* Delete confirmation */}
-      <AlertDialog
-        open={!!deleteCampaign}
-        onOpenChange={(o) => !o && setDeleteCampaign(null)}
-      >
+      <AlertDialog open={!!deleteCampaign} onOpenChange={(o) => !o && setDeleteCampaign(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Campaign?</AlertDialogTitle>

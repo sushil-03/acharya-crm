@@ -224,7 +224,7 @@ export function EmailTemplatesList() {
           </Button>
         }
       />
-      <div className="p-3 flex flex-col min-h-0 h-full">
+      <div className="p-3 flex flex-col min-h-0 h-full border-t">
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           <StatCard

@@ -1,43 +1,18 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/app-shell";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { PageHeader, Card, StatCard, Badge } from "@/components/ui-kit";
-import {
-  Users,
-  Flame,
-  Target,
-  TrendingUp,
-  Filter,
-  Download,
-  Plus,
-  Search,
-  Phone,
-  Mail,
-  MoreHorizontal,
-  Loader2,
-  MoreVertical,
-} from "lucide-react";
+import { PageHeader, Card, Badge } from "@/components/ui-kit";
+import { Loader2, MoreVertical } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { toast } from "sonner";
 
 import React, { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { useDataGrid } from "@/hooks/use-data-grid";
 import { DataGrid } from "@/components/data-grid/data-grid";
-import type { ColumnDef } from "@tanstack/react-table";
-import { DataGridFilterMenu } from "@/components/data-grid/data-grid-filter-menu";
-import { DataGridSortMenu } from "@/components/data-grid/data-grid-sort-menu";
 import { DataGridViewMenu } from "@/components/data-grid/data-grid-view-menu";
 import { DataGridRowHeightMenu } from "@/components/data-grid/data-grid-row-height-menu";
 import { getDataGridSelectColumn } from "@/components/data-grid/data-grid-select-column";
@@ -47,20 +22,101 @@ import { useGetLeads } from "@/components/leads/hook/query/use-get-leads";
 import { useUserStore } from "@/store/use-user-store";
 import { useGetCounsellors } from "@/components/global/hooks/use-get-counsellor";
 import InputSearch from "@/components/global/input-search";
-import { LEAD_STATUS, LEAD_SOURCES } from "@/lib/constant";
+import {
+  LeadsFilterBar,
+  ADVANCED_FILTER_ID,
+  type FilterCondition,
+} from "@/components/leads/leads-filter-bar";
 
 export const Route = createFileRoute("/leads/")({
   component: LeadsPage,
   head: () => ({ meta: [{ title: "Lead Management — Acharya One" }] }),
 });
 
+function getLeadRawValue(l: any, fieldId: string): unknown {
+  switch (fieldId) {
+    case "program":
+      return l.courseInterest;
+    case "score":
+      return l.leadScore;
+    case "createdAt":
+      return l.createdAt;
+    case "city":
+      return l.city;
+    case "state":
+      return l.state;
+    case "name":
+      return l.name;
+    case "email":
+      return l.email;
+    case "mobile":
+      return l.mobile;
+    case "utmSource":
+      return l.utmSource;
+    case "utmMedium":
+      return l.utmMedium;
+    case "utmCampaign":
+      return l.utmCampaign;
+    case "status":
+      return l.status;
+    case "sourceChannel":
+      return l.sourceChannel;
+    default:
+      return undefined;
+  }
+}
+
+function matchLeadCondition(l: any, f: FilterCondition): boolean {
+  const raw = getLeadRawValue(l, f.fieldId);
+  if (raw === undefined || raw === null) return false;
+
+  switch (f.operator) {
+    case "is":
+      return String(raw).toLowerCase() === String(f.value).toLowerCase();
+    case "is_not":
+      return String(raw).toLowerCase() !== String(f.value).toLowerCase();
+    case "contains":
+      return String(raw)
+        .toLowerCase()
+        .includes(String(f.value ?? "").toLowerCase());
+    case "not_contains":
+      return !String(raw)
+        .toLowerCase()
+        .includes(String(f.value ?? "").toLowerCase());
+    case "eq":
+      return Number(raw) === Number(f.value);
+    case "gt":
+      return Number(raw) > Number(f.value);
+    case "gte":
+      return Number(raw) >= Number(f.value);
+    case "lt":
+      return Number(raw) < Number(f.value);
+    case "lte":
+      return Number(raw) <= Number(f.value);
+    case "between": {
+      const n = Number(raw);
+      return n >= Number(f.value) && n <= Number(f.endValue ?? f.value);
+    }
+    case "on":
+      return new Date(String(raw)).toDateString() === new Date(String(f.value)).toDateString();
+    case "before":
+      return new Date(String(raw)) < new Date(String(f.value));
+    case "after":
+      return new Date(String(raw)) > new Date(String(f.value));
+    default:
+      return true;
+  }
+}
+
 function LeadsPage() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState(() => {
-    return localStorage.getItem("leads_table_status") || "all";
-  });
-  const [sourceChannel, setSourceChannel] = useState(() => {
-    return localStorage.getItem("leads_table_source") || "all";
+  const [filters, setFilters] = useState<FilterCondition[]>(() => {
+    try {
+      const saved = localStorage.getItem("leads_table_filters");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
   });
   const [q, setQ] = useState(() => {
     return localStorage.getItem("leads_table_search") || "";
@@ -73,7 +129,6 @@ function LeadsPage() {
 
   const isCounsellor = user?.role === "counsellor" || user?.role === "councellor";
 
-  // Resolve counselor ID for logged-in counselor
   const resolvedCounsellorId = React.useMemo(() => {
     if (counsellorId) return counsellorId;
     if (isCounsellor && counsellors) {
@@ -82,10 +137,27 @@ function LeadsPage() {
     return undefined;
   }, [counsellorId, isCounsellor, counsellors, user?.id]);
 
+  const handleFiltersChange = (next: FilterCondition[]) => {
+    setFilters(next);
+    setPage(1);
+    try {
+      localStorage.setItem("leads_table_filters", JSON.stringify(next));
+    } catch {
+      // ignore
+    }
+  };
+
+  // Map filter conditions to API-supported params (server-side)
+  const apiStatus = filters.find((f) => f.fieldId === "status" && f.operator === "is")?.value as
+    | string
+    | undefined;
+  const apiSource = filters.find((f) => f.fieldId === "sourceChannel" && f.operator === "is")
+    ?.value as string | undefined;
+
   const { data, isLoading } = useGetLeads({
     search: q || undefined,
-    status: tab === "all" ? undefined : tab,
-    sourceChannel: sourceChannel === "all" ? undefined : sourceChannel,
+    status: apiStatus,
+    sourceChannel: apiSource,
     assignedTo: isCounsellor ? resolvedCounsellorId : undefined,
     page,
     pageSize,
@@ -107,19 +179,34 @@ function LeadsPage() {
       });
     }
 
+    // Client-side filtering
+    for (const f of filters) {
+      if (f.fieldId === "status" || f.fieldId === "sourceChannel") continue; // server-side
+
+      if (f.fieldId === ADVANCED_FILTER_ID) {
+        const subs = f.subConditions ?? [];
+        if (subs.length === 0) continue;
+        // OR logic: lead passes if it matches ANY sub-condition
+        list = list.filter((l) => subs.some((sub) => matchLeadCondition(l, sub)));
+        continue;
+      }
+
+      if (f.value === undefined || f.value === "") continue;
+      list = list.filter((l) => matchLeadCondition(l, f));
+    }
+
     return list.map((l) => ({
       ...l,
       program: l.courseInterest,
       campus: l.campusId,
       city: l.city,
-
       source: l.sourceChannel,
       stage: l.status,
       score: l.leadScore,
       counsellor: l.assignments,
       lastActivity: l.lastContactedAt ?? l.createdAt,
     }));
-  }, [data, isCounsellor, resolvedCounsellorId]);
+  }, [data, isCounsellor, resolvedCounsellorId, filters]);
 
   const leadsColumns = useMemo(
     () => [getDataGridSelectColumn<any>({ enableRowMarkers: true }), ...getLeadsColumn],
@@ -187,7 +274,7 @@ function LeadsPage() {
   return (
     <AppShell className="h-screen overflow-hidden" noPadding>
       <PageHeader
-        title="Lead Management"
+        title="Leads"
         subtitle="Centralized acquisition, attribution, scoring & distribution across all channels."
         actions={
           <>
@@ -240,43 +327,19 @@ function LeadsPage() {
         </div> */}
 
         <Card className="overflow-hidden flex flex-col min-h-0 flex-1 border-none">
-          <div className="p-3 border-b border-border flex flex-wrap items-center gap-3">
+          <div className="px-3 py-2 border-b border-border flex flex-wrap items-center gap-2">
             <InputSearch
               searchTerm={q}
               setSearchTerm={setQ}
               className="h-7"
-              placeholder="Search by name or ID..."
+              containerClassName="w-44 flex-none"
+              placeholder="Search.."
             />
-            <div className="flex items-center gap-2 ml-auto">
-              <Select value={tab} onValueChange={setTab}>
-                <SelectTrigger size="xs" className="w-[140px] ">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  {LEAD_STATUS.map((status) => (
-                    <SelectItem key={status.value} value={status.value}>
-                      {status.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={sourceChannel} onValueChange={setSourceChannel}>
-                <SelectTrigger size="xs" className="w-[140px] ">
-                  <SelectValue placeholder="Source" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Sources</SelectItem>
-                  {LEAD_SOURCES.map((source) => (
-                    <SelectItem key={source.value} value={source.value}>
-                      {source.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="h-4 w-px bg-border" />
+            <LeadsFilterBar filters={filters} onChange={handleFiltersChange} className="flex-1" />
+            <div className="flex items-center gap-1.5 ml-auto">
               <DataGridViewMenu table={dataGrid.table} />
-              <DataGridRowHeightMenu table={dataGrid.table} />
+              {/* <DataGridRowHeightMenu table={dataGrid.table} /> */}
             </div>
           </div>
 
